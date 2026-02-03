@@ -120,6 +120,49 @@
             user-select: none;
         }
 
+        /* Each word + its trailing pipe is one unbreakable inline unit */
+        .word-wrap {
+            display: inline-block;
+        }
+
+        /* ─── Banner ─── */
+        .banner {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 1.1rem 1.5rem 1rem;
+            margin-bottom: 1.8rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+        }
+
+        .banner.played  { border-color: #538d4e; }
+        .banner.fresh   { border-color: #c9b458; }
+
+        .banner-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .banner-text {
+            font-size: 1.05rem;
+            color: #d7dadc;
+            letter-spacing: 0.02em;
+        }
+
+        .banner-text strong { font-weight: 700; }
+
+        /* ─── Grayed / disabled state ─── */
+        #wordlist.grayed .word {
+            color: #4a4a4c !important;
+            text-shadow: none !important;
+        }
+
+        #wordlist.grayed .word:hover {
+            opacity: 0.5;
+            text-shadow: none !important;
+        }
+
         /* ─── Empty state ─── */
         .empty {
             color: #818384;
@@ -153,6 +196,8 @@
             </div>
         </header>
 
+        <div id="banner" class="banner" style="display:none"></div>
+
         <div id="wordlist"></div>
 
         <footer>All previously played Wordle answers · updated 2026</footer>
@@ -174,17 +219,23 @@
                 const frag = document.createDocumentFragment();
 
                 words.forEach((word, i) => {
-                    if (i > 0) {
-                        const pipe = document.createElement('span');
-                        pipe.className = 'pipe';
-                        pipe.textContent = ' | ';
-                        frag.appendChild(pipe);
-                    }
+                    const wrap = document.createElement('span');
+                    wrap.className = 'word-wrap';
 
                     const span = document.createElement('span');
                     span.className = 'word ' + colors[i % 3];
                     span.textContent = word;
-                    frag.appendChild(span);
+                    wrap.appendChild(span);
+
+                    // Trailing pipe on every word except the last
+                    if (i < words.length - 1) {
+                        const pipe = document.createElement('span');
+                        pipe.className = 'pipe';
+                        pipe.textContent = ' | ';
+                        wrap.appendChild(pipe);
+                    }
+
+                    frag.appendChild(wrap);
                 });
 
                 container.innerHTML = '';
@@ -202,6 +253,27 @@
 
                     document.getElementById('count').textContent = allWords.length;
                     render(allWords);
+
+                    // ── Banner: random "played before" vs "never played" ──
+                    const playedBefore = Math.random() < 0.5;
+                    const banner      = document.getElementById('banner');
+                    const wordlist    = document.getElementById('wordlist');
+
+                    banner.style.display = 'block';
+
+                    if (playedBefore) {
+                        banner.className = 'banner played';
+                        banner.innerHTML =
+                            '<div class="banner-icon">🔍</div>' +
+                            '<p class="banner-text">Today\'s word <strong>has been played before!</strong></p>';
+                        wordlist.classList.add('grayed');
+                    } else {
+                        banner.className = 'banner fresh';
+                        banner.innerHTML =
+                            '<div class="banner-icon">✨</div>' +
+                            '<p class="banner-text">Today\'s word has <strong class="c-yellow">NEVER</strong> been played before!</p>';
+                        wordlist.classList.remove('grayed');
+                    }
                 })
                 .catch(err => {
                     document.getElementById('wordlist').innerHTML =
