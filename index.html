@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle Word List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #121213;
+            color: #d7dadc;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* ─── Header ─── */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        h1 {
+            font-size: clamp(1.8rem, 5vw, 2.6rem);
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+
+        /* Individual letter colors for "WORDLE" */
+        .c-green { color: #538d4e; }
+        .c-yellow { color: #c9b458; }
+        .c-light { color: #d7dadc; }
+        .c-white { color: #ffffff; }
+
+        .subtitle {
+            color: #818384;
+            font-size: 0.88rem;
+            margin-bottom: 1.1rem;
+            letter-spacing: 0.04em;
+        }
+
+        .subtitle span {
+            color: #d7dadc;
+            font-weight: 600;
+        }
+
+        /* ─── Search ─── */
+        .search-wrap {
+            max-width: 340px;
+            margin: 0 auto;
+        }
+
+        #search {
+            width: 100%;
+            padding: 0.65rem 1rem;
+            border: 2px solid #3a3a3c;
+            border-radius: 10px;
+            background: #1a1a1b;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+            letter-spacing: 0.05em;
+        }
+
+        #search:focus {
+            border-color: #538d4e;
+        }
+
+        #search::placeholder {
+            color: #818384;
+        }
+
+        /* ─── Word List ─── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        #wordlist {
+            animation: fadeIn 0.35s ease both;
+            line-height: 2.4;
+            padding: 0.5rem 0;
+        }
+
+        .word {
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            cursor: default;
+            user-select: none;
+            transition: opacity 0.15s ease, text-shadow 0.15s ease;
+            display: inline;
+        }
+
+        .word:hover {
+            opacity: 0.6;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        .pipe {
+            color: #3a3a3c;
+            font-weight: 300;
+            margin: 0 0.28em;
+            display: inline;
+            user-select: none;
+        }
+
+        /* ─── Empty state ─── */
+        .empty {
+            color: #818384;
+            font-style: italic;
+            padding: 2rem 0;
+            text-align: center;
+            letter-spacing: 0.05em;
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span><span class="c-white">&nbsp;WORD LIST</span>
+            </h1>
+            <p class="subtitle"><span id="count">—</span> words</p>
+            <div class="search-wrap">
+                <input type="text" id="search" placeholder="Filter words…" autocomplete="off" spellcheck="false">
+            </div>
+        </header>
+
+        <div id="wordlist"></div>
+
+        <footer>All previously played Wordle answers · updated 2026</footer>
+    </div>
+
+    <script>
+        (function () {
+            const colors = ['c-green', 'c-yellow', 'c-light'];
+
+            function hashWord(w) {
+                let h = 0;
+                for (let i = 0; i < w.length; i++) {
+                    h = ((h << 5) - h) + w.charCodeAt(i);
+                    h |= 0;
+                }
+                return Math.abs(h);
+            }
+
+            function render(words) {
+                const container = document.getElementById('wordlist');
+
+                if (words.length === 0) {
+                    container.innerHTML = '<p class="empty">No words match that filter.</p>';
+                    return;
+                }
+
+                // Build DOM in a fragment for speed
+                const frag = document.createDocumentFragment();
+
+                words.forEach((word, i) => {
+                    if (i > 0) {
+                        const pipe = document.createElement('span');
+                        pipe.className = 'pipe';
+                        pipe.textContent = '|';
+                        frag.appendChild(pipe);
+                    }
+
+                    const span = document.createElement('span');
+                    span.className = 'word ' + colors[hashWord(word) % 3];
+                    span.textContent = word;
+                    frag.appendChild(span);
+                });
+
+                container.innerHTML = '';
+                container.appendChild(frag);
+            }
+
+            let allWords = [];
+
+            fetch('words.txt')
+                .then(r => r.text())
+                .then(text => {
+                    allWords = text.trim().split('\n')
+                        .map(w => w.trim().toUpperCase())
+                        .filter(w => w.length === 5);
+
+                    document.getElementById('count').textContent = allWords.length;
+                    render(allWords);
+                })
+                .catch(err => {
+                    document.getElementById('wordlist').innerHTML =
+                        '<p class="empty" style="color:#c9b458">Could not load words.txt — ' + err.message + '</p>';
+                });
+
+            document.getElementById('search').addEventListener('input', function () {
+                const q = this.value.trim().toUpperCase();
+                const filtered = q ? allWords.filter(w => w.includes(q)) : allWords;
+                document.getElementById('count').textContent = filtered.length;
+                render(filtered);
+            });
+        })();
+    </script>
+</body>
+</html>
