@@ -116,7 +116,6 @@
         .pipe {
             color: #3a3a3c;
             font-weight: 300;
-            margin: 0 0.28em;
             display: inline;
             user-select: none;
         }
@@ -163,15 +162,6 @@
         (function () {
             const colors = ['c-green', 'c-yellow', 'c-light'];
 
-            function hashWord(w) {
-                let h = 0;
-                for (let i = 0; i < w.length; i++) {
-                    h = ((h << 5) - h) + w.charCodeAt(i);
-                    h |= 0;
-                }
-                return Math.abs(h);
-            }
-
             function render(words) {
                 const container = document.getElementById('wordlist');
 
@@ -187,12 +177,12 @@
                     if (i > 0) {
                         const pipe = document.createElement('span');
                         pipe.className = 'pipe';
-                        pipe.textContent = '|';
+                        pipe.textContent = ' | ';
                         frag.appendChild(pipe);
                     }
 
                     const span = document.createElement('span');
-                    span.className = 'word ' + colors[hashWord(word) % 3];
+                    span.className = 'word ' + colors[i % 3];
                     span.textContent = word;
                     frag.appendChild(span);
                 });
