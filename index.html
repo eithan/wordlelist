@@ -219,6 +219,13 @@
                 const frag = document.createDocumentFragment();
 
                 words.forEach((word, i) => {
+                    // Whitespace text node between units — renders as a
+                    // space on the same line, but collapses cleanly at
+                    // line breaks so new lines always start with a word.
+                    if (i > 0) {
+                        frag.appendChild(document.createTextNode(' '));
+                    }
+
                     const wrap = document.createElement('span');
                     wrap.className = 'word-wrap';
 
@@ -231,7 +238,7 @@
                     if (i < words.length - 1) {
                         const pipe = document.createElement('span');
                         pipe.className = 'pipe';
-                        pipe.textContent = ' | ';
+                        pipe.textContent = ' |';
                         wrap.appendChild(pipe);
                     }
 
