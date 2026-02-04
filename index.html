@@ -298,94 +298,143 @@
     </div>
 
     <script>
-        (function () {
-            const colors = ['c-green', 'c-yellow', 'c-light'];
+    (function () {
+        const colors = ['c-green', 'c-yellow', 'c-light'];
 
-            function render(words) {
-                const container = document.getElementById('wordlist');
+        /* ── user's local date as YYYY-MM-DD ── */
+        function getLocalDate() {
+            const d = new Date();
+            return d.getFullYear() + '-' +
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                   String(d.getDate()).padStart(2, '0');
+        }
 
-                if (words.length === 0) {
-                    container.innerHTML = '<p class="empty">No words match that filter.</p>';
-                    return;
+        /* ── render word list ── */
+        function render(words) {
+            const container = document.getElementById('wordlist');
+            if (words.length === 0) {
+                container.innerHTML = '<p class="empty">No words match that filter.</p>';
+                return;
+            }
+            const frag = document.createDocumentFragment();
+            words.forEach((word, i) => {
+                // Whitespace text node between units — collapses at
+                // line breaks so new lines always start with a word.
+                if (i > 0) frag.appendChild(document.createTextNode(' '));
+
+                const wrap = document.createElement('span');
+                wrap.className = 'word-wrap';
+
+                const span = document.createElement('span');
+                span.className = 'word ' + colors[i % 3];
+                span.textContent = word;
+                wrap.appendChild(span);
+
+                if (i < words.length - 1) {
+                    const pipe = document.createElement('span');
+                    pipe.className = 'pipe';
+                    pipe.textContent = ' |';
+                    wrap.appendChild(pipe);
                 }
+                frag.appendChild(wrap);
+            });
+            container.innerHTML = '';
+            container.appendChild(frag);
+        }
 
-                const frag = document.createDocumentFragment();
+        /* ── module-level state for search ── */
+        var displayWords = [];
 
-                words.forEach((word, i) => {
-                    // Whitespace text node between units — collapses at
-                    // line breaks so new lines always start with a word.
-                    if (i > 0) {
-                        frag.appendChild(document.createTextNode(' '));
-                    }
+        /* ── load everything in parallel ── */
+        Promise.all([
+            fetch('words.txt').then(function (r) { return r.text(); }),
+            fetch('current.txt').then(function (r) { return r.text(); }),
+            fetch('prior.txt').then(function (r) { return r.text(); }),
+            fetch('meta.json').then(function (r) { return r.json(); }).catch(function () { return null; }),
+        ]).then(function (results) {
+            var wordsText  = results[0];
+            var currentTxt = results[1];
+            var priorTxt   = results[2];
+            var meta       = results[3];
 
-                    const wrap = document.createElement('span');
-                    wrap.className = 'word-wrap';
+            /* base word list from words.txt (already sorted) */
+            var baseWords = wordsText.trim().split('\n')
+                .map(function (w) { return w.trim().toUpperCase(); })
+                .filter(function (w) { return w.length === 5; });
 
-                    const span = document.createElement('span');
-                    span.className = 'word ' + colors[i % 3];
-                    span.textContent = word;
-                    wrap.appendChild(span);
+            var currentWord = currentTxt.trim().toUpperCase();
+            var priorWord   = priorTxt.trim().toUpperCase();
 
-                    // Trailing pipe on every word except the last
-                    if (i < words.length - 1) {
-                        const pipe = document.createElement('span');
-                        pipe.className = 'pipe';
-                        pipe.textContent = ' |';
-                        wrap.appendChild(pipe);
-                    }
+            /* ── timezone gate ──
+             *  meta.wordle_date = the date (in UTC+14) when current.txt became active.
+             *  If the user's local date  ≥ wordle_date  →  they're on the NEW puzzle.
+             *  If the user's local date  <  wordle_date  →  still on yesterday's puzzle.
+             */
+            var localDate  = getLocalDate();
+            var wordleDate = meta ? meta.wordle_date : localDate;
 
-                    frag.appendChild(wrap);
-                });
+            var answerWord;
 
-                container.innerHTML = '';
-                container.appendChild(frag);
+            if (localDate >= wordleDate) {
+                /*
+                 * NEW puzzle:
+                 *   • answer = current.txt
+                 *   • prior.txt was completed yesterday but hasn't been folded
+                 *     into words.txt yet (that happens at the next job run).
+                 *     Inject it so the list looks complete.
+                 */
+                answerWord = currentWord;
+                if (!baseWords.includes(priorWord)) {
+                    baseWords.push(priorWord);
+                    baseWords.sort();
+                }
+            } else {
+                /*
+                 * OLD puzzle:
+                 *   • answer = prior.txt  (still in progress for this user)
+                 *   • don't inject anything — prior is the live puzzle word
+                 */
+                answerWord = priorWord;
             }
 
-            let allWords = [];
+            displayWords = baseWords;   // exposed for search
 
-            fetch('words.txt')
-                .then(r => r.text())
-                .then(text => {
-                    allWords = text.trim().split('\n')
-                        .map(w => w.trim().toUpperCase())
-                        .filter(w => w.length === 5);
+            /* ── render list ── */
+            document.getElementById('count').textContent = displayWords.length;
+            render(displayWords);
 
-                    document.getElementById('count').textContent = allWords.length;
-                    render(allWords);
+            /* ── banner: played-before check ── */
+            var playedBefore = displayWords.indexOf(answerWord) !== -1;
+            var banner       = document.getElementById('banner');
+            var wordlist     = document.getElementById('wordlist');
+            banner.style.display = 'block';
 
-                    // ── Banner: random "played before" vs "never played" ──
-                    const playedBefore = Math.random() < 0.5;
-                    const banner       = document.getElementById('banner');
-                    const wordlist     = document.getElementById('wordlist');
+            if (playedBefore) {
+                banner.className = 'banner played';
+                banner.innerHTML =
+                    '<div class="banner-icon">🔍</div>' +
+                    '<p class="banner-text">Today\'s word <strong>has been played before!</strong></p>';
+                wordlist.classList.remove('glowing');
+            } else {
+                banner.className = 'banner fresh';
+                banner.innerHTML =
+                    '<div class="banner-icon">✨</div>' +
+                    '<p class="banner-text">Today\'s word has <strong class="c-yellow">NEVER</strong> been played before!</p>';
+                wordlist.classList.add('glowing');
+            }
+        }).catch(function (err) {
+            document.getElementById('wordlist').innerHTML =
+                '<p class="empty" style="color:#c9b458">Could not load data — ' + err.message + '</p>';
+        });
 
-                    banner.style.display = 'block';
-
-                    if (playedBefore) {
-                        banner.className = 'banner played';
-                        banner.innerHTML =
-                            '<div class="banner-icon">🔍</div>' +
-                            '<p class="banner-text">Today\'s word <strong>has been played before!</strong></p>';
-                        wordlist.classList.remove('glowing');
-                    } else {
-                        banner.className = 'banner fresh';
-                        banner.innerHTML =
-                            '<div class="banner-icon">✨</div>' +
-                            '<p class="banner-text">Today\'s word has <strong class="c-yellow">NEVER</strong> been played before!</p>';
-                        wordlist.classList.add('glowing');
-                    }
-                })
-                .catch(err => {
-                    document.getElementById('wordlist').innerHTML =
-                        '<p class="empty" style="color:#c9b458">Could not load words.txt — ' + err.message + '</p>';
-                });
-
-            document.getElementById('search').addEventListener('input', function () {
-                const q = this.value.trim().toUpperCase();
-                const filtered = q ? allWords.filter(w => w.includes(q)) : allWords;
-                document.getElementById('count').textContent = filtered.length;
-                render(filtered);
-            });
-        })();
+        /* ── search filter ── */
+        document.getElementById('search').addEventListener('input', function () {
+            var q        = this.value.trim().toUpperCase();
+            var filtered = q ? displayWords.filter(function (w) { return w.indexOf(q) !== -1; }) : displayWords;
+            document.getElementById('count').textContent = filtered.length;
+            render(filtered);
+        });
+    })();
     </script>
 </body>
 </html>
