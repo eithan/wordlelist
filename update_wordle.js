@@ -107,12 +107,12 @@ async function fetchNewWord(puzzleNum) {
     // 1. Get the Wordle HTML page
     const pageHtml = await httpsGet('https://www.nytimes.com/games/wordle/index.html');
 
-    // 2. Extract JS file URLs (games-assets)
+    // 2. Extract JS file URLs (games-assets — may be full or relative)
     const jsUrls = [];
-    const re = /src="(\/games-assets\/[^"]+\.js)"/g;
+    const re = /src="((?:https:\/\/www\.nytimes\.com)?\/games-assets\/[^"]+\.js)"/g;
     let m;
     while ((m = re.exec(pageHtml)) !== null) {
-        jsUrls.push('https://www.nytimes.com' + m[1]);
+        jsUrls.push(m[1].startsWith('http') ? m[1] : 'https://www.nytimes.com' + m[1]);
     }
     log(`Found ${jsUrls.length} JS files`);
 
