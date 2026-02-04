@@ -123,12 +123,16 @@
             outline: none;
             transition: border-color 0.2s ease;
             letter-spacing: 0.05em;
-            /* native search-cancel on Safari/Chrome mobile */
-            -webkit-appearance: none;
         }
 
         #search:focus        { border-color: #538d4e; }
         #search::placeholder { color: #818384; }
+
+        /* desktop: suppress the native × so only our custom one shows */
+        @media (hover: hover) {
+            #search::-webkit-search-cancel-button  { display: none; }
+            #search::-webkit-search-decoration     { display: none; }
+        }
 
         /* ── custom × clear button (desktop) ── */
         .search-clear {
