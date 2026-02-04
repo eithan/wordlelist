@@ -3,7 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordle Word List</title>
+    <title>Wordle Word List – All Previous Wordle Answers</title>
+
+    <!-- SEO ─── -->
+    <meta name="description" content="A complete list of all previously played Wordle answers. Browse every past NYT Wordle word in one searchable place — updated regularly.">
+    <meta name="keywords" content="Wordle answers, previous Wordle words, past Wordle answers, Wordle word list, NYT Wordle history, complete Wordle answers, Wordle words played, previous Wordle answers list">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://wordlelist.com/">
+
+    <!-- Open Graph ─── -->
+    <meta property="og:title" content="Wordle Word List – All Previous Wordle Answers">
+    <meta property="og:description" content="Browse every previously played Wordle answer in one place. A clean, searchable list of all past NYT Wordle words.">
+    <meta property="og:url" content="https://wordlelist.com/">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card ─── -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Wordle Word List – All Previous Wordle Answers">
+    <meta name="twitter:description" content="Browse every previously played Wordle answer in one place. A clean, searchable list of all past NYT Wordle words.">
+
+    <!-- Structured Data ─── -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Wordle Word List – All Previous Wordle Answers",
+        "description": "A complete, searchable list of all previously played Wordle answers and past NYT Wordle words.",
+        "url": "https://wordlelist.com/",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Wordle Word List",
+            "url": "https://wordlelist.com/"
+        }
+    }
+    </script>
+
     <style>
         * {
             margin: 0;
@@ -17,6 +51,7 @@
             font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
             padding: 2.5rem 1.5rem 1.5rem;
+            overflow-x: hidden;
         }
 
         .container {
@@ -33,18 +68,30 @@
         }
 
         h1 {
-            font-size: clamp(1.8rem, 5vw, 2.6rem);
             font-weight: 800;
             letter-spacing: 0.22em;
             text-transform: uppercase;
             margin-bottom: 0.4rem;
+            line-height: 1.2;
+        }
+
+        .title-wordle {
+            display: block;
+            font-size: clamp(2rem, 6vw, 2.8rem);
+        }
+
+        .title-sub {
+            display: block;
+            font-size: clamp(1rem, 2.8vw, 1.4rem);
+            letter-spacing: 0.32em;
+            color: #ffffff;
+            margin-top: 0.2em;
         }
 
         /* Individual letter colors for "WORDLE" */
-        .c-green { color: #538d4e; }
+        .c-green  { color: #538d4e; }
         .c-yellow { color: #c9b458; }
-        .c-light { color: #d7dadc; }
-        .c-white { color: #ffffff; }
+        .c-light  { color: #d7dadc; }
 
         .subtitle {
             color: #818384;
@@ -77,13 +124,36 @@
             letter-spacing: 0.05em;
         }
 
-        #search:focus {
-            border-color: #538d4e;
+        #search:focus       { border-color: #538d4e; }
+        #search::placeholder { color: #818384; }
+
+        /* ─── Banner ─── */
+        .banner {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 1.1rem 1.5rem 1rem;
+            margin: 0 auto 1.8rem;
+            max-width: 720px;
+            text-align: center;
+            transition: border-color 0.3s ease;
         }
 
-        #search::placeholder {
-            color: #818384;
+        .banner.played { border-color: #538d4e; }
+        .banner.fresh  { border-color: #c9b458; }
+
+        .banner-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
         }
+
+        .banner-text {
+            font-size: 1.05rem;
+            color: #d7dadc;
+            letter-spacing: 0.02em;
+        }
+
+        .banner-text strong { font-weight: 700; }
 
         /* ─── Word List ─── */
         @keyframes fadeIn {
@@ -95,6 +165,12 @@
             animation: fadeIn 0.35s ease both;
             line-height: 2.4;
             padding: 0.5rem 0;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
+        .word-wrap {
+            display: inline-block;
         }
 
         .word {
@@ -120,47 +196,14 @@
             user-select: none;
         }
 
-        /* Each word + its trailing pipe is one unbreakable inline unit */
-        .word-wrap {
-            display: inline-block;
+        /* ─── Glow: "never played" state ─── */
+        #wordlist.glowing .word {
+            text-shadow: 0 0 10px currentColor;
         }
 
-        /* ─── Banner ─── */
-        .banner {
-            background: #1a1a1b;
-            border: 1px solid #3a3a3c;
-            border-radius: 12px;
-            padding: 1.1rem 1.5rem 1rem;
-            margin-bottom: 1.8rem;
-            text-align: center;
-            transition: border-color 0.3s ease;
-        }
-
-        .banner.played  { border-color: #538d4e; }
-        .banner.fresh   { border-color: #c9b458; }
-
-        .banner-icon {
-            font-size: 1.5rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .banner-text {
-            font-size: 1.05rem;
-            color: #d7dadc;
-            letter-spacing: 0.02em;
-        }
-
-        .banner-text strong { font-weight: 700; }
-
-        /* ─── Grayed / disabled state ─── */
-        #wordlist.grayed .word {
-            color: #4a4a4c !important;
-            text-shadow: none !important;
-        }
-
-        #wordlist.grayed .word:hover {
-            opacity: 0.5;
-            text-shadow: none !important;
+        #wordlist.glowing .word:hover {
+            opacity: 0.7;
+            text-shadow: 0 0 16px currentColor;
         }
 
         /* ─── Empty state ─── */
@@ -172,10 +215,41 @@
             letter-spacing: 0.05em;
         }
 
+        /* ─── SEO content (subtle, bottom of page) ─── */
+        .seo-content {
+            max-width: 720px;
+            margin: 3rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #2a2a2c;
+        }
+
+        .seo-content h2 {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #636466;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 0.7rem;
+        }
+
+        .seo-content p {
+            font-size: 0.82rem;
+            color: #636466;
+            line-height: 1.65;
+            margin-bottom: 0.55rem;
+        }
+
+        .seo-content p:last-child { margin-bottom: 0; }
+
+        .seo-content strong {
+            color: #7a7d80;
+            font-weight: 600;
+        }
+
         /* ─── Footer ─── */
         footer {
             text-align: center;
-            margin-top: 2.5rem;
+            margin-top: 2rem;
             padding-top: 1.2rem;
             border-top: 1px solid #3a3a3c;
             color: #818384;
@@ -188,7 +262,8 @@
     <div class="container">
         <header>
             <h1>
-                <span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span><span class="c-white">&nbsp;WORD LIST</span>
+                <span class="title-wordle"><span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span></span>
+                <span class="title-sub">WORD LIST</span>
             </h1>
             <p class="subtitle"><span id="count">—</span> words</p>
             <div class="search-wrap">
@@ -199,6 +274,25 @@
         <div id="banner" class="banner" style="display:none"></div>
 
         <div id="wordlist"></div>
+
+        <!-- SEO: keyword-rich, visually subtle ─── -->
+        <section class="seo-content" aria-label="About this word list">
+            <h2>About This Word List</h2>
+            <p>
+                This is a complete list of all <strong>previously played Wordle answers</strong> from the NYT Wordle game.
+                Every word on this page has been an official Wordle answer at some point — use the search above to check
+                whether a specific word has already appeared as a <strong>past Wordle word</strong>.
+            </p>
+            <p>
+                Wondering what <strong>today's Wordle answer</strong> might be? If the banner above says today's word has
+                been played before, it's somewhere in this list of <strong>previous Wordle answers</strong>. If it says
+                the word has never been played, it's a fresh word not found in <strong>Wordle history</strong>.
+            </p>
+            <p>
+                This <strong>Wordle word list</strong> is updated regularly. Bookmark it to quickly look up any word in the
+                <strong>complete list of Wordle answers</strong> — past, present, and future.
+            </p>
+        </section>
 
         <footer>All previously played Wordle answers · updated 2026</footer>
     </div>
@@ -215,12 +309,10 @@
                     return;
                 }
 
-                // Build DOM in a fragment for speed
                 const frag = document.createDocumentFragment();
 
                 words.forEach((word, i) => {
-                    // Whitespace text node between units — renders as a
-                    // space on the same line, but collapses cleanly at
+                    // Whitespace text node between units — collapses at
                     // line breaks so new lines always start with a word.
                     if (i > 0) {
                         frag.appendChild(document.createTextNode(' '));
@@ -263,8 +355,8 @@
 
                     // ── Banner: random "played before" vs "never played" ──
                     const playedBefore = Math.random() < 0.5;
-                    const banner      = document.getElementById('banner');
-                    const wordlist    = document.getElementById('wordlist');
+                    const banner       = document.getElementById('banner');
+                    const wordlist     = document.getElementById('wordlist');
 
                     banner.style.display = 'block';
 
@@ -273,13 +365,13 @@
                         banner.innerHTML =
                             '<div class="banner-icon">🔍</div>' +
                             '<p class="banner-text">Today\'s word <strong>has been played before!</strong></p>';
-                        wordlist.classList.add('grayed');
+                        wordlist.classList.remove('glowing');
                     } else {
                         banner.className = 'banner fresh';
                         banner.innerHTML =
                             '<div class="banner-icon">✨</div>' +
                             '<p class="banner-text">Today\'s word has <strong class="c-yellow">NEVER</strong> been played before!</p>';
-                        wordlist.classList.remove('grayed');
+                        wordlist.classList.add('glowing');
                     }
                 })
                 .catch(err => {
