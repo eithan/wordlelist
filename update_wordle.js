@@ -8,16 +8,15 @@
  *   1. git pull
  *   2. Add prior.txt word → words.txt  (alphabetical insert, no dupes)
  *   3. Rotate: current.txt  →  prior.txt
- *   4. Fetch new Wordle answer from NYT JS bundle  →  current.txt
+ *   4. Fetch new answer from NYT API  →  current.txt
  *   5. Write meta.json with wordle_date  (= today's date in UTC+14)
  *   6. git commit + push
  *
- * Word source: NYT embeds the full answer sequence in the Wordle game's
- * JavaScript bundle.  We download that bundle, find the answer array
- * (anchored on "cigar" = puzzle #0), and index by puzzle number.
- *
- * Puzzle number = days since 2021-06-19 (the epoch).
- * wordle_date   = the UTC+14 date at job-run time (always the next puzzle day).
+ * Word source:
+ *   https://www.nytimes.com/svc/wordle/v2/{YYYY-MM-DD}.json
+ *   Returns: { solution, print_date, days_since_launch, id, editor }
+ *   No auth required.  Future dates return tomorrow's word, so we only
+ *   ever request the date we need (wordle_date = UTC+14 today).
  *
  * If the fetch fails for any reason, everything EXCEPT current.txt is
  * still pushed — the site keeps working with the previous word.
@@ -28,14 +27,10 @@
 const { execSync } = require('child_process');
 const fs           = require('fs');
 const https        = require('https');
-const http         = require('http');
-const path         = require('path');
-const os           = require('os');
 
 /* ── config ── */
-const REPO_DIR   = '/tmp/wordlelist';
-const LOG_FILE   = '/tmp/wordlelist_update.log';
-const EPOCH      = new Date('2021-06-19T00:00:00Z'); // puzzle #0 = cigar
+const REPO_DIR = '/tmp/wordlelist';
+const LOG_FILE = '/tmp/wordlelist_update.log';
 
 /* ── helpers ── */
 function log(msg) {
@@ -73,79 +68,28 @@ function addWordToList(word) {
     log(`Added "${word}" to words.txt  (${words.length} words)`);
 }
 
-/* ── HTTP fetch (follows redirects, timeout 15 s) ── */
-function httpsGet(url, depth = 0) {
-    if (depth > 5) return Promise.reject(new Error('Too many redirects'));
+/* ── NYT API fetch ── */
+function fetchWordleAPI(date) {
+    // date = "YYYY-MM-DD"
+    const url = `https://www.nytimes.com/svc/wordle/v2/${date}.json`;
     return new Promise((resolve, reject) => {
-        const mod = url.startsWith('https') ? https : http;
-        const req = mod.get(url, {
+        const req = https.get(url, {
             headers: {
-                'User-Agent'     : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept'         : 'text/html,application/javascript,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.9',
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             }
         }, res => {
-            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location)
-                return httpsGet(res.headers.location, depth + 1).then(resolve).catch(reject);
-            // Accept both 200 and 404 — NYT sometimes returns 404 with full content
-            if (res.statusCode >= 500)
-                return reject(new Error(`HTTP ${res.statusCode}`));
+            if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode} from ${url}`));
             let data = '';
             res.on('data',  c => data += c);
-            res.on('end',   () => resolve(data));
+            res.on('end',   () => {
+                try { resolve(JSON.parse(data)); }
+                catch (e) { reject(new Error(`Bad JSON: ${e.message}`)); }
+            });
             res.on('error', reject);
         });
         req.on('error', reject);
-        req.setTimeout(15000, () => { req.destroy(); reject(new Error('Timeout')); });
+        req.setTimeout(10000, () => { req.destroy(); reject(new Error('Timeout')); });
     });
-}
-
-/* ── NYT bundle: download wordle page, grab JS links, search for answer array ── */
-async function fetchNewWord(puzzleNum) {
-    log(`Fetching NYT Wordle page to find JS bundle …`);
-
-    // 1. Get the Wordle HTML page
-    const pageHtml = await httpsGet('https://www.nytimes.com/games/wordle/index.html');
-
-    // 2. Extract JS file URLs (games-assets — may be full or relative)
-    const jsUrls = [];
-    const re = /src="((?:https:\/\/www\.nytimes\.com)?\/games-assets\/[^"]+\.js)"/g;
-    let m;
-    while ((m = re.exec(pageHtml)) !== null) {
-        jsUrls.push(m[1].startsWith('http') ? m[1] : 'https://www.nytimes.com' + m[1]);
-    }
-    log(`Found ${jsUrls.length} JS files`);
-
-    // 3. Download each JS file and search for the answer array
-    for (const jsUrl of jsUrls) {
-        try {
-            const jsText = await httpsGet(jsUrl);
-            // Answer array contains "cigar" (puzzle #0 anchor) among many 5-letter words
-            const arrayMatch = jsText.match(/\[(?:"[a-z]{5}",)*?"cigar"(?:,"[a-z]{5}")+\]/);
-            if (!arrayMatch) continue;
-
-            const arr       = JSON.parse(arrayMatch[0]);
-            const cigarIdx  = arr.indexOf('cigar');
-            const answers   = arr.slice(cigarIdx);   // answers[0] = cigar = puzzle #0
-            log(`Found answer array: ${answers.length} answers (cigar at raw index ${cigarIdx})`);
-
-            if (puzzleNum >= answers.length) {
-                log(`ERROR: puzzle #${puzzleNum} exceeds known answers (${answers.length})`);
-                return null;
-            }
-
-            const word = answers[puzzleNum].toUpperCase();
-            log(`Puzzle #${puzzleNum} = ${word}`);
-            return word;
-
-        } catch (e) {
-            // This JS file didn't have the array — keep looking
-            continue;
-        }
-    }
-
-    log('ERROR: answer array not found in any JS bundle');
-    return null;
 }
 
 /* ── main ── */
@@ -170,26 +114,25 @@ async function main() {
 
     /* 5. wordle_date = today in UTC+14 (the new puzzle's date) */
     const utcPlus14   = new Date(Date.now() + 14 * 60 * 60 * 1000);
-    const wordleDate  = utcPlus14.toISOString().split('T')[0];
+    const wordleDate  = utcPlus14.toISOString().split('T')[0];   // YYYY-MM-DD
     log(`wordle_date = ${wordleDate}`);
 
-    /* 6. compute puzzle number = days since epoch */
-    const daysSinceEpoch = Math.round((utcPlus14 - EPOCH) / (24 * 60 * 60 * 1000));
-    log(`Puzzle number = ${daysSinceEpoch}`);
-
-    /* 7. fetch new word from NYT bundle */
-    const newWord = await fetchNewWord(daysSinceEpoch);
-    if (newWord) {
+    /* 6. fetch new word from NYT API */
+    let newWord = null;
+    try {
+        const puzzle = await fetchWordleAPI(wordleDate);
+        newWord = puzzle.solution.toUpperCase();
+        log(`NYT API → solution: ${newWord}  (days_since_launch: ${puzzle.days_since_launch})`);
         fs.writeFileSync(`${REPO_DIR}/current.txt`, newWord);
-    } else {
-        log('⚠️  Word fetch FAILED — current.txt unchanged. Site will use previous word.');
+    } catch (e) {
+        log(`⚠️  NYT API failed: ${e.message} — current.txt unchanged.`);
     }
 
-    /* 8. meta.json */
+    /* 7. meta.json */
     const meta = { wordle_date: wordleDate, ran_at: new Date().toISOString() };
     fs.writeFileSync(`${REPO_DIR}/meta.json`, JSON.stringify(meta, null, 2) + '\n');
 
-    /* 9. commit + push */
+    /* 8. commit + push */
     run('git add words.txt prior.txt current.txt meta.json');
     try {
         run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + newWord : ' (word fetch failed)'}"` );
