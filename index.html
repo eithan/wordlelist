@@ -109,11 +109,12 @@
         .search-wrap {
             max-width: 340px;
             margin: 0 auto;
+            position: relative;
         }
 
         #search {
             width: 100%;
-            padding: 0.65rem 1rem;
+            padding: 0.65rem 2.2rem 0.65rem 1rem;   /* right pad for × button */
             border: 2px solid #3a3a3c;
             border-radius: 10px;
             background: #1a1a1b;
@@ -122,10 +123,43 @@
             outline: none;
             transition: border-color 0.2s ease;
             letter-spacing: 0.05em;
+            /* native search-cancel on Safari/Chrome mobile */
+            -webkit-appearance: none;
         }
 
-        #search:focus       { border-color: #538d4e; }
+        #search:focus        { border-color: #538d4e; }
         #search::placeholder { color: #818384; }
+
+        /* ── custom × clear button (desktop) ── */
+        .search-clear {
+            position: absolute;
+            right: 0.55rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.4rem;
+            height: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: #818384;
+            font-size: 1.1rem;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.15s ease, color 0.15s ease;
+            /* don't steal focus from the input */
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .search-clear.visible { opacity: 1; }
+        .search-clear:hover   { color: #d7dadc; }
+
+        /* hide our custom button on mobile — native one handles it */
+        @media (hover: none) and (pointer: coarse) {
+            .search-clear { display: none; }
+        }
 
         /* ─── Banner ─── */
         .banner {
@@ -267,7 +301,8 @@
             </h1>
             <p class="subtitle"><span id="count">—</span> words</p>
             <div class="search-wrap">
-                <input type="text" id="search" placeholder="Filter words…" autocomplete="off" spellcheck="false">
+                <input type="search" id="search" placeholder="Filter words…" autocomplete="off" spellcheck="false">
+                <button class="search-clear" id="searchClear" aria-label="Clear search">&#x2715;</button>
             </div>
         </header>
 
@@ -427,12 +462,29 @@
                 '<p class="empty" style="color:#c9b458">Could not load data — ' + err.message + '</p>';
         });
 
-        /* ── search filter ── */
-        document.getElementById('search').addEventListener('input', function () {
-            var q        = this.value.trim().toUpperCase();
+        /* ── search filter + clear button ── */
+        var searchEl      = document.getElementById('search');
+        var searchClearEl = document.getElementById('searchClear');
+
+        function applyFilter() {
+            var q        = searchEl.value.trim().toUpperCase();
             var filtered = q ? displayWords.filter(function (w) { return w.indexOf(q) !== -1; }) : displayWords;
             document.getElementById('count').textContent = filtered.length;
             render(filtered);
+            // toggle × visibility
+            searchClearEl.classList.toggle('visible', searchEl.value.length > 0);
+        }
+
+        searchEl.addEventListener('input', applyFilter);
+
+        // native <search> fires "search" on clear (Safari/Chrome mobile)
+        searchEl.addEventListener('search', applyFilter);
+
+        searchClearEl.addEventListener('mousedown', function (e) {
+            e.preventDefault();          // don't steal focus
+            searchEl.value = '';
+            applyFilter();
+            searchEl.focus();
         });
     })();
     </script>
