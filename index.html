@@ -437,6 +437,9 @@
                 answerWord = priorWord;
             }
 
+            /* ── banner: check if answer was played before (BEFORE filtering) ── */
+            var playedBefore = baseWords.indexOf(answerWord) !== -1;
+
             displayWords = baseWords;   // exposed for search
 
             /* ── filter out answer word to prevent spoilers ── */
@@ -446,15 +449,24 @@
             document.getElementById('count').textContent = displayWords.length;
             render(displayWords);
 
-            /* ── banner: neutral (no spoilers about current puzzle) ── */
+            /* ── banner: show whether today's word has been used before ── */
             var banner   = document.getElementById('banner');
             var wordlist = document.getElementById('wordlist');
             banner.style.display = 'block';
-            banner.className = 'banner';
-            banner.innerHTML =
-                '<div class="banner-icon">📝</div>' +
-                '<p class="banner-text">Historical Wordle answers — <strong>' + displayWords.length + '</strong> words (today\'s puzzle excluded)</p>';
-            wordlist.classList.remove('glowing');
+
+            if (playedBefore) {
+                banner.className = 'banner played';
+                banner.innerHTML =
+                    '<div class="banner-icon">🔍</div>' +
+                    '<p class="banner-text">Today\'s word <strong>has been played before!</strong></p>';
+                wordlist.classList.remove('glowing');
+            } else {
+                banner.className = 'banner fresh';
+                banner.innerHTML =
+                    '<div class="banner-icon">✨</div>' +
+                    '<p class="banner-text">Today\'s word has <strong class="c-yellow">NEVER</strong> been played before!</p>';
+                wordlist.classList.add('glowing');
+            }
         }).catch(function (err) {
             document.getElementById('wordlist').innerHTML =
                 '<p class="empty" style="color:#c9b458">Could not load data — ' + err.message + '</p>';
