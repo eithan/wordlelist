@@ -414,6 +414,7 @@
             var wordleDate = meta ? meta.wordle_date : localDate;
 
             var answerWord;
+            var playedBefore;
 
             if (localDate >= wordleDate) {
                 /*
@@ -428,17 +429,18 @@
                     baseWords.push(priorWord);
                     baseWords.sort();
                 }
+                // Check if today's word is in the historical list
+                playedBefore = baseWords.indexOf(answerWord) !== -1;
             } else {
                 /*
                  * OLD puzzle:
                  *   • answer = prior.txt  (still in progress for this user)
                  *   • don't inject anything — prior is the live puzzle word
+                 *   • This is TODAY's puzzle for this user, so not "played before" yet
                  */
                 answerWord = priorWord;
+                playedBefore = false;
             }
-
-            /* ── banner: check if answer was played before (BEFORE filtering) ── */
-            var playedBefore = baseWords.indexOf(answerWord) !== -1;
 
             displayWords = baseWords;   // exposed for search
 
