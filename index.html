@@ -439,11 +439,11 @@
 
             displayWords = baseWords;   // exposed for search
 
-            /* ── banner: played-before check (before filtering) ── */
-            var playedBefore = displayWords.indexOf(answerWord) !== -1;
-
             /* ── filter out answer word to prevent spoilers ── */
             displayWords = displayWords.filter(function (w) { return w !== answerWord; });
+
+            /* ── banner: always treat active puzzle as "never played" ── */
+            var playedBefore = false;
 
             /* ── render list ── */
             document.getElementById('count').textContent = displayWords.length;
