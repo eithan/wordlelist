@@ -442,29 +442,19 @@
             /* ── filter out answer word to prevent spoilers ── */
             displayWords = displayWords.filter(function (w) { return w !== answerWord; });
 
-            /* ── banner: always treat active puzzle as "never played" ── */
-            var playedBefore = false;
-
             /* ── render list ── */
             document.getElementById('count').textContent = displayWords.length;
             render(displayWords);
-            var banner       = document.getElementById('banner');
-            var wordlist     = document.getElementById('wordlist');
-            banner.style.display = 'block';
 
-            if (playedBefore) {
-                banner.className = 'banner played';
-                banner.innerHTML =
-                    '<div class="banner-icon">🔍</div>' +
-                    '<p class="banner-text">Today\'s word <strong>has been played before!</strong></p>';
-                wordlist.classList.remove('glowing');
-            } else {
-                banner.className = 'banner fresh';
-                banner.innerHTML =
-                    '<div class="banner-icon">✨</div>' +
-                    '<p class="banner-text">Today\'s word has <strong class="c-yellow">NEVER</strong> been played before!</p>';
-                wordlist.classList.add('glowing');
-            }
+            /* ── banner: neutral (no spoilers about current puzzle) ── */
+            var banner   = document.getElementById('banner');
+            var wordlist = document.getElementById('wordlist');
+            banner.style.display = 'block';
+            banner.className = 'banner';
+            banner.innerHTML =
+                '<div class="banner-icon">📝</div>' +
+                '<p class="banner-text">Historical Wordle answers — <strong>' + displayWords.length + '</strong> words (today\'s puzzle excluded)</p>';
+            wordlist.classList.remove('glowing');
         }).catch(function (err) {
             document.getElementById('wordlist').innerHTML =
                 '<p class="empty" style="color:#c9b458">Could not load data — ' + err.message + '</p>';
