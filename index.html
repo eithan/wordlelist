@@ -439,12 +439,15 @@
 
             displayWords = baseWords;   // exposed for search
 
+            /* ── banner: played-before check (before filtering) ── */
+            var playedBefore = displayWords.indexOf(answerWord) !== -1;
+
+            /* ── filter out answer word to prevent spoilers ── */
+            displayWords = displayWords.filter(function (w) { return w !== answerWord; });
+
             /* ── render list ── */
             document.getElementById('count').textContent = displayWords.length;
             render(displayWords);
-
-            /* ── banner: played-before check ── */
-            var playedBefore = displayWords.indexOf(answerWord) !== -1;
             var banner       = document.getElementById('banner');
             var wordlist     = document.getElementById('wordlist');
             banner.style.display = 'block';
