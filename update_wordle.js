@@ -6,17 +6,22 @@
  *
  * What it does each run:
  *   1. git pull
- *   2. Add prior.txt word → words.txt  (alphabetical insert, no dupes)
- *   3. Rotate: current.txt  →  prior.txt
- *   4. Fetch new answer from NYT API  →  current.txt
- *   5. Write meta.json with wordle_date  (= today's date in UTC+14)
- *   6. git commit + push
+ *   2. Add safe.txt word → words.txt  (if exists; it's 2 days old, safe for all TZs)
+ *   3. Rotate: prior.txt  →  safe.txt
+ *   4. Rotate: current.txt  →  prior.txt
+ *   5. Fetch new answer from NYT API  →  current.txt
+ *   6. Write meta.json with wordle_date  (= today's date in UTC+14)
+ *   7. git commit + push
  *
  * Word source:
  *   https://www.nytimes.com/svc/wordle/v2/{YYYY-MM-DD}.json
  *   Returns: { solution, print_date, days_since_launch, id, editor }
  *   No auth required.  Future dates return tomorrow's word, so we only
  *   ever request the date we need (wordle_date = UTC+14 today).
+ *
+ * Timing note:
+ *   Words are delayed by 1 extra day before adding to words.txt to ensure
+ *   they're fully in the past for ALL timezones (not just UTC+14).
  *
  * If the fetch fails for any reason, everything EXCEPT current.txt is
  * still pushed — the site keeps working with the previous word.
@@ -103,21 +108,29 @@ async function main() {
     /* 2. read state */
     const priorWord   = fs.readFileSync(`${REPO_DIR}/prior.txt`,   'utf-8').trim().toUpperCase();
     const currentWord = fs.readFileSync(`${REPO_DIR}/current.txt`, 'utf-8').trim().toUpperCase();
-    log(`State  →  prior: ${priorWord}  |  current: ${currentWord}`);
+    const safePath    = `${REPO_DIR}/safe.txt`;
+    const safeWord    = fs.existsSync(safePath) ? fs.readFileSync(safePath, 'utf-8').trim().toUpperCase() : null;
+    log(`State  →  safe: ${safeWord || '(none)'}  |  prior: ${priorWord}  |  current: ${currentWord}`);
 
-    /* 3. inject prior → words.txt */
-    addWordToList(priorWord);
+    /* 3. add safe word to words.txt (it's 2 days old, safe for all timezones) */
+    if (safeWord) {
+        addWordToList(safeWord);
+    }
 
-    /* 4. rotate current → prior */
+    /* 4. rotate prior → safe */
+    fs.writeFileSync(safePath, priorWord);
+    log(`Rotated safe.txt = ${priorWord}`);
+
+    /* 5. rotate current → prior */
     fs.writeFileSync(`${REPO_DIR}/prior.txt`, currentWord);
     log(`Rotated prior.txt = ${currentWord}`);
 
-    /* 5. wordle_date = today in UTC+14 (the new puzzle's date) */
+    /* 6. wordle_date = today in UTC+14 (the new puzzle's date) */
     const utcPlus14   = new Date(Date.now() + 14 * 60 * 60 * 1000);
     const wordleDate  = utcPlus14.toISOString().split('T')[0];   // YYYY-MM-DD
     log(`wordle_date = ${wordleDate}`);
 
-    /* 6. fetch new word from NYT API */
+    /* 7. fetch new word from NYT API */
     let newWord = null;
     try {
         const puzzle = await fetchWordleAPI(wordleDate);
@@ -128,12 +141,12 @@ async function main() {
         log(`⚠️  NYT API failed: ${e.message} — current.txt unchanged.`);
     }
 
-    /* 7. meta.json */
+    /* 8. meta.json */
     const meta = { wordle_date: wordleDate, ran_at: new Date().toISOString() };
     fs.writeFileSync(`${REPO_DIR}/meta.json`, JSON.stringify(meta, null, 2) + '\n');
 
-    /* 8. commit + push */
-    run('git add words.txt prior.txt current.txt meta.json');
+    /* 9. commit + push */
+    run('git add words.txt safe.txt prior.txt current.txt meta.json');
     try {
         run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + newWord : ' (word fetch failed)'}"` );
     } catch (_) {
