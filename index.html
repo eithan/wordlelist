@@ -444,8 +444,10 @@
 
             displayWords = baseWords;   // exposed for search
 
-            /* ── filter out answer word to prevent spoilers ── */
-            displayWords = displayWords.filter(function (w) { return w !== answerWord; });
+            /* ── filter out answer word ONLY if it's never been played ── */
+            if (!playedBefore) {
+                displayWords = displayWords.filter(function (w) { return w !== answerWord; });
+            }
 
             /* ── render list ── */
             document.getElementById('count').textContent = displayWords.length;
