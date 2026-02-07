@@ -390,12 +390,14 @@
             fetch('words.txt').then(function (r) { return r.text(); }),
             fetch('current.txt').then(function (r) { return r.text(); }),
             fetch('prior.txt').then(function (r) { return r.text(); }),
+            fetch('safe.txt').then(function (r) { return r.text(); }).catch(function () { return ''; }),
             fetch('meta.json').then(function (r) { return r.json(); }).catch(function () { return null; }),
         ]).then(function (results) {
             var wordsText  = results[0];
             var currentTxt = results[1];
             var priorTxt   = results[2];
-            var meta       = results[3];
+            var safeTxt    = results[3];
+            var meta       = results[4];
 
             /* base word list from words.txt (already sorted) */
             var baseWords = wordsText.trim().split('\n')
@@ -404,6 +406,13 @@
 
             var currentWord = currentTxt.trim().toUpperCase();
             var priorWord   = priorTxt.trim().toUpperCase();
+            var safeWord    = safeTxt.trim().toUpperCase();
+
+            /* inject safe word (2 days old, always safe to show) */
+            if (safeWord && !baseWords.includes(safeWord)) {
+                baseWords.push(safeWord);
+                baseWords.sort();
+            }
 
             /* ── timezone gate ──
              *  meta.wordle_date = the date (in UTC+14) when current.txt became active.
