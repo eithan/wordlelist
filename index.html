@@ -26,15 +26,51 @@
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
-        "@type": "WebPage",
-        "name": "Wordle Word List – All Previous Wordle Answers",
-        "description": "A complete, searchable list of all previously played Wordle answers and past NYT Wordle words.",
+        "@type": "WebSite",
+        "name": "Wordle Word List",
+        "alternateName": ["Wordlelist", "Wordle Word List"],
         "url": "https://wordlelist.com/",
-        "isPartOf": {
-            "@type": "WebSite",
-            "name": "Wordle Word List",
-            "url": "https://wordlelist.com/"
+        "description": "A complete, searchable list of all previously played Wordle answers and past NYT Wordle words.",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://wordlelist.com/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
         }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What are all the previous Wordle answers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Wordlelist.com maintains a complete, searchable list of every past Wordle answer from the NYT Wordle game, updated daily. The list currently contains over 1,690 words."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Has today's Wordle word been used before?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Visit wordlelist.com to see a live banner that tells you whether today's Wordle answer has been played before or if it's a brand new word — without spoiling the answer."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How many Wordle words have been played?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "As of early 2026, over 1,690 unique words have been used as Wordle answers since the game launched in June 2021. The list grows by one word each day."
+                }
+            }
+        ]
     }
     </script>
 
