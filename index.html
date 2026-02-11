@@ -385,6 +385,28 @@
                    String(d.getDate()).padStart(2, '0');
         }
 
+        /* ── freshness check ──
+         *  On revisit (e.g. stale Safari tab), fetch meta.json bypassing
+         *  cache.  If the wordle_date has changed since the page was first
+         *  served, do a one-time hard reload so every file is fresh.
+         *  Cost: one ~74-byte request; no impact on first loads.
+         */
+        (function freshness() {
+            var stored = sessionStorage.getItem('wl_date');
+            fetch('meta.json?_=' + Date.now(), { cache: 'no-store' })
+                .then(function (r) { return r.json(); })
+                .then(function (meta) {
+                    if (!meta || !meta.wordle_date) return;
+                    if (stored && stored !== meta.wordle_date) {
+                        sessionStorage.setItem('wl_date', meta.wordle_date);
+                        location.reload();
+                    } else {
+                        sessionStorage.setItem('wl_date', meta.wordle_date);
+                    }
+                })
+                .catch(function () { /* network error — proceed with cached page */ });
+        })();
+
         /* ── render word list ── */
         function render(words) {
             const container = document.getElementById('wordlist');
