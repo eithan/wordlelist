@@ -1,6 +1,8 @@
 # Wordle Word List
 
-A static, zero-dependency site that displays every previously played NYT Wordle answer. Hosted at [wordlelist.com](https://wordlelist.com) via GitHub Pages.
+**[wordlelist.com](https://wordlelist.com)** — A complete, searchable list of every previously played NYT Wordle answer. Updated daily.
+
+Browse all 1,690+ past Wordle words, search for specific words, and see whether today's answer has ever been used before — all without spoilers. Zero dependencies, dark mode, mobile-friendly.
 
 ## How it works
 
@@ -39,3 +41,16 @@ Add it with `crontab -e`.
 ### Logs
 
 The script appends to `/tmp/wordlelist_update.log`. If the NYT API call fails for any reason, `current.txt` is left unchanged and the site keeps working with the previous word — nothing breaks.
+
+## Features
+
+- 🔍 **Search** — Instantly filter through all past answers
+- ✨ **Spoiler-free banner** — Tells you if today's word has been used before, without revealing it
+- 🌍 **Timezone-aware** — Shows the right puzzle based on your local time
+- 📱 **Mobile-friendly** — Clean dark-mode design, works on any device
+- ⚡ **Fast** — Static site, no frameworks, no tracking, no cookies
+
+## Links
+
+- **Live site:** [wordlelist.com](https://wordlelist.com)
+- **Sitemap:** [wordlelist.com/sitemap.xml](https://wordlelist.com/sitemap.xml)
