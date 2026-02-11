@@ -561,6 +561,9 @@
             render(filtered);
             // toggle × visibility
             searchClearEl.classList.toggle('visible', searchEl.value.length > 0);
+            // hide banner while filtering, restore when cleared
+            var banner = document.getElementById('banner');
+            if (banner) banner.style.display = q ? 'none' : 'block';
         }
 
         searchEl.addEventListener('input', applyFilter);
