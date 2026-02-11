@@ -81,17 +81,21 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            overflow-x: hidden;
+        }
+
         body {
             background-color: #121213;
             color: #d7dadc;
             font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
             padding: 2.5rem 1.5rem 1.5rem;
-            overflow-x: hidden;
         }
 
         .container {
             max-width: 1100px;
+            max-width: min(1100px, 100vw);
             margin: 0 auto;
         }
 
@@ -114,6 +118,7 @@
         .title-wordle {
             display: block;
             font-size: clamp(2rem, 6vw, 2.8rem);
+            margin-right: -0.22em; /* trim trailing letter-spacing */
         }
 
         .title-sub {
@@ -122,6 +127,7 @@
             letter-spacing: 0.32em;
             color: #ffffff;
             margin-top: 0.2em;
+            margin-right: -0.32em; /* trim trailing letter-spacing */
         }
 
         /* Individual letter colors for "WORDLE" */
@@ -242,6 +248,8 @@
             padding: 0.5rem 0;
             max-width: 720px;
             margin: 0 auto;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
         }
 
         .word-wrap {
