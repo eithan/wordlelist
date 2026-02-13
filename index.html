@@ -372,7 +372,7 @@
             </div>
         </header>
 
-        <p class="intro">A complete archive of all <strong id="introCount">1,690+</strong> past Wordle answers, updated daily.</p>
+        <p class="intro">A complete archive of every past Wordle answer, updated daily.</p>
 
         <div id="banner" class="banner" style="display:none"></div>
 
@@ -545,8 +545,6 @@
 
             /* ── render list ── */
             document.getElementById('count').textContent = displayWords.length;
-            var introCount = document.getElementById('introCount');
-            if (introCount) introCount.textContent = displayWords.length.toLocaleString();
             render(displayWords);
 
             /* ── banner: show whether today's word has been used before ── */
