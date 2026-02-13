@@ -6,21 +6,23 @@
     <title>Wordle Word List – All Previous Wordle Answers</title>
 
     <!-- SEO ─── -->
-    <meta name="description" content="A complete list of all previously played Wordle answers. Browse every past NYT Wordle word in one searchable place — updated regularly.">
+    <meta name="description" content="Complete list of every past Wordle answer (1,690+ words). Searchable, updated daily, and spoiler-free — see if today's word has been played before.">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <meta name="keywords" content="Wordle answers, previous Wordle words, past Wordle answers, Wordle word list, NYT Wordle history, complete Wordle answers, Wordle words played, previous Wordle answers list">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://wordlelist.com/">
 
     <!-- Open Graph ─── -->
     <meta property="og:title" content="Wordle Word List – All Previous Wordle Answers">
-    <meta property="og:description" content="Browse every previously played Wordle answer in one place. A clean, searchable list of all past NYT Wordle words.">
+    <meta property="og:description" content="Complete list of every past Wordle answer (1,690+ words). Searchable, updated daily, and spoiler-free.">
+    <meta property="og:image" content="https://wordlelist.com/og-image.png">
     <meta property="og:url" content="https://wordlelist.com/">
     <meta property="og:type" content="website">
 
     <!-- Twitter Card ─── -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Wordle Word List – All Previous Wordle Answers">
-    <meta name="twitter:description" content="Browse every previously played Wordle answer in one place. A clean, searchable list of all past NYT Wordle words.">
+    <meta name="twitter:description" content="Complete list of every past Wordle answer (1,690+ words). Searchable, updated daily, and spoiler-free.">
 
     <!-- Structured Data ─── -->
     <script type="application/ld+json">
@@ -207,6 +209,22 @@
             #search::-webkit-search-decoration     { -webkit-appearance: none; }
         }
 
+        /* ─── Intro ─── */
+        .intro {
+            max-width: 720px;
+            margin: 0 auto 1.5rem;
+            text-align: center;
+            font-size: 0.92rem;
+            color: #818384;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+        }
+
+        .intro strong {
+            color: #d7dadc;
+            font-weight: 600;
+        }
+
         /* ─── Banner ─── */
         .banner {
             background: #1a1a1b;
@@ -353,6 +371,8 @@
                 <button class="search-clear" id="searchClear" aria-label="Clear search">&#x2715;</button>
             </div>
         </header>
+
+        <p class="intro">Every past Wordle answer in one place — <strong id="introCount">1,690+</strong> words and counting. Search the full archive, check if today's word has been used before, and never waste a guess on an old answer. Updated daily, no spoilers.</p>
 
         <div id="banner" class="banner" style="display:none"></div>
 
@@ -525,6 +545,8 @@
 
             /* ── render list ── */
             document.getElementById('count').textContent = displayWords.length;
+            var introCount = document.getElementById('introCount');
+            if (introCount) introCount.textContent = displayWords.length.toLocaleString();
             render(displayWords);
 
             /* ── banner: show whether today's word has been used before ── */
@@ -561,9 +583,11 @@
             render(filtered);
             // toggle × visibility
             searchClearEl.classList.toggle('visible', searchEl.value.length > 0);
-            // hide banner while filtering, restore when cleared
+            // hide banner + intro while filtering, restore when cleared
             var banner = document.getElementById('banner');
+            var intro  = document.querySelector('.intro');
             if (banner) banner.style.display = q ? 'none' : 'block';
+            if (intro)  intro.style.display  = q ? 'none' : 'block';
         }
 
         searchEl.addEventListener('input', applyFilter);
