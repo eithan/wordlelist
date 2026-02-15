@@ -11,7 +11,6 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    <meta name="keywords" content="Wordle answers, previous Wordle words, past Wordle answers, Wordle word list, NYT Wordle history, complete Wordle answers, Wordle words played, previous Wordle answers list">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://wordlelist.com/">
 
@@ -35,47 +34,7 @@
         "name": "Wordle Word List",
         "alternateName": ["Wordlelist", "Wordle Word List"],
         "url": "https://wordlelist.com/",
-        "description": "A complete, searchable list of all previously played Wordle answers and past NYT Wordle words.",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": {
-                "@type": "EntryPoint",
-                "urlTemplate": "https://wordlelist.com/?q={search_term_string}"
-            },
-            "query-input": "required name=search_term_string"
-        }
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-            {
-                "@type": "Question",
-                "name": "What are all the previous Wordle answers?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Wordlelist.com maintains a complete, searchable list of every past Wordle answer from the NYT Wordle game, updated daily. The list currently contains over 1,690 words."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "Has today's Wordle word been used before?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "Visit wordlelist.com to see a live banner that tells you whether today's Wordle answer has been played before or if it's a brand new word — without spoiling the answer."
-                }
-            },
-            {
-                "@type": "Question",
-                "name": "How many Wordle words have been played?",
-                "acceptedAnswer": {
-                    "@type": "Answer",
-                    "text": "As of early 2026, over 1,690 unique words have been used as Wordle answers since the game launched in June 2021. The list grows by one word each day."
-                }
-            }
-        ]
+        "description": "A complete, searchable list of all previously played Wordle answers and past NYT Wordle words."
     }
     </script>
 
@@ -318,37 +277,6 @@
             letter-spacing: 0.05em;
         }
 
-        /* ─── SEO content (subtle, bottom of page) ─── */
-        .seo-content {
-            max-width: 720px;
-            margin: 3rem auto 0;
-            padding-top: 1.5rem;
-            border-top: 1px solid #2a2a2c;
-        }
-
-        .seo-content h2 {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: #636466;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            margin-bottom: 0.7rem;
-        }
-
-        .seo-content p {
-            font-size: 0.82rem;
-            color: #636466;
-            line-height: 1.65;
-            margin-bottom: 0.55rem;
-        }
-
-        .seo-content p:last-child { margin-bottom: 0; }
-
-        .seo-content strong {
-            color: #7a7d80;
-            font-weight: 600;
-        }
-
         /* ─── Footer ─── */
         footer {
             text-align: center;
@@ -380,25 +308,6 @@
         <div id="banner" class="banner" style="display:none"></div>
 
         <div id="wordlist"></div>
-
-        <!-- SEO: keyword-rich, visually subtle ─── -->
-        <section class="seo-content" aria-label="About this word list">
-            <h2>About This Word List</h2>
-            <p>
-                This is a complete list of all <strong>previously played Wordle answers</strong> from the NYT Wordle game.
-                Every word on this page has been an official Wordle answer at some point — use the search above to check
-                whether a specific word has already appeared as a <strong>past Wordle word</strong>.
-            </p>
-            <p>
-                Wondering what <strong>today's Wordle answer</strong> might be? If the banner above says today's word has
-                been played before, it's somewhere in this list of <strong>previous Wordle answers</strong>. If it says
-                the word has never been played, it's a fresh word not found in <strong>Wordle history</strong>.
-            </p>
-            <p>
-                This <strong>Wordle word list</strong> is updated regularly. Bookmark it to quickly look up any word in the
-                <strong>complete list of Wordle answers</strong> — past, present, and future.
-            </p>
-        </section>
 
         <footer>All previously played Wordle answers · updated 2026</footer>
     </div>
