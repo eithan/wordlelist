@@ -384,11 +384,11 @@
 
         /* ── load everything in parallel ── */
         Promise.all([
-            fetch('words.txt').then(function (r) { return r.text(); }),
-            fetch('current.txt').then(function (r) { return r.text(); }),
-            fetch('prior.txt').then(function (r) { return r.text(); }),
-            fetch('safe.txt').then(function (r) { return r.text(); }).catch(function () { return ''; }),
-            fetch('meta.json').then(function (r) { return r.json(); }).catch(function () { return null; }),
+            fetch('words.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('current.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('prior.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('safe.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }).catch(function () { return ''; }),
+            fetch('meta.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return null; }),
         ]).then(function (results) {
             var wordsText  = results[0];
             var currentTxt = results[1];
