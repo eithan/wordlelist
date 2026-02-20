@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordle Word List – All Previous Wordle Answers</title>
+    <title>Past Wordle Answers – Every Previous Wordle Word (Updated Daily)</title>
 
     <!-- SEO ─── -->
-    <meta name="description" content="Complete list of every past Wordle answer (1,690+ words). Searchable, updated daily, and spoiler-free — see if today's word has been played before.">
+    <meta name="description" content="Complete list of all past Wordle answers (1,690+ words). Search any word to check if it has been a Wordle word. Updated daily, spoiler-free.">
     <link rel="icon" href="favicon.ico" sizes="any">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -15,26 +15,66 @@
     <link rel="canonical" href="https://wordlelist.com/">
 
     <!-- Open Graph ─── -->
-    <meta property="og:title" content="Wordle Word List – All Previous Wordle Answers">
-    <meta property="og:description" content="Complete list of every past Wordle answer (1,690+ words). Searchable, updated daily, and spoiler-free.">
+    <meta property="og:title" content="Past Wordle Answers – Every Previous Wordle Word">
+    <meta property="og:description" content="Complete list of all past Wordle answers (1,690+ words). Search any word to check if it has been a Wordle word.">
     <meta property="og:image" content="https://wordlelist.com/og-image.png">
     <meta property="og:url" content="https://wordlelist.com/">
     <meta property="og:type" content="website">
 
     <!-- Twitter Card ─── -->
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Wordle Word List – All Previous Wordle Answers">
-    <meta name="twitter:description" content="Complete list of every past Wordle answer (1,690+ words). Searchable, updated daily, and spoiler-free.">
+    <meta name="twitter:title" content="Past Wordle Answers – Every Previous Wordle Word">
+    <meta name="twitter:description" content="Complete list of all past Wordle answers (1,690+ words). Search any word to check if it has been a Wordle word.">
 
     <!-- Structured Data ─── -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "Wordle Word List",
-        "alternateName": ["Wordlelist", "Wordle Word List"],
+        "name": "Past Wordle Answers",
+        "alternateName": ["Wordlelist", "Wordle Word List", "Wordle Answers List"],
         "url": "https://wordlelist.com/",
-        "description": "A complete, searchable list of all previously played Wordle answers and past NYT Wordle words."
+        "description": "A complete, searchable list of all past Wordle answers and every previous Wordle word."
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How many Wordle answers have there been?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "There have been over 1,690 past Wordle answers since the game launched in June 2021. A new word is added every day."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Has a Wordle word ever been repeated?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, Wordle has occasionally repeated words. You can search our complete list to check if any specific word has been used before."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Where can I find a list of all past Wordle answers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Wordlelist.com maintains a complete, searchable, daily-updated list of every past Wordle answer. You can search for any word to see if it has been a Wordle word."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How can I check if a word has been a Wordle answer?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use the search box on wordlelist.com to type any 5-letter word. If it appears in the list, it has been a past Wordle answer. The site also tells you whether today's word has been used before."
+                }
+            }
+        ]
     }
     </script>
 
@@ -287,6 +327,53 @@
             letter-spacing: 0.05em;
         }
 
+        /* ─── SEO Content / FAQ ─── */
+        .seo-content {
+            max-width: 720px;
+            margin: 2.5rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        .seo-content h2 {
+            color: #d7dadc;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 1.5rem 0 0.6rem;
+            letter-spacing: 0.03em;
+        }
+
+        .seo-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .seo-content p {
+            margin-bottom: 0.7rem;
+        }
+
+        .seo-content details {
+            margin-bottom: 0.5rem;
+        }
+
+        .seo-content summary {
+            color: #d7dadc;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.4rem 0;
+        }
+
+        .seo-content summary:hover {
+            color: #538d4e;
+        }
+
+        .seo-content details p {
+            padding-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
         /* ─── Footer ─── */
         footer {
             text-align: center;
@@ -313,13 +400,37 @@
             </div>
         </header>
 
-        <p class="intro">A complete archive of every past Wordle answer, updated daily.</p>
+        <p class="intro">A complete, searchable list of all past Wordle answers. Check if any word has been a Wordle word — updated daily, spoiler-free.</p>
 
         <div id="banner" class="banner" aria-hidden="true"></div>
 
         <div id="wordlist"></div>
 
-        <footer>All previously played Wordle answers · updated 2026</footer>
+        <section class="seo-content">
+            <h2>About This Wordle Word List</h2>
+            <p>This is a complete archive of every past Wordle answer, updated automatically each day. Use the search box above to check if any word has been a Wordle answer before — perfect for narrowing down your guesses or settling debates with friends.</p>
+            <p>The list includes all previous Wordle words since the game launched in June 2021. Today's answer is never spoiled — we only show whether it's a new word or a repeat.</p>
+
+            <h2>Frequently Asked Questions</h2>
+            <details>
+                <summary>How many Wordle answers have there been?</summary>
+                <p>There have been over 1,690 past Wordle answers since the game launched in June 2021. A new word is added every day.</p>
+            </details>
+            <details>
+                <summary>Has a Wordle word ever been repeated?</summary>
+                <p>Yes, Wordle has occasionally repeated words. You can search our complete list to check if any specific word has been used before.</p>
+            </details>
+            <details>
+                <summary>How can I check if a word has been a Wordle answer?</summary>
+                <p>Use the search box above to type any 5-letter word. If it appears in the list, it has been a past Wordle answer. The site also tells you whether today's word has been used before.</p>
+            </details>
+            <details>
+                <summary>Is this list spoiler-free?</summary>
+                <p>Yes! Today's Wordle answer is never shown in the word list. We only tell you whether it's a new word or one that has been played before, so you can browse safely.</p>
+            </details>
+        </section>
+
+        <footer>All past Wordle answers · updated daily · wordlelist.com</footer>
     </div>
 
     <script>
