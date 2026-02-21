@@ -617,7 +617,7 @@
             var banner = document.getElementById('banner');
             var intro  = document.querySelector('.intro');
             var wlist  = document.getElementById('wordlist');
-            if (banner) banner.style.visibility = q ? 'hidden' : '';
+            if (banner) { banner.style.display = q ? 'none' : ''; banner.style.visibility = q ? '' : ''; }
             if (intro)  intro.style.display  = q ? 'none' : 'block';
             if (wlist)  wlist.style.minHeight = q ? 'auto' : '';
         }
