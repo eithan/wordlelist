@@ -616,8 +616,10 @@
             // hide banner + intro while filtering, restore when cleared
             var banner = document.getElementById('banner');
             var intro  = document.querySelector('.intro');
+            var wlist  = document.getElementById('wordlist');
             if (banner) banner.style.visibility = q ? 'hidden' : '';
             if (intro)  intro.style.display  = q ? 'none' : 'block';
+            if (wlist)  wlist.style.minHeight = q ? 'auto' : '';
         }
 
         searchEl.addEventListener('input', applyFilter);
