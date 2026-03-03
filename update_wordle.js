@@ -13,15 +13,15 @@
  *   6. Write meta.json with wordle_date  (= today's date in UTC+14)
  *   7. git commit + push
  *
+ * Timing note:
+ *   Words are delayed by 1 extra day before adding to words.txt to ensure
+ *   they're fully in the past for ALL timezones (not just UTC+14).
+ *
  * Word source:
  *   https://www.nytimes.com/svc/wordle/v2/{YYYY-MM-DD}.json
  *   Returns: { solution, print_date, days_since_launch, id, editor }
  *   No auth required.  Future dates return tomorrow's word, so we only
  *   ever request the date we need (wordle_date = UTC+14 today).
- *
- * Timing note:
- *   Words are delayed by 1 extra day before adding to words.txt to ensure
- *   they're fully in the past for ALL timezones (not just UTC+14).
  *
  * If the fetch fails for any reason, everything EXCEPT current.txt is
  * still pushed — the site keeps working with the previous word.
@@ -51,12 +51,11 @@ function run(cmd) {
 /* ── git ── */
 function gitSetup() {
     if (!fs.existsSync(REPO_DIR)) {
-        execSync(`gh repo clone eithan/wordlelist ${REPO_DIR}`, { encoding: 'utf-8' });
+        execSync(`git clone git@github.com:eithan/wordlelist.git ${REPO_DIR}`, { encoding: 'utf-8' });
     } else {
         run('git pull --rebase origin main');
     }
-    const token = execSync('gh auth token', { encoding: 'utf-8' }).trim();
-    run(`git remote set-url origin https://x-access-token:${token}@github.com/eithan/wordlelist.git`);
+    run('git remote set-url origin git@github.com:eithan/wordlelist.git');
     run('git config user.email "jarvis@openclaw.ai"');
     run('git config user.name  "Jarvis"');
 }
@@ -105,10 +104,22 @@ async function main() {
     log('git setup …');
     gitSetup();
 
+    /* idempotency check — skip if already ran for today's UTC+14 date */
+    const metaPath = `${REPO_DIR}/meta.json`;
+    if (fs.existsSync(metaPath)) {
+        const savedMeta = JSON.parse(fs.readFileSync(metaPath, 'utf-8'));
+        const utcPlus14Now = new Date(Date.now() + 14 * 60 * 60 * 1000).toISOString().split('T')[0];
+        if (savedMeta.wordle_date === utcPlus14Now) {
+            log(`Already ran for ${utcPlus14Now} — skipping.`);
+            log('=== Wordle updater DONE (no-op) ===\n');
+            return;
+        }
+    }
+
     /* 2. read state */
+    const safePath    = `${REPO_DIR}/safe.txt`;
     const priorWord   = fs.readFileSync(`${REPO_DIR}/prior.txt`,   'utf-8').trim().toUpperCase();
     const currentWord = fs.readFileSync(`${REPO_DIR}/current.txt`, 'utf-8').trim().toUpperCase();
-    const safePath    = `${REPO_DIR}/safe.txt`;
     const safeWord    = fs.existsSync(safePath) ? fs.readFileSync(safePath, 'utf-8').trim().toUpperCase() : null;
     log(`State  →  safe: ${safeWord || '(none)'}  |  prior: ${priorWord}  |  current: ${currentWord}`);
 
