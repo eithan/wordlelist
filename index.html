@@ -616,8 +616,8 @@
             // hide banner + intro while filtering, restore when cleared
             var banner = document.getElementById('banner');
             var intro  = document.querySelector('.intro');
-            if (banner) banner.style.visibility = q ? 'hidden' : '';
-            if (intro)  intro.style.display  = q ? 'none' : 'block';
+            if (banner) banner.style.display = q ? 'none' : '';
+            if (intro)  intro.style.display  = q ? 'none' : '';
         }
 
         searchEl.addEventListener('input', applyFilter);
