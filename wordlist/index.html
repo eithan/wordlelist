@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Past Wordle Answers – Every Previous Wordle Word (Updated Daily)</title>
+
+    <!-- SEO ─── -->
+    <meta name="description" content="Complete list of all past Wordle answers (1,690+ words). Search any word to check if it has been a Wordle word. Updated daily, spoiler-free.">
+    <link rel="icon" href="favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://wordlelist.com/">
+
+    <!-- Open Graph ─── -->
+    <meta property="og:title" content="Past Wordle Answers – Every Previous Wordle Word">
+    <meta property="og:description" content="Complete list of all past Wordle answers (1,690+ words). Search any word to check if it has been a Wordle word.">
+    <meta property="og:image" content="https://wordlelist.com/og-image.png">
+    <meta property="og:url" content="https://wordlelist.com/">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card ─── -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Past Wordle Answers – Every Previous Wordle Word">
+    <meta name="twitter:description" content="Complete list of all past Wordle answers (1,690+ words). Search any word to check if it has been a Wordle word.">
+
+    <!-- Structured Data ─── -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Past Wordle Answers",
+        "alternateName": ["Wordlelist", "Wordle Word List", "Wordle Answers List"],
+        "url": "https://wordlelist.com/",
+        "description": "A complete, searchable list of all past Wordle answers and every previous Wordle word."
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How many Wordle answers have there been?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "There have been over 1,690 past Wordle answers since the game launched in June 2021. A new word is added every day."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Has a Wordle word ever been repeated?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, Wordle has occasionally repeated words. You can search our complete list to check if any specific word has been used before."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Where can I find a list of all past Wordle answers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Wordlelist.com maintains a complete, searchable, daily-updated list of every past Wordle answer. You can search for any word to see if it has been a Wordle word."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How can I check if a word has been a Wordle answer?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Use the search box on wordlelist.com to type any 5-letter word. If it appears in the list, it has been a past Wordle answer. The site also tells you whether today's word has been used before."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            overflow-x: hidden;
+        }
+
+        body {
+            background-color: #121213;
+            color: #d7dadc;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding: 1.25rem 1.5rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* ─── Header ─── */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        h1 {
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+            line-height: 1.2;
+        }
+
+        .title-wordle {
+            display: block;
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            margin-right: -0.22em; /* trim trailing letter-spacing */
+        }
+
+        .title-sub {
+            display: block;
+            font-size: clamp(1rem, 2.8vw, 1.4rem);
+            letter-spacing: 0.32em;
+            color: #ffffff;
+            margin-top: 0.2em;
+            margin-right: -0.32em; /* trim trailing letter-spacing */
+        }
+
+        /* Individual letter colors for "WORDLE" */
+        .c-green  { color: #538d4e; }
+        .c-yellow { color: #c9b458; }
+        .c-light  { color: #d7dadc; }
+
+        .subtitle {
+            color: #818384;
+            font-size: 0.88rem;
+            margin-bottom: 1.1rem;
+            letter-spacing: 0.04em;
+        }
+
+        .subtitle span {
+            color: #d7dadc;
+            font-weight: 600;
+        }
+
+        /* ─── Search ─── */
+        .search-wrap {
+            max-width: 340px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        #search {
+            width: 100%;
+            padding: 0.65rem 2.2rem 0.65rem 1rem;   /* right pad for × button */
+            border: 2px solid #3a3a3c;
+            border-radius: 10px;
+            background: #1a1a1b;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+            letter-spacing: 0.05em;
+        }
+
+        #search:focus        { border-color: #538d4e; }
+        #search::placeholder { color: #818384; }
+
+        /* desktop: suppress the native × so only our custom one shows */
+        @media (hover: hover) {
+            #search::-webkit-search-cancel-button  { display: none; }
+            #search::-webkit-search-decoration     { display: none; }
+        }
+
+        /* ── custom × clear button (desktop) ── */
+        .search-clear {
+            position: absolute;
+            right: 0.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            /* 44×44 px minimum touch target (Apple HIG) */
+            width: 2.75rem;
+            height: 2.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: #818384;
+            font-size: 1.1rem;
+            line-height: 1;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.15s ease, color 0.15s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .search-clear.visible { opacity: 1; }
+        .search-clear:hover   { color: #d7dadc; }
+
+        /* also suppress native × on mobile — we use our own everywhere */
+        @media (hover: none) {
+            #search::-webkit-search-cancel-button  { -webkit-appearance: none; }
+            #search::-webkit-search-decoration     { -webkit-appearance: none; }
+        }
+
+        /* ─── Intro ─── */
+        .intro {
+            max-width: 720px;
+            margin: 0 auto 1.5rem;
+            text-align: center;
+            font-size: 0.92rem;
+            color: #818384;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+        }
+
+        .intro strong {
+            color: #d7dadc;
+            font-weight: 600;
+        }
+
+        /* ─── Banner ─── */
+        .banner {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 1.1rem 1.5rem 1rem;
+            margin: 0 auto 1.8rem;
+            max-width: 720px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            /* CLS fix: reserve space, hide visually until JS populates */
+            min-height: 4.5rem;
+            visibility: hidden;
+        }
+
+        .banner.played,
+        .banner.fresh {
+            visibility: visible;
+        }
+
+        .banner.played { border-color: #538d4e; }
+        .banner.fresh  { border-color: #c9b458; }
+
+        .banner-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .banner-text {
+            font-size: 1.05rem;
+            color: #d7dadc;
+            letter-spacing: 0.02em;
+        }
+
+        .banner-text strong { font-weight: 700; }
+
+        /* ─── Word List ─── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        #wordlist {
+            animation: fadeIn 0.35s ease both;
+            line-height: 2.4;
+            padding: 0.5rem 0;
+            max-width: 720px;
+            margin: 0 auto;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            /* CLS fix: reserve space so content below doesn't shift */
+            min-height: 60vh;
+        }
+
+        .word-wrap {
+            display: inline-block;
+        }
+
+        .word {
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.13em;
+            text-transform: uppercase;
+            cursor: default;
+            user-select: none;
+            transition: opacity 0.15s ease, text-shadow 0.15s ease;
+            display: inline;
+        }
+
+        .word:hover {
+            opacity: 0.6;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        .pipe {
+            color: #3a3a3c;
+            font-weight: 300;
+            display: inline;
+            user-select: none;
+        }
+
+        /* ─── Glow: "never played" state ─── */
+        #wordlist.glowing .word {
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        #wordlist.glowing .word:hover {
+            opacity: 0.7;
+            text-shadow: 0 0 16px currentColor;
+        }
+
+        /* ─── Empty state ─── */
+        .empty {
+            color: #818384;
+            font-style: italic;
+            padding: 2rem 0;
+            text-align: center;
+            letter-spacing: 0.05em;
+        }
+
+        /* ─── SEO Content / FAQ ─── */
+        .seo-content {
+            max-width: 720px;
+            margin: 2.5rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        .seo-content h2 {
+            color: #d7dadc;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 1.5rem 0 0.6rem;
+            letter-spacing: 0.03em;
+        }
+
+        .seo-content h2:first-child {
+            margin-top: 0;
+        }
+
+        .seo-content p {
+            margin-bottom: 0.7rem;
+        }
+
+        .seo-content details {
+            margin-bottom: 0.5rem;
+        }
+
+        .seo-content summary {
+            color: #d7dadc;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.4rem 0;
+        }
+
+        .seo-content summary:hover {
+            color: #538d4e;
+        }
+
+        .seo-content details p {
+            padding-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="title-wordle"><span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span></span>
+                <span class="title-sub">WORD LIST</span>
+            </h1>
+            <p class="subtitle"><span id="count">—</span> words</p>
+            <div class="search-wrap">
+                <input type="search" id="search" placeholder="Filter words…" autocomplete="off" spellcheck="false">
+                <button class="search-clear" id="searchClear" aria-label="Clear search">&#x2715;</button>
+            </div>
+        </header>
+
+        <p class="intro">A complete, searchable list of all past Wordle answers. Check if any word has been a Wordle word — updated daily, spoiler-free.</p>
+
+        <div id="banner" class="banner" aria-hidden="true"></div>
+
+        <div id="wordlist"></div>
+
+        <section class="seo-content">
+            <h2>About This Wordle Word List</h2>
+            <p>This is a complete archive of every past Wordle answer, updated automatically each day. Use the search box above to check if any word has been a Wordle answer before — perfect for narrowing down your guesses or settling debates with friends.</p>
+            <p>The list includes all previous Wordle words since the game launched in June 2021. Today's answer is never spoiled — we only show whether it's a new word or a repeat.</p>
+
+            <h2>Frequently Asked Questions</h2>
+            <details>
+                <summary>How many Wordle answers have there been?</summary>
+                <p>There have been over 1,690 past Wordle answers since the game launched in June 2021. A new word is added every day.</p>
+            </details>
+            <details>
+                <summary>Has a Wordle word ever been repeated?</summary>
+                <p>Yes, Wordle has occasionally repeated words. You can search our complete list to check if any specific word has been used before.</p>
+            </details>
+            <details>
+                <summary>How can I check if a word has been a Wordle answer?</summary>
+                <p>Use the search box above to type any 5-letter word. If it appears in the list, it has been a past Wordle answer. The site also tells you whether today's word has been used before.</p>
+            </details>
+            <details>
+                <summary>Is this list spoiler-free?</summary>
+                <p>Yes! Today's Wordle answer is never shown in the word list. We only tell you whether it's a new word or one that has been played before, so you can browse safely.</p>
+            </details>
+        </section>
+
+        <footer>All past Wordle answers · updated daily · wordlelist.com</footer>
+    </div>
+
+    <script>
+    (function () {
+        const colors = ['c-green', 'c-yellow', 'c-light'];
+
+        /* ── user's local date as YYYY-MM-DD ── */
+        function getLocalDate() {
+            const d = new Date();
+            return d.getFullYear() + '-' +
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                   String(d.getDate()).padStart(2, '0');
+        }
+
+        /* ── freshness check ──
+         *  On revisit (e.g. stale Safari tab), fetch meta.json bypassing
+         *  cache.  If the wordle_date has changed since the page was first
+         *  served, do a one-time hard reload so every file is fresh.
+         *  Cost: one ~74-byte request; no impact on first loads.
+         */
+        (function freshness() {
+            var stored = sessionStorage.getItem('wl_date');
+            fetch('meta.json?_=' + Date.now(), { cache: 'no-store' })
+                .then(function (r) { return r.json(); })
+                .then(function (meta) {
+                    if (!meta || !meta.wordle_date) return;
+                    if (stored && stored !== meta.wordle_date) {
+                        sessionStorage.setItem('wl_date', meta.wordle_date);
+                        location.reload();
+                    } else {
+                        sessionStorage.setItem('wl_date', meta.wordle_date);
+                    }
+                })
+                .catch(function () { /* network error — proceed with cached page */ });
+        })();
+
+        /* ── render word list ── */
+        function render(words) {
+            const container = document.getElementById('wordlist');
+            if (words.length === 0) {
+                container.innerHTML = '<p class="empty">No words match that filter.</p>';
+                return;
+            }
+            const frag = document.createDocumentFragment();
+            words.forEach((word, i) => {
+                // Whitespace text node between units — collapses at
+                // line breaks so new lines always start with a word.
+                if (i > 0) frag.appendChild(document.createTextNode(' '));
+
+                const wrap = document.createElement('span');
+                wrap.className = 'word-wrap';
+
+                const span = document.createElement('span');
+                span.className = 'word ' + colors[i % 3];
+                span.textContent = word;
+                wrap.appendChild(span);
+
+                if (i < words.length - 1) {
+                    const pipe = document.createElement('span');
+                    pipe.className = 'pipe';
+                    pipe.textContent = ' |';
+                    wrap.appendChild(pipe);
+                }
+                frag.appendChild(wrap);
+            });
+            container.innerHTML = '';
+            container.appendChild(frag);
+        }
+
+        /* ── module-level state for search ── */
+        var displayWords = [];
+
+        /* ── load everything in parallel ── */
+        Promise.all([
+            fetch('words.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('current.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('prior.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('safe.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }).catch(function () { return ''; }),
+            fetch('meta.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return null; }),
+        ]).then(function (results) {
+            var wordsText  = results[0];
+            var currentTxt = results[1];
+            var priorTxt   = results[2];
+            var safeTxt    = results[3];
+            var meta       = results[4];
+
+            /* base word list from words.txt (already sorted) */
+            var baseWords = wordsText.trim().split('\n')
+                .map(function (w) { return w.trim().toUpperCase(); })
+                .filter(function (w) { return w.length === 5; });
+
+            var currentWord = currentTxt.trim().toUpperCase();
+            var priorWord   = priorTxt.trim().toUpperCase();
+            var safeWord    = safeTxt.trim().toUpperCase();
+
+            /* inject safe word (2 days old, always safe to show) */
+            if (safeWord && !baseWords.includes(safeWord)) {
+                baseWords.push(safeWord);
+                baseWords.sort();
+            }
+
+            /* ── timezone gate ──
+             *  meta.wordle_date = the date (in UTC+14) when current.txt became active.
+             *  If the user's local date  ≥ wordle_date  →  they're on the NEW puzzle.
+             *  If the user's local date  <  wordle_date  →  still on yesterday's puzzle.
+             */
+            var localDate  = getLocalDate();
+            var wordleDate = meta ? meta.wordle_date : localDate;
+
+            var answerWord;
+            var playedBefore;
+
+            if (localDate >= wordleDate) {
+                /*
+                 * NEW puzzle:
+                 *   • answer = current.txt
+                 *   • prior.txt was completed yesterday but hasn't been folded
+                 *     into words.txt yet (that happens at the next job run).
+                 *     Inject it so the list looks complete.
+                 */
+                answerWord = currentWord;
+                if (!baseWords.includes(priorWord)) {
+                    baseWords.push(priorWord);
+                    baseWords.sort();
+                }
+                // Check if today's word is in the historical list
+                playedBefore = baseWords.indexOf(answerWord) !== -1;
+            } else {
+                /*
+                 * OLD puzzle:
+                 *   • answer = prior.txt  (still in progress for this user)
+                 *   • don't inject anything — prior is the live puzzle word
+                 *   • This is TODAY's puzzle for this user, so not "played before" yet
+                 */
+                answerWord = priorWord;
+                playedBefore = false;
+            }
+
+            displayWords = baseWords;   // exposed for search
+
+            /* ── filter out answer word ONLY if it's never been played ── */
+            if (!playedBefore) {
+                displayWords = displayWords.filter(function (w) { return w !== answerWord; });
+            }
+
+            /* ── render list ── */
+            document.getElementById('count').textContent = displayWords.length;
+            render(displayWords);
+
+            /* ── banner: show whether today's word has been used before ── */
+            var banner   = document.getElementById('banner');
+            var wordlist = document.getElementById('wordlist');
+
+            if (playedBefore) {
+                banner.className = 'banner played';
+                banner.innerHTML =
+                    '<div class="banner-icon">🔍</div>' +
+                    '<p class="banner-text">Today\'s word <strong>has been played before!</strong></p>';
+                wordlist.classList.remove('glowing');
+            } else {
+                banner.className = 'banner fresh';
+                banner.innerHTML =
+                    '<div class="banner-icon">✨</div>' +
+                    '<p class="banner-text">Today\'s word has <strong class="c-yellow">NEVER</strong> been played before!</p>';
+                wordlist.classList.add('glowing');
+            }
+        }).catch(function (err) {
+            document.getElementById('wordlist').innerHTML =
+                '<p class="empty" style="color:#c9b458">Could not load data — ' + err.message + '</p>';
+        });
+
+        /* ── search filter + clear button ── */
+        var searchEl      = document.getElementById('search');
+        var searchClearEl = document.getElementById('searchClear');
+
+        function applyFilter() {
+            var q        = searchEl.value.trim().toUpperCase();
+            var filtered = q ? displayWords.filter(function (w) { return w.indexOf(q) !== -1; }) : displayWords;
+            document.getElementById('count').textContent = filtered.length;
+            render(filtered);
+            // toggle × visibility
+            searchClearEl.classList.toggle('visible', searchEl.value.length > 0);
+            // hide banner + intro while filtering, restore when cleared
+            var banner = document.getElementById('banner');
+            var intro  = document.querySelector('.intro');
+            if (banner) banner.style.display = q ? 'none' : '';
+            if (intro)  intro.style.display  = q ? 'none' : '';
+        }
+
+        searchEl.addEventListener('input', applyFilter);
+
+        // native <search> fires "search" on clear (Safari/Chrome mobile)
+        searchEl.addEventListener('search', applyFilter);
+
+        function clearSearch(e) {
+            e.preventDefault();
+            searchEl.value = '';
+            applyFilter();
+            searchEl.focus();
+        }
+        searchClearEl.addEventListener('mousedown', clearSearch);   // desktop
+        searchClearEl.addEventListener('touchend',  clearSearch);   // iOS
+    })();
+    </script>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "46707338e53242e685de97acc0026ce1"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
