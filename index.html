@@ -87,6 +87,7 @@
 
         html, body {
             overflow-x: hidden;
+            max-width: 100%;
         }
 
         body {
@@ -95,9 +96,11 @@
             font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
             padding: 1.25rem 1.5rem 1.5rem;
+            overscroll-behavior-x: none; /* prevents iOS rubber-band horizontal scroll */
         }
 
         .container {
+            width: 100%;
             max-width: 1100px;
             margin: 0 auto;
         }
@@ -121,7 +124,7 @@
         .title-wordle {
             display: block;
             font-size: clamp(2rem, 6vw, 2.8rem);
-            margin-right: -0.22em; /* trim trailing letter-spacing */
+            padding-left: 0.22em; /* balance trailing letter-spacing so text is truly centered */
         }
 
         .title-sub {
@@ -130,7 +133,7 @@
             letter-spacing: 0.32em;
             color: #ffffff;
             margin-top: 0.2em;
-            margin-right: -0.32em; /* trim trailing letter-spacing */
+            padding-left: 0.32em; /* balance trailing letter-spacing so text is truly centered */
         }
 
         /* Individual letter colors for "WORDLE" */
