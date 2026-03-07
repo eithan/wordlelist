@@ -118,7 +118,16 @@ function injectWordList() {
     // Simple space-separated word paragraph — crawlable, honest, compact (~10KB)
     const block = `<p class="static-wordlist">${baseWords.join(' ')}</p>`;
 
+    // Last updated date in MM/DD/YYYY format (UTC)
+    const now   = new Date();
+    const mm    = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const dd    = String(now.getUTCDate()).padStart(2, '0');
+    const yyyy  = now.getUTCFullYear();
+    const dateStr = `${mm}/${dd}/${yyyy}`;
+
     let html = fs.readFileSync(indexPath, 'utf-8');
+
+    // ── inject word list ──
     const startMarker = '<!-- WORDS:START -->';
     const endMarker   = '<!-- WORDS:END -->';
     const startIdx = html.indexOf(startMarker);
@@ -129,12 +138,28 @@ function injectWordList() {
         return;
     }
 
-    const newHtml =
+    html =
         html.slice(0, startIdx + startMarker.length) +
         '\n        ' + block + '\n        ' +
         html.slice(endIdx);
-    fs.writeFileSync(indexPath, newHtml);
-    log(`Injected ${baseWords.length} words into index.html`);
+
+    // ── inject last updated date ──
+    const dateStart = '<!-- DATE:START -->';
+    const dateEnd   = '<!-- DATE:END -->';
+    const dateStartIdx = html.indexOf(dateStart);
+    const dateEndIdx   = html.indexOf(dateEnd);
+
+    if (dateStartIdx !== -1 && dateEndIdx !== -1) {
+        html =
+            html.slice(0, dateStartIdx + dateStart.length) +
+            dateStr +
+            html.slice(dateEndIdx);
+    } else {
+        log('⚠️  Date markers not found in index.html — skipping date injection');
+    }
+
+    fs.writeFileSync(indexPath, html);
+    log(`Injected ${baseWords.length} words + last updated ${dateStr} into index.html`);
 }
 
 /* ── update sitemap.xml with today's lastmod ── */
