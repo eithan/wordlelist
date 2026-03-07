@@ -85,24 +85,28 @@
             box-sizing: border-box;
         }
 
-        html, body {
-            overflow-x: hidden;
+        html {
+            overflow-x: clip; /* clip (not hidden) — doesn't create a scroll container, truly prevents iOS horizontal scroll */
             max-width: 100%;
         }
 
         body {
+            overflow-x: hidden;
+            max-width: 100%;
+            position: relative; /* required for iOS overflow containment to work */
             background-color: #121213;
             color: #d7dadc;
             font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
             padding: 1.25rem 1.5rem 1.5rem;
-            overscroll-behavior-x: none; /* prevents iOS rubber-band horizontal scroll */
+            overscroll-behavior-x: none;
         }
 
         .container {
             width: 100%;
             max-width: 1100px;
             margin: 0 auto;
+            overflow-x: hidden; /* belt-and-suspenders: clip overflow at container level too */
         }
 
         /* ─── Header ─── */
