@@ -96,6 +96,65 @@ function fetchWordleAPI(date) {
     });
 }
 
+/* ── inject static word list into index.html (for SEO) ── */
+function injectWordList() {
+    const indexPath = `${REPO_DIR}/index.html`;
+    const wordsPath = `${REPO_DIR}/words.txt`;
+    const safePath  = `${REPO_DIR}/safe.txt`;
+
+    // Build the word set: words.txt + safe.txt (both always safe to show publicly)
+    const baseWords = fs.readFileSync(wordsPath, 'utf-8').trim().split('\n')
+        .map(w => w.trim().toUpperCase())
+        .filter(w => w.length === 5);
+
+    if (fs.existsSync(safePath)) {
+        const safeWord = fs.readFileSync(safePath, 'utf-8').trim().toUpperCase();
+        if (safeWord.length === 5 && !baseWords.includes(safeWord)) {
+            baseWords.push(safeWord);
+            baseWords.sort();
+        }
+    }
+
+    // Simple space-separated word paragraph — crawlable, honest, compact (~10KB)
+    const block = `<p class="static-wordlist">${baseWords.join(' ')}</p>`;
+
+    let html = fs.readFileSync(indexPath, 'utf-8');
+    const startMarker = '<!-- WORDS:START -->';
+    const endMarker   = '<!-- WORDS:END -->';
+    const startIdx = html.indexOf(startMarker);
+    const endIdx   = html.indexOf(endMarker);
+
+    if (startIdx === -1 || endIdx === -1) {
+        log('⚠️  Word list markers not found in index.html — skipping injection');
+        return;
+    }
+
+    const newHtml =
+        html.slice(0, startIdx + startMarker.length) +
+        '\n        ' + block + '\n        ' +
+        html.slice(endIdx);
+    fs.writeFileSync(indexPath, newHtml);
+    log(`Injected ${baseWords.length} words into index.html`);
+}
+
+/* ── update sitemap.xml with today's lastmod ── */
+function updateSitemap() {
+    const today = new Date().toISOString().split('T')[0];
+    const sitemap =
+`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://wordlelist.com/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+`;
+    fs.writeFileSync(`${REPO_DIR}/sitemap.xml`, sitemap);
+    log(`Updated sitemap.xml with lastmod ${today}`);
+}
+
 /* ── main ── */
 async function main() {
     log('=== Wordle updater START ===');
@@ -156,8 +215,12 @@ async function main() {
     const meta = { wordle_date: wordleDate, ran_at: new Date().toISOString() };
     fs.writeFileSync(`${REPO_DIR}/meta.json`, JSON.stringify(meta, null, 2) + '\n');
 
-    /* 9. commit + push */
-    run('git add words.txt safe.txt prior.txt current.txt meta.json');
+    /* 9. inject static word list + update sitemap */
+    injectWordList();
+    updateSitemap();
+
+    /* 10. commit + push */
+    run('git add words.txt safe.txt prior.txt current.txt meta.json index.html sitemap.xml');
     try {
         run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + newWord : ' (word fetch failed)'}"` );
     } catch (_) {
