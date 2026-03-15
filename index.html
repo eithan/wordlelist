@@ -586,7 +586,7 @@
                  *   • This is TODAY's puzzle for this user, so not "played before" yet
                  */
                 answerWord = priorWord;
-                playedBefore = false;
+                playedBefore = baseWords.indexOf(answerWord) !== -1;
             }
 
             displayWords = baseWords;   // exposed for search
