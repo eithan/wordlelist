@@ -591,10 +591,10 @@
                  * OLD puzzle:
                  *   • answer = prior.txt  (still in progress for this user)
                  *   • don't inject anything — prior is the live puzzle word
-                 *   • This is TODAY's puzzle for this user, so not "played before" yet
+                 *   • Still check if prior word has been played before historically
                  */
                 answerWord = priorWord;
-                playedBefore = false;
+                playedBefore = baseWords.indexOf(answerWord) !== -1;
             }
 
             displayWords = baseWords;   // exposed for search
