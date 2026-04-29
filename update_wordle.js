@@ -247,7 +247,7 @@ async function main() {
     /* 10. commit + push */
     run('git add words.txt safe.txt prior.txt current.txt meta.json index.html sitemap.xml');
     try {
-        run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + newWord : ' (word fetch failed)'}"` );
+        run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + ' (REDACTED newWord)' : ' (word fetch failed)'}"` );
     } catch (_) {
         log('Nothing to commit');
     }
