@@ -34,7 +34,7 @@ const fs           = require('fs');
 const https        = require('https');
 
 /* ── config ── */
-const REPO_DIR = '/tmp/wordlelist';
+const REPO_DIR = '/home/eithan/wordlelist';
 const LOG_FILE = '/tmp/wordlelist_update.log';
 
 /* ── helpers ── */
