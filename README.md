@@ -50,7 +50,7 @@ The script appends to `/tmp/wordlelist_update.log`. If the NYT API call fails fo
 - 📱 **Mobile-friendly** — Clean dark-mode design, works on any device
 - ⚡ **Fast** — Static site, no frameworks, no tracking, no cookies
 
-## Links
+## Links 
 
 - **Live site:** [wordlelist.com](https://wordlelist.com)
 - **Sitemap:** [wordlelist.com/sitemap.xml](https://wordlelist.com/sitemap.xml)
