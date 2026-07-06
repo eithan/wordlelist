@@ -143,6 +143,11 @@ function injectWordList() {
         '\n        ' + block + '\n        ' +
         html.slice(endIdx);
 
+    // ── refresh word counts in meta description + FAQ (visible & JSON-LD) ──
+    const rounded = (Math.floor(baseWords.length / 10) * 10).toLocaleString('en-US');
+    html = html.replace(/[\d,]+\+ words/g, `${rounded}+ words`);
+    html = html.replace(/over [\d,]+ past Wordle answers/g, `over ${rounded} past Wordle answers`);
+
     // ── inject last updated date ──
     const dateStart = '<!-- DATE:START -->';
     const dateEnd   = '<!-- DATE:END -->';
@@ -173,6 +178,12 @@ function updateSitemap() {
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://wordlelist.com/hint/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
 </urlset>
 `;

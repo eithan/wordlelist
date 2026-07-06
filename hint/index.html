@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Wordle Hint – Spoiler-Free Clues, One at a Time (Updated Daily)</title>
+
+    <!-- SEO ─── -->
+    <meta name="description" content="Spoiler-free hints for today's Wordle. Reveal clues one at a time — vowels, first letter, last letter — and only see the answer if you choose to. Updated daily.">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://wordlelist.com/hint/">
+
+    <!-- Open Graph ─── -->
+    <meta property="og:title" content="Today's Wordle Hint – Spoiler-Free Clues, One at a Time">
+    <meta property="og:description" content="Reveal today's Wordle clues one at a time — vowels, first letter, last letter — and only see the answer if you choose to.">
+    <meta property="og:image" content="https://wordlelist.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://wordlelist.com/hint/">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card ─── -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Today's Wordle Hint – Spoiler-Free Clues, One at a Time">
+    <meta name="twitter:description" content="Reveal today's Wordle clues one at a time — and only see the answer if you choose to.">
+    <meta name="twitter:image" content="https://wordlelist.com/og-image.png">
+
+    <!-- Structured Data ─── -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Today's Wordle Hint",
+        "url": "https://wordlelist.com/hint/",
+        "description": "Spoiler-free hints for today's Wordle puzzle, revealed one clue at a time.",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Past Wordle Answers",
+            "url": "https://wordlelist.com/"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Are these Wordle hints spoiler-free?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Nothing is revealed until you tap it. Hints are ordered from gentlest to strongest, so you can take exactly as much help as you want and stop at any time."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "When does the new Wordle come out?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "A new Wordle puzzle is released at midnight in your local timezone. This page automatically shows hints for the puzzle you are currently playing, wherever you are in the world."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I see today's Wordle answer here?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes — the final hint reveals the full answer, but only if you tap it. It is clearly marked so you will never see it by accident."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Has today's Wordle word been used before?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "This page tells you whether today's answer has appeared as a past Wordle answer — a unique clue based on our complete archive of every previous Wordle word."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: clip;
+            max-width: 100%;
+        }
+
+        body {
+            overflow-x: hidden;
+            max-width: 100%;
+            position: relative;
+            background-color: #121213;
+            color: #d7dadc;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding: 1.25rem 1.5rem 1.5rem;
+            overscroll-behavior-x: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        /* ─── Header ─── */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        h1 {
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+            line-height: 1.2;
+        }
+
+        .title-wordle {
+            display: block;
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            padding-left: 0.22em;
+        }
+
+        .title-sub {
+            display: block;
+            font-size: clamp(1rem, 2.8vw, 1.4rem);
+            letter-spacing: 0.32em;
+            color: #ffffff;
+            margin-top: 0.2em;
+            padding-left: 0.32em;
+        }
+
+        .c-green  { color: #538d4e; }
+        .c-yellow { color: #c9b458; }
+        .c-light  { color: #d7dadc; }
+
+        .subtitle {
+            color: #818384;
+            font-size: 0.88rem;
+            letter-spacing: 0.04em;
+            /* CLS fix: reserve one line before JS fills in puzzle number/date */
+            min-height: 1.2em;
+        }
+
+        .subtitle span { color: #d7dadc; font-weight: 600; }
+
+        .home-link {
+            display: inline-block;
+            margin-top: 0.9rem;
+            color: #818384;
+            font-size: 0.82rem;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .home-link:hover { border-color: #538d4e; color: #d7dadc; }
+
+        /* ─── Intro ─── */
+        .intro {
+            max-width: 720px;
+            margin: 0 auto 1.5rem;
+            text-align: center;
+            font-size: 0.92rem;
+            color: #818384;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+        }
+
+        .intro strong { color: #d7dadc; font-weight: 600; }
+
+        /* ─── Status banner (played before / never played) ─── */
+        .banner {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 1.1rem 1.5rem 1rem;
+            margin: 0 auto 1.8rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            min-height: 4.5rem;
+            visibility: hidden;
+        }
+
+        .banner.played, .banner.fresh { visibility: visible; }
+
+        .banner.played {
+            border-color: #538d4e;
+            animation: playedPulse 2.5s ease-in-out infinite;
+        }
+        .banner.fresh { border-color: #c9b458; }
+
+        @keyframes playedPulse {
+            0%, 100% { box-shadow: 0 0 6px rgba(83, 141, 78, 0.35), 0 0 14px rgba(83, 141, 78, 0.15); }
+            50%       { box-shadow: 0 0 20px rgba(83, 141, 78, 0.75), 0 0 36px rgba(83, 141, 78, 0.3); }
+        }
+
+        .banner-icon { font-size: 1.5rem; margin-bottom: 0.25rem; }
+
+        .banner-text {
+            font-size: 1.05rem;
+            color: #d7dadc;
+            letter-spacing: 0.02em;
+        }
+
+        .banner-text strong { font-weight: 700; }
+
+        /* ─── Hint cards ─── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hints {
+            animation: fadeIn 0.35s ease both;
+        }
+
+        .hint-card {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 1.1rem 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .hint-info { flex: 1 1 14rem; }
+
+        .hint-step {
+            display: block;
+            color: #818384;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        .hint-label {
+            color: #d7dadc;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            line-height: 1.4;
+        }
+
+        .reveal-btn {
+            flex: 0 0 auto;
+            min-width: 8.5rem;
+            min-height: 2.75rem;   /* 44px touch target */
+            padding: 0.55rem 1.1rem;
+            border: 2px solid #3a3a3c;
+            border-radius: 10px;
+            background: #121213;
+            color: #818384;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: border-color 0.2s ease, color 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .reveal-btn:hover, .reveal-btn:focus-visible {
+            border-color: #538d4e;
+            color: #d7dadc;
+            outline: none;
+        }
+
+        .reveal-btn:disabled {
+            cursor: default;
+            opacity: 0.55;
+        }
+
+        .hint-value {
+            flex: 0 0 auto;
+            min-height: 2.75rem;
+            display: none;
+            align-items: center;
+            color: #d7dadc;
+            font-size: 0.98rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            animation: fadeIn 0.25s ease both;
+        }
+
+        .hint-card.revealed .reveal-btn  { display: none; }
+        .hint-card.revealed .hint-value  { display: flex; }
+
+        /* text-only answers (hints 1 & 2) in Wordle green to stand out from the question */
+        #card-repeat .hint-value,
+        #card-vowelcount .hint-value {
+            color: #538d4e;
+        }
+
+        /* ─── Letter tiles ─── */
+        .tiles { display: flex; gap: 0.3rem; }
+
+        .tile {
+            width: 2.4rem;
+            height: 2.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #ffffff;
+            background: #538d4e;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .tile.gray { background: #3a3a3c; }
+
+        @media (max-width: 420px) {
+            .tile { width: 2.1rem; height: 2.1rem; font-size: 1.1rem; }
+        }
+
+        /* ─── Answer card (strongest spoiler) ─── */
+        .hint-card.answer-card { border-color: #c9b458; }
+
+        .hint-card.answer-card .reveal-btn:hover,
+        .hint-card.answer-card .reveal-btn:focus-visible {
+            border-color: #c9b458;
+        }
+
+        /* ─── Section divider ─── */
+        .section-label {
+            color: #818384;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            text-align: center;
+            margin: 2rem 0 1rem;
+        }
+
+        /* ─── Error state ─── */
+        .load-error {
+            color: #c9b458;
+            font-style: italic;
+            text-align: center;
+            padding: 1.5rem 0;
+            letter-spacing: 0.05em;
+            display: none;
+        }
+
+        /* ─── SEO Content / FAQ ─── */
+        .seo-content {
+            margin: 2.5rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        .seo-content h2 {
+            color: #d7dadc;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 1.5rem 0 0.6rem;
+            letter-spacing: 0.03em;
+        }
+
+        .seo-content h2:first-child { margin-top: 0; }
+
+        .seo-content p { margin-bottom: 0.7rem; }
+
+        .seo-content a { color: #538d4e; }
+
+        .seo-content details { margin-bottom: 0.5rem; }
+
+        .seo-content summary {
+            color: #d7dadc;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.4rem 0;
+        }
+
+        .seo-content summary:hover { color: #538d4e; }
+
+        .seo-content details p {
+            padding-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+        }
+
+        footer a { color: #818384; }
+        footer a:hover { color: #d7dadc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="title-wordle"><span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span></span>
+                <span class="title-sub">TODAY'S HINT</span>
+            </h1>
+            <p class="subtitle" id="puzzleMeta">&nbsp;</p>
+            <a class="home-link" href="/">← All past Wordle answers</a>
+        </header>
+
+        <p class="intro">Stuck on today's Wordle? Reveal <strong>one clue at a time</strong>, from gentlest to strongest. Nothing is spoiled until you tap it — stop whenever you've had enough help.</p>
+
+        <div id="banner" class="banner" aria-hidden="true"></div>
+
+        <p class="load-error" id="loadError">Could not load today's puzzle data — please refresh to try again.</p>
+
+        <div class="hints">
+            <div class="hint-card" id="card-repeat">
+                <div class="hint-info">
+                    <span class="hint-step">Hint 1 · Gentle</span>
+                    <p class="hint-label">Does today's word have a repeated letter?</p>
+                </div>
+                <button class="reveal-btn" disabled aria-controls="value-repeat">Tap to reveal</button>
+                <div class="hint-value" id="value-repeat" role="status"></div>
+            </div>
+
+            <div class="hint-card" id="card-vowelcount">
+                <div class="hint-info">
+                    <span class="hint-step">Hint 2 · Gentle</span>
+                    <p class="hint-label">How many of its five letters are vowels?</p>
+                </div>
+                <button class="reveal-btn" disabled aria-controls="value-vowelcount">Tap to reveal</button>
+                <div class="hint-value" id="value-vowelcount" role="status"></div>
+            </div>
+
+            <div class="hint-card" id="card-vowels">
+                <div class="hint-info">
+                    <span class="hint-step">Hint 3 · Medium</span>
+                    <p class="hint-label">Which vowels does it contain?</p>
+                </div>
+                <button class="reveal-btn" disabled aria-controls="value-vowels">Tap to reveal</button>
+                <div class="hint-value" id="value-vowels" role="status"></div>
+            </div>
+
+            <div class="hint-card" id="card-first">
+                <div class="hint-info">
+                    <span class="hint-step">Hint 4 · Strong</span>
+                    <p class="hint-label">What's the first letter?</p>
+                </div>
+                <button class="reveal-btn" disabled aria-controls="value-first">Tap to reveal</button>
+                <div class="hint-value" id="value-first" role="status"></div>
+            </div>
+
+            <div class="hint-card" id="card-last">
+                <div class="hint-info">
+                    <span class="hint-step">Hint 5 · Strong</span>
+                    <p class="hint-label">What's the last letter?</p>
+                </div>
+                <button class="reveal-btn" disabled aria-controls="value-last">Tap to reveal</button>
+                <div class="hint-value" id="value-last" role="status"></div>
+            </div>
+
+            <div class="hint-card answer-card" id="card-answer">
+                <div class="hint-info">
+                    <span class="hint-step">Final · Full spoiler</span>
+                    <p class="hint-label">Reveal today's Wordle answer</p>
+                </div>
+                <button class="reveal-btn" disabled aria-controls="value-answer">Show answer</button>
+                <div class="hint-value" id="value-answer" role="status"></div>
+            </div>
+
+            <p class="section-label" id="yesterdayLabel" hidden>Missed a day?</p>
+
+            <div class="hint-card" id="card-yesterday" hidden>
+                <div class="hint-info">
+                    <span class="hint-step">Archive</span>
+                    <p class="hint-label">Reveal yesterday's Wordle answer</p>
+                </div>
+                <button class="reveal-btn" disabled aria-controls="value-yesterday">Show answer</button>
+                <div class="hint-value" id="value-yesterday" role="status"></div>
+            </div>
+        </div>
+
+        <section class="seo-content">
+            <h2>Spoiler-Free Wordle Hints, Updated Daily</h2>
+            <p>This page gives you hints for today's Wordle puzzle without ruining it. Clues are ordered from gentlest (letter patterns) to strongest (specific letters), and the full answer is only shown if you explicitly tap the final reveal. A new set of hints appears automatically at midnight in your local timezone — the same moment your new Wordle puzzle unlocks.</p>
+            <p>Want to know if a word has ever been used before? Browse the <a href="/">complete list of past Wordle answers</a> — searchable and spoiler-free.</p>
+
+            <h2>Frequently Asked Questions</h2>
+            <details>
+                <summary>Are these Wordle hints spoiler-free?</summary>
+                <p>Yes. Nothing is revealed until you tap it. Hints are ordered from gentlest to strongest, so you can take exactly as much help as you want and stop at any time.</p>
+            </details>
+            <details>
+                <summary>When does the new Wordle come out?</summary>
+                <p>A new Wordle is released at midnight in your local timezone. This page automatically shows hints for the puzzle you're currently playing, wherever you are in the world.</p>
+            </details>
+            <details>
+                <summary>Can I see today's Wordle answer here?</summary>
+                <p>Yes — the final hint reveals the full answer, but only if you tap it. It's clearly marked, so you'll never see it by accident.</p>
+            </details>
+            <details>
+                <summary>Has today's Wordle word been used before?</summary>
+                <p>The banner at the top of this page tells you whether today's answer has appeared as a past Wordle answer — a clue you won't find anywhere else, powered by our complete archive of every previous Wordle word.</p>
+            </details>
+        </section>
+
+        <footer>Today's Wordle hint · updated daily · <a href="/">wordlelist.com</a> — every past Wordle answer</footer>
+    </div>
+
+    <script>
+    (function () {
+        /* ── user's local date as YYYY-MM-DD ── */
+        function getLocalDate() {
+            var d = new Date();
+            return d.getFullYear() + '-' +
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                   String(d.getDate()).padStart(2, '0');
+        }
+
+        /* ── freshness check (same pattern as homepage) ──
+         *  On revisit with a stale tab, if wordle_date changed since this
+         *  page was first served, hard-reload once so all data is fresh.
+         */
+        (function freshness() {
+            var stored = sessionStorage.getItem('wl_hint_date');
+            fetch('/meta.json?_=' + Date.now(), { cache: 'no-store' })
+                .then(function (r) { return r.json(); })
+                .then(function (meta) {
+                    if (!meta || !meta.wordle_date) return;
+                    if (stored && stored !== meta.wordle_date) {
+                        sessionStorage.setItem('wl_hint_date', meta.wordle_date);
+                        location.reload();
+                    } else {
+                        sessionStorage.setItem('wl_hint_date', meta.wordle_date);
+                    }
+                })
+                .catch(function () { /* network error — proceed */ });
+        })();
+
+        /* ── puzzle number: days since Wordle #0 (2021-06-19), local frame ── */
+        function puzzleNumber(localDateStr) {
+            var p = localDateStr.split('-');
+            var utc = Date.UTC(+p[0], +p[1] - 1, +p[2]);
+            var launch = Date.UTC(2021, 5, 19);
+            return Math.round((utc - launch) / 86400000);
+        }
+
+        function formatDate(localDateStr) {
+            var p = localDateStr.split('-');
+            var d = new Date(+p[0], +p[1] - 1, +p[2]);
+            return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        }
+
+        /* ── tile helper ── */
+        function tiles(letters, gray) {
+            var wrap = document.createElement('span');
+            wrap.className = 'tiles';
+            letters.split('').forEach(function (ch) {
+                var t = document.createElement('span');
+                t.className = 'tile' + (gray ? ' gray' : '');
+                t.textContent = ch;
+                wrap.appendChild(t);
+            });
+            return wrap;
+        }
+
+        /* ── reveal wiring (works before data arrives; buttons start disabled) ── */
+        document.querySelectorAll('.hint-card').forEach(function (card) {
+            var btn = card.querySelector('.reveal-btn');
+            btn.addEventListener('click', function () {
+                card.classList.add('revealed');
+            });
+        });
+
+        function setValue(cardId, contentNode) {
+            var card  = document.getElementById(cardId);
+            var value = card.querySelector('.hint-value');
+            value.innerHTML = '';
+            value.appendChild(contentNode);
+            card.querySelector('.reveal-btn').disabled = false;
+        }
+
+        function text(s) { return document.createTextNode(s); }
+
+        /* ── load data (same files + timezone gate as homepage) ── */
+        Promise.all([
+            fetch('/words.txt',   { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('/current.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('/prior.txt',   { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('/safe.txt',    { cache: 'no-store' }).then(function (r) { return r.text(); }).catch(function () { return ''; }),
+            fetch('/meta.json',   { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return null; })
+        ]).then(function (results) {
+            var baseWords = results[0].trim().split('\n')
+                .map(function (w) { return w.trim().toUpperCase(); })
+                .filter(function (w) { return w.length === 5; });
+
+            var currentWord = results[1].trim().toUpperCase();
+            var priorWord   = results[2].trim().toUpperCase();
+            var safeWord    = results[3].trim().toUpperCase();
+            var meta        = results[4];
+
+            if (safeWord && baseWords.indexOf(safeWord) === -1) baseWords.push(safeWord);
+
+            /* ── timezone gate (identical to homepage) ── */
+            var localDate  = getLocalDate();
+            var wordleDate = meta ? meta.wordle_date : localDate;
+
+            var answer, yesterday;
+            if (localDate >= wordleDate) {
+                answer    = currentWord;
+                yesterday = priorWord;
+                if (baseWords.indexOf(priorWord) === -1) baseWords.push(priorWord);
+            } else {
+                answer    = priorWord;
+                yesterday = safeWord || null;
+            }
+
+            if (!answer || answer.length !== 5) throw new Error('bad data');
+
+            /* ── header meta ── */
+            document.getElementById('puzzleMeta').innerHTML =
+                'Wordle <span>#' + puzzleNumber(localDate).toLocaleString('en-US') + '</span> · ' + formatDate(localDate);
+
+            /* ── played-before banner ──
+             *  Same semantics as homepage: baseWords = words.txt + safe
+             *  (+ prior when on the new puzzle, where prior ≠ answer).
+             *  The answer itself is never in that set unless it's a repeat.
+             */
+            var playedBefore = baseWords.indexOf(answer) !== -1;
+
+            var banner = document.getElementById('banner');
+            if (playedBefore) {
+                banner.className = 'banner played';
+                banner.innerHTML =
+                    '<div class="banner-icon">⚠️ 🔍 ⚠️</div>' +
+                    '<p class="banner-text">Free clue: today\'s word <strong>has been played before!</strong></p>';
+            } else {
+                banner.className = 'banner fresh';
+                banner.innerHTML =
+                    '<div class="banner-icon">✨</div>' +
+                    '<p class="banner-text">Free clue: today\'s word has <strong class="c-yellow">NEVER</strong> been played before!</p>';
+            }
+            banner.removeAttribute('aria-hidden');
+
+            /* ── compute hints ── */
+            var letters   = answer.split('');
+            var unique    = letters.filter(function (ch, i) { return letters.indexOf(ch) === i; });
+            var hasRepeat = unique.length < 5;
+
+            var VOWELS = 'AEIOU';
+            var vowelOccurrences = letters.filter(function (ch) { return VOWELS.indexOf(ch) !== -1; }).length;
+            var uniqueVowels = unique.filter(function (ch) { return VOWELS.indexOf(ch) !== -1; });
+            var hasY = answer.indexOf('Y') !== -1;
+
+            setValue('card-repeat', text(hasRepeat
+                ? 'Yes — a letter appears more than once'
+                : 'No — all five letters are different'));
+
+            var vcText = vowelOccurrences + (vowelOccurrences === 1 ? ' vowel' : ' vowels');
+            if (hasY) vcText += ' (plus a Y)';
+            setValue('card-vowelcount', text(vcText));
+
+            var vowelNode;
+            if (uniqueVowels.length > 0) {
+                vowelNode = tiles(uniqueVowels.join(''), true);
+            } else {
+                vowelNode = text(hasY ? 'No A, E, I, O or U — think Y!' : 'No vowels at all!');
+            }
+            setValue('card-vowels', vowelNode);
+
+            setValue('card-first', tiles(answer[0], true));
+            setValue('card-last',  tiles(answer[4], true));
+            setValue('card-answer', tiles(answer, false));
+
+            /* ── yesterday's answer ── */
+            if (yesterday && yesterday.length === 5) {
+                document.getElementById('yesterdayLabel').hidden = false;
+                document.getElementById('card-yesterday').hidden = false;
+                setValue('card-yesterday', tiles(yesterday, false));
+            }
+        }).catch(function () {
+            document.getElementById('loadError').style.display = 'block';
+        });
+    })();
+    </script>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "46707338e53242e685de97acc0026ce1"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
