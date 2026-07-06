@@ -244,8 +244,21 @@
             pointer-events: none;
         }
 
-        .row { display: flex; gap: 0.35rem; }
+        .row { display: flex; gap: 0.35rem; align-items: center; }
         .row.hidden { display: none; }
+
+        /* tiny guess number — dim enough to disappear until needed */
+        .row-num {
+            width: 1.1rem;
+            flex: 0 0 1.1rem;
+            color: #3a3a3c;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-align: right;
+            user-select: none;
+        }
+
+        .row-num.spacer { visibility: hidden; }
 
         .tile {
             width: 3.1rem;
@@ -272,6 +285,7 @@
         .tile.st1 { background: #c9b458; border-color: #c9b458; }
         .tile.st2 { background: #538d4e; border-color: #538d4e; }
         .tile.locked { cursor: default; opacity: 0.92; }
+        .tile.sel { border-color: #d7dadc; }   /* tapped tile — backspace clears it */
 
         @media (max-width: 420px) {
             .tile { width: 2.7rem; height: 2.7rem; font-size: 1.35rem; }
@@ -289,27 +303,7 @@
         .controls {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 1.2rem;
-            flex-wrap: wrap;
             margin-bottom: 1.4rem;
-            font-size: 0.85rem;
-            color: #818384;
-        }
-
-        .toggle-wrap {
-            display: flex;
-            align-items: center;
-            gap: 0.45rem;
-            cursor: pointer;
-            letter-spacing: 0.02em;
-        }
-
-        .toggle-wrap input {
-            width: 1.05rem;
-            height: 1.05rem;
-            accent-color: #538d4e;
-            cursor: pointer;
         }
 
         .reset-btn {
@@ -474,7 +468,6 @@
         <p class="board-hint">tap a letter to cycle: gray → yellow → green · greens carry into the next row</p>
 
         <div class="controls">
-            <label class="toggle-wrap"><input type="checkbox" id="useClue" checked> use today's played-before clue</label>
             <button class="reset-btn" id="resetBtn">Reset</button>
         </div>
 
@@ -499,7 +492,7 @@
             </details>
             <details>
                 <summary>Does the solver spoil today's answer?</summary>
-                <p>No. It uses only a yes/no fact — whether today's word has been played before — never the answer itself. What you see is determined entirely by the guesses you enter. Uncheck "use today's played-before clue" to disable it (e.g., for practice puzzles or other Wordle-like games).</p>
+                <p>No. It uses only a yes/no fact — whether today's word has been played before — never the answer itself. What you see is determined entirely by the guesses you enter.</p>
             </details>
             <details>
                 <summary>How are repeated letters handled?</summary>
@@ -561,6 +554,10 @@
         for (var br = 0; br < MAX_ROWS; br++) {
             var rowEl = document.createElement('div');
             rowEl.className = 'row hidden';
+            var num = document.createElement('span');
+            num.className = 'row-num';
+            num.textContent = br + 1;
+            rowEl.appendChild(num);
             var rowTiles = [];
             for (var bc = 0; bc < COLS; bc++) {
                 var t = document.createElement('button');
@@ -570,9 +567,15 @@
                 rowEl.appendChild(t);
                 rowTiles.push(t);
             }
+            var spacer = document.createElement('span');
+            spacer.className = 'row-num spacer';
+            rowEl.appendChild(spacer);
             board.appendChild(rowEl);
             tiles.push(rowTiles);
         }
+
+        /* tapped-tile selection: backspace clears this tile specifically */
+        var selected = null;
 
         /* ── typing targets ── */
         function nextEmpty(grid, visible) {
@@ -588,17 +591,27 @@
         }
 
         function doLetter(ch) {
+            selected = null;
             var grid = computeGrid(), visible = visibleCount(grid);
             var p = nextEmpty(grid, visible);
             if (!p) return;
             letters[p.r][p.c] = ch;
             states[p.r][p.c] = 0;
             refresh();
+            keepCursorRowVisible();
         }
 
         function doBackspace() {
             var grid = computeGrid(), visible = visibleCount(grid);
-            var p = lastUserFilled(grid, visible);
+            var p = null;
+            /* a tapped tile takes priority — backspace clears that box */
+            if (selected && selected.r < visible &&
+                grid[selected.r][selected.c].ch && !grid[selected.r][selected.c].locked) {
+                p = selected;
+            } else {
+                p = lastUserFilled(grid, visible);
+            }
+            selected = null;
             if (!p) return;
             letters[p.r][p.c] = '';
             states[p.r][p.c] = 0;
@@ -618,6 +631,27 @@
             try { ghost.setSelectionRange(1, 1); } catch (e) {}
         }
         resetGhost();
+
+        /* keep the board above the software keyboard: when the keyboard
+           opens (ghost focus) scroll the board to the top of the viewport,
+           and keep the active row in view as it grows */
+        var touchDevice = window.matchMedia && window.matchMedia('(hover: none)').matches;
+        function scrollBoardUp() {
+            if (touchDevice && board.scrollIntoView) {
+                setTimeout(function () {
+                    board.scrollIntoView({ block: 'start', behavior: 'smooth' });
+                }, 150);   /* wait for the keyboard animation to claim space */
+            }
+        }
+        ghost.addEventListener('focus', scrollBoardUp);
+
+        function keepCursorRowVisible() {
+            var grid = computeGrid(), visible = visibleCount(grid);
+            var rowEl = tiles[visible - 1][0].parentNode;
+            if (rowEl.scrollIntoView && document.activeElement === ghost) {
+                rowEl.scrollIntoView({ block: 'nearest' });
+            }
+        }
 
         ghost.addEventListener('input', function () {
             var v = ghost.value;
@@ -642,24 +676,28 @@
             var r = +t.dataset.r, c = +t.dataset.c;
             var grid = computeGrid();
             if (grid[r][c].locked) return;
+            /* every tile tap summons the native keyboard, so backspace is
+               always reachable while adjusting the board */
+            ghost.focus();
+            resetGhost();
             if (!grid[r][c].ch) {
-                /* empty tile → summon the native keyboard */
-                ghost.focus();
-                resetGhost();
+                selected = null;
+                refresh();
                 return;
             }
+            /* filled tile: cycle color and arm it for targeted backspace */
+            selected = { r: r, c: c };
             states[r][c] = (states[r][c] + 1) % 3;
             refresh();
         });
 
         document.getElementById('resetBtn').addEventListener('click', function () {
+            selected = null;
             for (var r = 0; r < MAX_ROWS; r++) for (var c = 0; c < COLS; c++) {
                 letters[r][c] = ''; states[r][c] = 0;
             }
             refresh();
         });
-
-        document.getElementById('useClue').addEventListener('change', refresh);
 
         /* ── Wordle feedback simulation (exact duplicate-letter rules) ── */
         function feedback(guess, answer) {
@@ -716,13 +754,19 @@
             return true;
         }
 
-        /* ── candidate scoring: letter coverage over remaining possibles ── */
+        /* ── candidate scoring ──
+         *  Coverage (distinct-letter frequency over the remaining pool)
+         *  plus positional frequency, which biases picks toward words with
+         *  letters in likely slots — i.e., words that look like answers
+         *  rather than obscure letter-dumps.
+         */
         function topPicks(possible) {
-            var freq = {}, i;
+            var freq = {}, pfreq = [{},{},{},{},{}], i, j, ch;
             for (i = 0; i < possible.length; i++) {
                 var seen = {}, w = possible[i];
-                for (var j = 0; j < 5; j++) {
-                    var ch = w[j];
+                for (j = 0; j < 5; j++) {
+                    ch = w[j];
+                    pfreq[j][ch] = (pfreq[j][ch] || 0) + 1;
                     if (!seen[ch]) { freq[ch] = (freq[ch] || 0) + 1; seen[ch] = 1; }
                 }
             }
@@ -730,7 +774,8 @@
                 var s = 0, seen = {};
                 for (var j = 0; j < 5; j++) {
                     var c = word[j];
-                    if (!seen[c]) { s += freq[c] || 0; seen[c] = 1; }
+                    s += pfreq[j][c] || 0;
+                    if (!seen[c]) { s += (freq[c] || 0) * 2; seen[c] = 1; }
                 }
                 return [word, s];
             });
@@ -749,6 +794,7 @@
                     t.className = 'tile st' + cell.st +
                         (cell.ch ? ' filled' : '') +
                         (cell.locked ? ' locked' : '') +
+                        (selected && selected.r === r && selected.c === c ? ' sel' : '') +
                         (cur && cur.r === r && cur.c === c ? ' cursor' : '');
                 }
             }
@@ -763,7 +809,7 @@
             var possible = solverWords.filter(function (w) { return matches(w, cons); });
 
             /* played-before clue: which candidates can't be today's answer? */
-            var useClue = document.getElementById('useClue').checked && playedBefore !== null && playedSet;
+            var useClue = playedBefore !== null && playedSet;
             var out = [];
             if (useClue) {
                 var split = [];
@@ -781,9 +827,10 @@
                 (possible.length === 1 ? '' : 's') +
                 (useClue && out.length ? ' <span class="ruled">· ' + out.length.toLocaleString('en-US') + ' ruled out by today\'s clue</span>' : '');
 
-            /* top picks */
+            /* top picks — in lockstep with the possible list; pointless when
+               the list is short enough to just read */
             var picksEl = document.getElementById('picks');
-            if (possible.length > 2 && cons.hasInput) {
+            if (possible.length >= 10) {
                 picksEl.hidden = false;
                 picksEl.innerHTML = '<span class="picks-label">Top picks</span>' +
                     topPicks(possible).map(function (w) { return '<span class="pick-word">' + w + '</span>'; }).join('');
