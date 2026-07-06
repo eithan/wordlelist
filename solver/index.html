@@ -276,6 +276,7 @@
             border-radius: 4px;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;   /* no double-tap zoom on rapid color cycling */
             transition: background 0.12s ease, border-color 0.12s ease;
             padding: 0;
         }
@@ -307,6 +308,7 @@
         }
 
         .reset-btn {
+            touch-action: manipulation;
             border: 1px solid #3a3a3c;
             border-radius: 8px;
             background: #1a1a1b;
@@ -328,14 +330,15 @@
         .results-head {
             text-align: center;
             color: #818384;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             letter-spacing: 0.03em;
-            margin-bottom: 0.9rem;
+            margin-top: 2.2rem;
+            margin-bottom: 1.2rem;
             min-height: 1.3em;
         }
 
-        .results-head strong { color: #d7dadc; font-weight: 700; }
-        .results-head .ruled { color: #c9b458; }
+        .results-head strong { color: #d7dadc; font-weight: 800; font-size: 1.25em; }
+        .results-head .ruled { color: #c9b458; font-size: 0.75em; display: block; margin-top: 0.25rem; }
 
         .picks {
             display: flex;
@@ -344,6 +347,9 @@
             flex-wrap: wrap;
             margin-bottom: 1.1rem;
         }
+
+        /* the hidden attribute must beat the display:flex class above */
+        .picks[hidden] { display: none; }
 
         .pick-word {
             font-weight: 800;
@@ -825,7 +831,7 @@
             var head = document.getElementById('resultsHead');
             head.innerHTML = '<strong>' + possible.length.toLocaleString('en-US') + '</strong> possible word' +
                 (possible.length === 1 ? '' : 's') +
-                (useClue && out.length ? ' <span class="ruled">· ' + out.length.toLocaleString('en-US') + ' ruled out by today\'s clue</span>' : '');
+                (useClue && out.length ? ' <span class="ruled">' + out.length.toLocaleString('en-US') + ' ruled out by today\'s clue</span>' : '');
 
             /* top picks — in lockstep with the possible list; pointless when
                the list is short enough to just read */
@@ -836,6 +842,7 @@
                     topPicks(possible).map(function (w) { return '<span class="pick-word">' + w + '</span>'; }).join('');
             } else {
                 picksEl.hidden = true;
+                picksEl.innerHTML = '';   /* never leave stale picks behind */
             }
 
             /* word list */

@@ -276,6 +276,7 @@
         }
 
         .reveal-btn {
+            touch-action: manipulation;   /* no double-tap zoom */
             flex: 0 0 auto;
             min-width: 8.5rem;
             min-height: 2.75rem;   /* 44px touch target */
@@ -319,6 +320,9 @@
 
         .hint-card.revealed .reveal-btn  { display: none; }
         .hint-card.revealed .hint-value  { display: flex; }
+
+        /* the hidden attribute must beat the display:flex on .hint-card */
+        .hint-card[hidden] { display: none; }
 
         /* text-only answers (hints 1 & 2) in Wordle green to stand out from the question */
         #card-repeat .hint-value,
