@@ -57,7 +57,7 @@
                 "name": "How do I use this Wordle solver?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Type the guesses you have already played into the grid, then tap each tile to cycle its color between gray, yellow and green until it matches your real board. The list below updates instantly with every word that still fits."
+                    "text": "Tap the board and type the guesses you have already played, then tap each tile to cycle its color between gray, yellow and green until it matches your real board. The word list filters instantly as you type and set colors — green letters even carry forward into your next row automatically."
                 }
             },
             {
@@ -223,9 +223,29 @@
             align-items: center;
             margin-bottom: 1rem;
             animation: fadeIn 0.35s ease both;
+            position: relative;
+        }
+
+        /* hidden input that summons the native keyboard —
+           16px font prevents iOS focus-zoom */
+        .ghost {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 1px;
+            opacity: 0.01;
+            font-size: 16px;
+            border: 0;
+            padding: 0;
+            background: transparent;
+            color: transparent;
+            caret-color: transparent;
+            pointer-events: none;
         }
 
         .row { display: flex; gap: 0.35rem; }
+        .row.hidden { display: none; }
 
         .tile {
             width: 3.1rem;
@@ -251,6 +271,7 @@
         .tile.st0.filled { background: #3a3a3c; border-color: #3a3a3c; }
         .tile.st1 { background: #c9b458; border-color: #c9b458; }
         .tile.st2 { background: #538d4e; border-color: #538d4e; }
+        .tile.locked { cursor: default; opacity: 0.92; }
 
         @media (max-width: 420px) {
             .tile { width: 2.7rem; height: 2.7rem; font-size: 1.35rem; }
@@ -262,43 +283,6 @@
             font-size: 0.78rem;
             letter-spacing: 0.04em;
             margin-bottom: 1rem;
-        }
-
-        /* ─── Keyboard ─── */
-        .kb {
-            max-width: 500px;
-            margin: 0 auto 1.2rem;
-            user-select: none;
-        }
-
-        .kb-row {
-            display: flex;
-            justify-content: center;
-            gap: 0.3rem;
-            margin-bottom: 0.35rem;
-        }
-
-        .key {
-            flex: 1;
-            max-width: 2.8rem;
-            height: 3.2rem;
-            border: none;
-            border-radius: 4px;
-            background: #818384;
-            color: #ffffff;
-            font-family: inherit;
-            font-size: 0.95rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .key:active { background: #6e7071; }
-        .key.wide { max-width: 4.6rem; flex: 1.6; font-size: 0.75rem; letter-spacing: 0.04em; }
-
-        @media (max-width: 420px) {
-            .key { height: 2.9rem; font-size: 0.85rem; }
         }
 
         /* ─── Controls ─── */
@@ -327,6 +311,24 @@
             accent-color: #538d4e;
             cursor: pointer;
         }
+
+        .reset-btn {
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            background: #1a1a1b;
+            color: #818384;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            padding: 0.45rem 1rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .reset-btn:hover { border-color: #538d4e; color: #d7dadc; }
 
         /* ─── Results ─── */
         .results-head {
@@ -462,18 +464,18 @@
             </nav>
         </header>
 
-        <p class="intro">Recreate your board: type your guesses, then <strong>tap each tile</strong> to match its color. Every word that still fits appears below — with words that <strong>can't</strong> be today's answer crossed out, thanks to our <a href="/">played-before archive</a>.</p>
+        <p class="intro">Recreate your board: <strong>tap the row and type</strong> your guess, then tap each letter to match its color. The list below filters live as you go — words that <strong>can't</strong> be today's answer are crossed out, thanks to our <a href="/">played-before archive</a>.</p>
 
         <div id="banner" class="banner" aria-hidden="true"></div>
 
-        <div class="board" id="board"></div>
-        <p class="board-hint">tap a filled tile to cycle: gray → yellow → green</p>
-
-        <div class="kb" id="kb"></div>
+        <div class="board" id="board">
+            <input id="ghost" class="ghost" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-label="type your guess" tabindex="-1">
+        </div>
+        <p class="board-hint">tap a letter to cycle: gray → yellow → green · greens carry into the next row</p>
 
         <div class="controls">
             <label class="toggle-wrap"><input type="checkbox" id="useClue" checked> use today's played-before clue</label>
-            <button class="nav-links-btn key wide" id="resetBtn" style="max-width:6rem;height:2.2rem;background:#3a3a3c;border-radius:8px">Reset</button>
+            <button class="reset-btn" id="resetBtn">Reset</button>
         </div>
 
         <p class="results-head" id="resultsHead">&nbsp;</p>
@@ -489,7 +491,7 @@
             <h2>Frequently Asked Questions</h2>
             <details>
                 <summary>How do I use this Wordle solver?</summary>
-                <p>Type the guesses you've already played (keyboard or the on-screen keys), then tap each tile to cycle its color until it matches your real board. Results update instantly. Incomplete rows are ignored.</p>
+                <p>Tap the board and type a guess you've played, then tap each tile to cycle its color until it matches your real board. The list filters instantly as you type: greens and yellows apply the moment you set them, and gray letters count once their row is complete. When you finish a row, a new one appears with your green letters already locked in.</p>
             </details>
             <details>
                 <summary>What makes this solver different?</summary>
@@ -510,30 +512,61 @@
 
     <script>
     (function () {
-        var ROWS = 6, COLS = 5;
+        var MAX_ROWS = 6, COLS = 5;
         var MAX_RENDER = 300, MAX_OUT_RENDER = 100;
 
-        /* ── state ── */
-        var letters = [];   // letters[r][c] = 'A'..'Z' or ''
-        var states  = [];   // states[r][c]  = 0 gray | 1 yellow | 2 green
-        for (var r = 0; r < ROWS; r++) { letters.push(['','','','','']); states.push([0,0,0,0,0]); }
+        /* ── state: user-entered letters/colors only (locks are derived) ── */
+        var letters = [], states = [];
+        for (var r = 0; r < MAX_ROWS; r++) { letters.push(['','','','','']); states.push([0,0,0,0,0]); }
 
-        var solverWords   = null;   // full guessable list
-        var playedSet     = null;   // words played before today's puzzle
-        var playedBefore  = null;   // boolean: is today's answer a repeat?
+        var solverWords  = null;
+        var playedSet    = null;
+        var playedBefore = null;
 
-        /* ── build board ── */
+        /* ── derived grid: merge user input with green locks from earlier rows.
+         *    cell = { ch, st, locked }  (locked cells are always green)      ── */
+        function computeGrid() {
+            var grid = [], lock = ['','','','',''];
+            for (var r = 0; r < MAX_ROWS; r++) {
+                var row = [];
+                for (var c = 0; c < COLS; c++) {
+                    if (lock[c]) row.push({ ch: lock[c], st: 2, locked: true });
+                    else row.push({ ch: letters[r][c], st: states[r][c], locked: false });
+                }
+                for (c = 0; c < COLS; c++) {
+                    if (row[c].ch && row[c].st === 2) lock[c] = row[c].ch;
+                }
+                grid.push(row);
+            }
+            return grid;
+        }
+
+        /* rows shown = completed rows + one active row (a row must contain at
+           least one user-typed letter to spawn the next — an all-locked row
+           means the word is fully known and spawning more would be silly) */
+        function visibleCount(grid) {
+            var v = 1;
+            for (var r = 0; r < MAX_ROWS - 1; r++) {
+                var complete = grid[r].every(function (x) { return x.ch; });
+                var hasUser  = grid[r].some(function (x) { return x.ch && !x.locked; });
+                if (complete && hasUser) v = r + 2; else break;
+            }
+            return v;
+        }
+
+        /* ── build board: 6 rows, hidden until needed ── */
         var board = document.getElementById('board');
+        var ghost = document.getElementById('ghost');
         var tiles = [];
-        for (var r = 0; r < ROWS; r++) {
+        for (var br = 0; br < MAX_ROWS; br++) {
             var rowEl = document.createElement('div');
-            rowEl.className = 'row';
+            rowEl.className = 'row hidden';
             var rowTiles = [];
-            for (var c = 0; c < COLS; c++) {
+            for (var bc = 0; bc < COLS; bc++) {
                 var t = document.createElement('button');
                 t.className = 'tile st0';
-                t.setAttribute('aria-label', 'row ' + (r+1) + ' letter ' + (c+1));
-                t.dataset.r = r; t.dataset.c = c;
+                t.setAttribute('aria-label', 'row ' + (br+1) + ' letter ' + (bc+1));
+                t.dataset.r = br; t.dataset.c = bc;
                 rowEl.appendChild(t);
                 rowTiles.push(t);
             }
@@ -541,39 +574,22 @@
             tiles.push(rowTiles);
         }
 
-        /* ── build keyboard ── */
-        var kb = document.getElementById('kb');
-        [['Q','W','E','R','T','Y','U','I','O','P'],
-         ['A','S','D','F','G','H','J','K','L'],
-         ['⌫','Z','X','C','V','B','N','M']].forEach(function (keys) {
-            var rowEl = document.createElement('div');
-            rowEl.className = 'kb-row';
-            keys.forEach(function (k) {
-                var b = document.createElement('button');
-                b.className = 'key' + (k === '⌫' ? ' wide' : '');
-                b.textContent = k;
-                b.setAttribute('aria-label', k === '⌫' ? 'backspace' : k);
-                b.addEventListener('click', function () { k === '⌫' ? doBackspace() : doLetter(k); });
-                rowEl.appendChild(b);
-            });
-            kb.appendChild(rowEl);
-        });
-
-        /* ── input handling ── */
-        function nextEmpty() {
-            for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++)
-                if (!letters[r][c]) return { r: r, c: c };
+        /* ── typing targets ── */
+        function nextEmpty(grid, visible) {
+            for (var r = 0; r < visible; r++) for (var c = 0; c < COLS; c++)
+                if (!grid[r][c].ch) return { r: r, c: c };
             return null;
         }
 
-        function lastFilled() {
-            for (var r = ROWS - 1; r >= 0; r--) for (var c = COLS - 1; c >= 0; c--)
-                if (letters[r][c]) return { r: r, c: c };
+        function lastUserFilled(grid, visible) {
+            for (var r = visible - 1; r >= 0; r--) for (var c = COLS - 1; c >= 0; c--)
+                if (grid[r][c].ch && !grid[r][c].locked) return { r: r, c: c };
             return null;
         }
 
         function doLetter(ch) {
-            var p = nextEmpty();
+            var grid = computeGrid(), visible = visibleCount(grid);
+            var p = nextEmpty(grid, visible);
             if (!p) return;
             letters[p.r][p.c] = ch;
             states[p.r][p.c] = 0;
@@ -581,29 +597,63 @@
         }
 
         function doBackspace() {
-            var p = lastFilled();
+            var grid = computeGrid(), visible = visibleCount(grid);
+            var p = lastUserFilled(grid, visible);
             if (!p) return;
             letters[p.r][p.c] = '';
             states[p.r][p.c] = 0;
             refresh();
         }
 
+        /* ── native keyboard via hidden input ──
+         *  Desktop: document keydown handles keys directly (preventDefault
+         *  stops the ghost input from double-firing). Mobile: keydown often
+         *  reports 'Unidentified', so the ghost's input event — driven by a
+         *  one-space sentinel value — detects letters (length grows) and
+         *  backspace (length shrinks).
+         */
+        var SENT = ' ';
+        function resetGhost() {
+            ghost.value = SENT;
+            try { ghost.setSelectionRange(1, 1); } catch (e) {}
+        }
+        resetGhost();
+
+        ghost.addEventListener('input', function () {
+            var v = ghost.value;
+            if (v.length < SENT.length) {
+                doBackspace();
+            } else if (v.length > SENT.length) {
+                var ch = v.charAt(v.length - 1).toUpperCase();
+                if (ch >= 'A' && ch <= 'Z') doLetter(ch);
+            }
+            resetGhost();
+        });
+
         document.addEventListener('keydown', function (e) {
             if (e.metaKey || e.ctrlKey || e.altKey) return;
             if (e.key === 'Backspace') { e.preventDefault(); doBackspace(); }
-            else if (/^[a-zA-Z]$/.test(e.key)) doLetter(e.key.toUpperCase());
+            else if (/^[a-zA-Z]$/.test(e.key)) { e.preventDefault(); doLetter(e.key.toUpperCase()); }
         });
 
         board.addEventListener('click', function (e) {
             var t = e.target.closest('.tile');
-            if (!t || !letters[t.dataset.r][t.dataset.c]) return;
-            var r = t.dataset.r, c = t.dataset.c;
+            if (!t) return;
+            var r = +t.dataset.r, c = +t.dataset.c;
+            var grid = computeGrid();
+            if (grid[r][c].locked) return;
+            if (!grid[r][c].ch) {
+                /* empty tile → summon the native keyboard */
+                ghost.focus();
+                resetGhost();
+                return;
+            }
             states[r][c] = (states[r][c] + 1) % 3;
             refresh();
         });
 
         document.getElementById('resetBtn').addEventListener('click', function () {
-            for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+            for (var r = 0; r < MAX_ROWS; r++) for (var c = 0; c < COLS; c++) {
                 letters[r][c] = ''; states[r][c] = 0;
             }
             refresh();
@@ -624,27 +674,55 @@
             return res[0]*10000 + res[1]*1000 + res[2]*100 + res[3]*10 + res[4];
         }
 
-        function completeRows() {
-            var rows = [];
-            for (var r = 0; r < ROWS; r++) {
-                if (letters[r].every(function (ch) { return ch; })) {
-                    rows.push({
-                        word: letters[r].join(''),
-                        pat: states[r][0]*10000 + states[r][1]*1000 + states[r][2]*100 + states[r][3]*10 + states[r][4]
-                    });
+        /* ── constraints ──
+         *  Complete rows: exact feedback simulation (grays fully meaningful).
+         *  Partial rows: only explicit colors apply — green pins a position,
+         *  yellow requires the letter elsewhere. Gray is the default state of
+         *  a letter you just typed, so it only counts once the row is done.
+         */
+        function getConstraints() {
+            var grid = computeGrid(), visible = visibleCount(grid);
+            var complete = [], partial = [];
+            for (var r = 0; r < visible; r++) {
+                var full = grid[r].every(function (x) { return x.ch; });
+                if (full) {
+                    var word = '', pat = 0;
+                    for (var c = 0; c < COLS; c++) {
+                        word += grid[r][c].ch;
+                        pat = pat * 10 + grid[r][c].st;
+                    }
+                    complete.push({ word: word, pat: pat });
+                } else {
+                    for (var c2 = 0; c2 < COLS; c2++) {
+                        var cell = grid[r][c2];
+                        if (cell.ch && cell.st === 2) partial.push({ type: 2, c: c2, ch: cell.ch });
+                        else if (cell.ch && cell.st === 1) partial.push({ type: 1, c: c2, ch: cell.ch });
+                    }
                 }
             }
-            return rows;
+            return { complete: complete, partial: partial, hasInput: complete.length > 0 || partial.length > 0 };
+        }
+
+        function matches(w, cons) {
+            var i;
+            for (i = 0; i < cons.complete.length; i++) {
+                if (feedback(cons.complete[i].word, w) !== cons.complete[i].pat) return false;
+            }
+            for (i = 0; i < cons.partial.length; i++) {
+                var p = cons.partial[i];
+                if (p.type === 2) { if (w[p.c] !== p.ch) return false; }
+                else { if (w.indexOf(p.ch) === -1 || w[p.c] === p.ch) return false; }
+            }
+            return true;
         }
 
         /* ── candidate scoring: letter coverage over remaining possibles ── */
         function topPicks(possible) {
-            var freq = {}, i, w, ch;
+            var freq = {}, i;
             for (i = 0; i < possible.length; i++) {
-                var seen = {};
-                w = possible[i];
+                var seen = {}, w = possible[i];
                 for (var j = 0; j < 5; j++) {
-                    ch = w[j];
+                    var ch = w[j];
                     if (!seen[ch]) { freq[ch] = (freq[ch] || 0) + 1; seen[ch] = 1; }
                 }
             }
@@ -661,27 +739,28 @@
         }
 
         /* ── render ── */
-        function refreshBoard() {
-            var cur = nextEmpty();
-            for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
-                var t = tiles[r][c];
-                t.textContent = letters[r][c];
-                t.className = 'tile st' + states[r][c] +
-                    (letters[r][c] ? ' filled' : '') +
-                    (cur && cur.r === r && cur.c === c ? ' cursor' : '');
+        function refreshBoard(grid, visible) {
+            var cur = nextEmpty(grid, visible);
+            for (var r = 0; r < MAX_ROWS; r++) {
+                tiles[r][0].parentNode.className = 'row' + (r < visible ? '' : ' hidden');
+                for (var c = 0; c < COLS; c++) {
+                    var t = tiles[r][c], cell = grid[r][c];
+                    t.textContent = cell.ch;
+                    t.className = 'tile st' + cell.st +
+                        (cell.ch ? ' filled' : '') +
+                        (cell.locked ? ' locked' : '') +
+                        (cur && cur.r === r && cur.c === c ? ' cursor' : '');
+                }
             }
         }
 
         function refresh() {
-            refreshBoard();
+            var grid = computeGrid(), visible = visibleCount(grid);
+            refreshBoard(grid, visible);
             if (!solverWords) return;
 
-            var rows = completeRows();
-            var possible = solverWords;
-            for (var k = 0; k < rows.length; k++) {
-                var g = rows[k].word, p = rows[k].pat;
-                possible = possible.filter(function (w) { return feedback(g, w) === p; });
-            }
+            var cons = getConstraints();
+            var possible = solverWords.filter(function (w) { return matches(w, cons); });
 
             /* played-before clue: which candidates can't be today's answer? */
             var useClue = document.getElementById('useClue').checked && playedBefore !== null && playedSet;
@@ -704,7 +783,7 @@
 
             /* top picks */
             var picksEl = document.getElementById('picks');
-            if (possible.length > 2 && rows.length > 0) {
+            if (possible.length > 2 && cons.hasInput) {
                 picksEl.hidden = false;
                 picksEl.innerHTML = '<span class="picks-label">Top picks</span>' +
                     topPicks(possible).map(function (w) { return '<span class="pick-word">' + w + '</span>'; }).join('');
@@ -735,6 +814,8 @@
             }
             wordsEl.innerHTML = html;
         }
+
+        refresh();   // draw the initial single empty row
 
         /* ── local date, same as homepage ── */
         function getLocalDate() {
