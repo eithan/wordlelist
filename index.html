@@ -84,6 +84,14 @@
                     "@type": "Answer",
                     "text": "The spoiler-free daily hint page at wordlelist.com/hint/ reveals clues one at a time, from gentlest to strongest, and only shows the answer if you explicitly ask for it."
                 }
+            },
+            {
+                "@type": "Question",
+                "name": "What is the best Wordle starting word?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Ranked against every real Wordle answer ever played, STARE is the best all-round starting word. See the full ranking at wordlelist.com/best-starting-words/, including the strongest two-word opening combination."
+                }
             }
         ]
     }
@@ -429,6 +437,10 @@
             font-size: 0.78rem;
             letter-spacing: 0.06em;
         }
+
+        footer a { color: #818384; }
+        footer a:hover { color: #d7dadc; }
+        .footer-nav { margin-bottom: 0.5rem; }
     </style>
 </head>
 <body>
@@ -481,9 +493,13 @@
                 <summary>Where can I get hints for today's Wordle?</summary>
                 <p>Try our <a href="/hint/">spoiler-free daily hint page</a> — it reveals clues one at a time, from gentlest to strongest, and only shows the answer if you explicitly ask for it.</p>
             </details>
+            <details>
+                <summary>What is the best Wordle starting word?</summary>
+                <p>We ranked every starting word against all past Wordle answers — see the <a href="/best-starting-words/">best Wordle starting words</a>, including why STARE beats ADIEU and the strongest two-word opening combo.</p>
+            </details>
         </section>
 
-        <footer>All past Wordle answers · updated daily · wordlelist.com · Last updated <!-- DATE:START -->07/06/2026<!-- DATE:END --></footer>
+        <footer><nav class="footer-nav"><a href="/hint/">Today's hint</a> · <a href="/best-starting-words/">Best starting words</a></nav>All past Wordle answers · updated daily · wordlelist.com · Last updated <!-- DATE:START -->07/06/2026<!-- DATE:END --></footer>
     </div>
 
     <script>
@@ -520,37 +536,24 @@
                 .catch(function () { /* network error — proceed with cached page */ });
         })();
 
-        /* ── render word list ── */
+        /* ── render word list ──
+         *  Single string build + one innerHTML assignment — ~10x faster than
+         *  per-word createElement, keeps INP low on slow devices. The ' '
+         *  join reproduces the whitespace text nodes between units, which
+         *  collapse at line breaks so new lines always start with a word.
+         *  Words are 5 uppercase letters (validated on load) — HTML-safe.
+         */
         function render(words) {
             const container = document.getElementById('wordlist');
             if (words.length === 0) {
                 container.innerHTML = '<p class="empty">No words match that filter.</p>';
                 return;
             }
-            const frag = document.createDocumentFragment();
-            words.forEach((word, i) => {
-                // Whitespace text node between units — collapses at
-                // line breaks so new lines always start with a word.
-                if (i > 0) frag.appendChild(document.createTextNode(' '));
-
-                const wrap = document.createElement('span');
-                wrap.className = 'word-wrap';
-
-                const span = document.createElement('span');
-                span.className = 'word ' + colors[i % 3];
-                span.textContent = word;
-                wrap.appendChild(span);
-
-                if (i < words.length - 1) {
-                    const pipe = document.createElement('span');
-                    pipe.className = 'pipe';
-                    pipe.textContent = ' |';
-                    wrap.appendChild(pipe);
-                }
-                frag.appendChild(wrap);
-            });
-            container.innerHTML = '';
-            container.appendChild(frag);
+            const last = words.length - 1;
+            container.innerHTML = words.map(function (word, i) {
+                return '<span class="word-wrap"><span class="word ' + colors[i % 3] + '">' + word +
+                       '</span>' + (i < last ? '<span class="pipe"> |</span>' : '') + '</span>';
+            }).join(' ');
         }
 
         /* ── module-level state for search ── */
@@ -629,9 +632,10 @@
                 displayWords = displayWords.filter(function (w) { return w !== answerWord; });
             }
 
-            /* ── render list ── */
-            document.getElementById('count').textContent = displayWords.length;
-            render(displayWords);
+            /* ── render list — through the filter path, so a query typed
+                 while data was still loading is respected ── */
+            lastQuery = null;
+            applyFilterNow();
 
             /* ── banner: show whether today's word has been used before ── */
             var banner   = document.getElementById('banner');
@@ -658,14 +662,18 @@
         /* ── search filter + clear button ── */
         var searchEl      = document.getElementById('search');
         var searchClearEl = document.getElementById('searchClear');
+        var searchTimer   = null;
+        var lastQuery     = null;   // last rendered query (null = nothing rendered yet)
 
         function applyFilter() {
-            var q        = searchEl.value.trim().toUpperCase();
+            var q = searchEl.value.trim().toUpperCase();
+            // toggle × visibility (cheap — always kept in sync)
+            searchClearEl.classList.toggle('visible', searchEl.value.length > 0);
+            if (q === lastQuery) return;   // query unchanged — skip the re-render
+            lastQuery = q;
             var filtered = q ? displayWords.filter(function (w) { return w.indexOf(q) !== -1; }) : displayWords;
             document.getElementById('count').textContent = filtered.length;
             render(filtered);
-            // toggle × visibility
-            searchClearEl.classList.toggle('visible', searchEl.value.length > 0);
             // hide banner + intro while filtering, restore when cleared
             var banner = document.getElementById('banner');
             var intro  = document.querySelector('.intro');
@@ -673,15 +681,25 @@
             if (intro)  intro.style.display  = q ? 'none' : '';
         }
 
-        searchEl.addEventListener('input', applyFilter);
+        function applyFilterNow() {
+            if (searchTimer) { clearTimeout(searchTimer); searchTimer = null; }
+            applyFilter();
+        }
 
-        // native <search> fires "search" on clear (Safari/Chrome mobile)
-        searchEl.addEventListener('search', applyFilter);
+        // debounce keystrokes (~100ms): fast typing = one render, not five —
+        // keeps the input event handler cheap so INP stays green
+        searchEl.addEventListener('input', function () {
+            if (searchTimer) clearTimeout(searchTimer);
+            searchTimer = setTimeout(applyFilterNow, 100);
+        });
+
+        // native <search> fires "search" on clear (Safari/Chrome mobile) — apply immediately
+        searchEl.addEventListener('search', applyFilterNow);
 
         function clearSearch(e) {
             e.preventDefault();
             searchEl.value = '';
-            applyFilter();
+            applyFilterNow();
             searchEl.focus();
         }
         searchClearEl.addEventListener('mousedown', clearSearch);   // desktop

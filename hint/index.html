@@ -161,9 +161,16 @@
 
         .subtitle span { color: #d7dadc; font-weight: 600; }
 
-        .home-link {
-            display: inline-block;
+        .nav-links {
             margin-top: 0.9rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            display: inline-block;
             color: #818384;
             font-size: 0.82rem;
             letter-spacing: 0.05em;
@@ -174,7 +181,7 @@
             transition: border-color 0.2s ease, color 0.2s ease;
         }
 
-        .home-link:hover { border-color: #538d4e; color: #d7dadc; }
+        .nav-links a:hover { border-color: #538d4e; color: #d7dadc; }
 
         /* ─── Intro ─── */
         .intro {
@@ -434,7 +441,10 @@
                 <span class="title-sub">TODAY'S HINT</span>
             </h1>
             <p class="subtitle" id="puzzleMeta">&nbsp;</p>
-            <a class="home-link" href="/">← All past Wordle answers</a>
+            <nav class="nav-links">
+                <a href="/">← All past answers</a>
+                <a href="/best-starting-words/">Best starting words</a>
+            </nav>
         </header>
 
         <p class="intro">Stuck on today's Wordle? Reveal <strong>one clue at a time</strong>, from gentlest to strongest. Nothing is spoiled until you tap it — stop whenever you've had enough help.</p>
@@ -513,7 +523,7 @@
         <section class="seo-content">
             <h2>Spoiler-Free Wordle Hints, Updated Daily</h2>
             <p>This page gives you hints for today's Wordle puzzle without ruining it. Clues are ordered from gentlest (letter patterns) to strongest (specific letters), and the full answer is only shown if you explicitly tap the final reveal. A new set of hints appears automatically at midnight in your local timezone — the same moment your new Wordle puzzle unlocks.</p>
-            <p>Want to know if a word has ever been used before? Browse the <a href="/">complete list of past Wordle answers</a> — searchable and spoiler-free.</p>
+            <p>Want to know if a word has ever been used before? Browse the <a href="/">complete list of past Wordle answers</a> — searchable and spoiler-free. And if your opener keeps letting you down, see the <a href="/best-starting-words/">best Wordle starting words</a>, ranked against every real answer ever played.</p>
 
             <h2>Frequently Asked Questions</h2>
             <details>
@@ -534,7 +544,7 @@
             </details>
         </section>
 
-        <footer>Today's Wordle hint · updated daily · <a href="/">wordlelist.com</a> — every past Wordle answer</footer>
+        <footer>Today's Wordle hint · updated daily · <a href="/">all past answers</a> · <a href="/best-starting-words/">best starting words</a> · wordlelist.com</footer>
     </div>
 
     <script>
