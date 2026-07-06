@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How to Win Wordle – Strategy Guide Backed by Every Real Answer</title>
+
+    <!-- SEO ─── -->
+    <meta name="description" content="A Wordle strategy guide backed by data from all 1,826 real answers: the best openers, second-guess tactics, the repeated-letter blind spot, the plural trap, and endgame technique.">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://wordlelist.com/how-to-win/">
+
+    <!-- Open Graph ─── -->
+    <meta property="og:title" content="How to Win Wordle – Strategy Guide Backed by Every Real Answer">
+    <meta property="og:description" content="The best openers, second-guess tactics, the repeated-letter blind spot, the plural trap, and endgame technique — backed by data from all real Wordle answers.">
+    <meta property="og:image" content="https://wordlelist.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://wordlelist.com/how-to-win/">
+    <meta property="og:type" content="article">
+
+    <!-- Twitter Card ─── -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="How to Win Wordle – Data-Backed Strategy Guide">
+    <meta name="twitter:description" content="The best openers, second-guess tactics, and the traps that end streaks — backed by every real Wordle answer.">
+    <meta name="twitter:image" content="https://wordlelist.com/og-image.png">
+
+    <!-- Structured Data ─── -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "How to Win Wordle: A Strategy Guide Backed by Every Real Answer",
+        "description": "Wordle strategy backed by data from all real Wordle answers ever played.",
+        "url": "https://wordlelist.com/how-to-win/",
+        "publisher": {
+            "@type": "Organization",
+            "name": "Wordlelist",
+            "url": "https://wordlelist.com/"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the best strategy for Wordle?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Open with a proven high-coverage word like STARE, use your second guess to test five new letters, prioritize common letters and positions, and stay alert for repeated letters — which appear in 31% of all real answers."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is there a trick to winning Wordle every time?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No guaranteed trick exists, but disciplined play — strong openers, information-dense second guesses, and avoiding known traps like plurals — makes losing rare. Most careful players solve well over 95% of puzzles."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What is a good average number of guesses in Wordle?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Around 4.0 is a solid average for regular players. Consistently averaging under 3.7 puts you in genuinely strong territory."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Should I use a different starting word every day?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Statistically it barely matters, but a fixed, proven opener like STARE removes a decision and guarantees consistent information. Vary it only if that keeps the game fun for you."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: clip;
+            max-width: 100%;
+        }
+
+        body {
+            overflow-x: hidden;
+            max-width: 100%;
+            position: relative;
+            background-color: #121213;
+            color: #d7dadc;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding: 1.25rem 1.5rem 1.5rem;
+            overscroll-behavior-x: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        /* ─── Header ─── */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        h1 {
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+            line-height: 1.2;
+        }
+
+        .title-wordle {
+            display: block;
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            padding-left: 0.22em;
+        }
+
+        .title-sub {
+            display: block;
+            font-size: clamp(1rem, 2.8vw, 1.4rem);
+            letter-spacing: 0.32em;
+            color: #ffffff;
+            margin-top: 0.2em;
+            padding-left: 0.32em;
+        }
+
+        .c-green  { color: #538d4e; }
+        .c-yellow { color: #c9b458; }
+        .c-light  { color: #d7dadc; }
+
+        .subtitle {
+            color: #818384;
+            font-size: 0.88rem;
+            letter-spacing: 0.04em;
+        }
+
+        .subtitle span { color: #d7dadc; font-weight: 600; }
+
+        .nav-links {
+            margin-top: 0.9rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            color: #818384;
+            font-size: 0.82rem;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a:hover { border-color: #538d4e; color: #d7dadc; }
+
+        /* ─── Intro ─── */
+        .intro {
+            margin: 0 auto 1.8rem;
+            text-align: center;
+            font-size: 0.92rem;
+            color: #818384;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+        }
+
+        .intro strong { color: #d7dadc; font-weight: 600; }
+        .intro a { color: #538d4e; }
+        .intro a:hover { color: #d7dadc; }
+
+        /* ─── Sections ─── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        main { animation: fadeIn 0.35s ease both; }
+
+        section { margin-bottom: 2.2rem; }
+
+        .step-num {
+            display: block;
+            color: #818384;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+
+        h2 {
+            color: #d7dadc;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.7rem;
+        }
+
+        section > p {
+            color: #818384;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 0.7rem;
+        }
+
+        section > p strong { color: #d7dadc; }
+        section a { color: #538d4e; }
+        section a:hover { color: #d7dadc; }
+
+        .word-inline {
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #d7dadc;
+        }
+
+        /* ─── Tiles ─── */
+        .tiles {
+            display: flex;
+            gap: 0.3rem;
+            margin: 0.6rem 0 0.8rem;
+        }
+
+        .tile {
+            width: 2.4rem;
+            height: 2.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #ffffff;
+            background: #538d4e;
+            border-radius: 4px;
+        }
+
+        .tile.gray   { background: #3a3a3c; }
+        .tile.yellow { background: #c9b458; }
+
+        @media (max-width: 420px) {
+            .tile { width: 2.1rem; height: 2.1rem; font-size: 1.1rem; }
+        }
+
+        /* ─── Callout box ─── */
+        .callout {
+            background: #1a1a1b;
+            border: 1px solid #538d4e;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin: 0.8rem 0;
+            color: #818384;
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        .callout strong { color: #d7dadc; }
+        .callout.warn { border-color: #c9b458; }
+
+        /* ─── FAQ ─── */
+        .seo-content {
+            margin: 2.5rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        .seo-content h2 { margin: 1.5rem 0 0.6rem; font-size: 1.05rem; }
+        .seo-content h2:first-child { margin-top: 0; }
+        .seo-content p { margin-bottom: 0.7rem; }
+        .seo-content a { color: #538d4e; }
+        .seo-content a:hover { color: #d7dadc; }
+        .seo-content details { margin-bottom: 0.5rem; }
+
+        .seo-content summary {
+            color: #d7dadc;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.4rem 0;
+        }
+
+        .seo-content summary:hover { color: #538d4e; }
+
+        .seo-content details p {
+            padding-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+        }
+
+        footer a { color: #818384; }
+        footer a:hover { color: #d7dadc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="title-wordle"><span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span></span>
+                <span class="title-sub">HOW TO WIN</span>
+            </h1>
+            <p class="subtitle">strategy backed by all <span>1,826</span> real answers</p>
+            <nav class="nav-links">
+                <a href="/">← All past answers</a>
+                <a href="/best-starting-words/">Best starting words</a>
+            </nav>
+        </header>
+
+        <p class="intro">Most Wordle advice is vibes. This guide is arithmetic: every claim below is computed from the <a href="/">complete archive of real Wordle answers</a>. Six habits, in the order they'll save your streak.</p>
+
+        <main>
+        <section>
+            <span class="step-num">Habit 1</span>
+            <h2>Open With a Proven Word — Then Stop Thinking About It</h2>
+            <p>Your first guess is the only one you can optimize in advance, so optimize it once and move on. Against every real answer ever played, <span class="word-inline">STARE</span> hits an average of 1.79 letters per game with the best green rate in its tier.</p>
+            <div class="tiles">
+                <span class="tile">S</span><span class="tile">T</span><span class="tile">A</span><span class="tile">R</span><span class="tile">E</span>
+            </div>
+            <p>Prefer alternatives? <span class="word-inline">LATER</span>, <span class="word-inline">ALERT</span> and <span class="word-inline">IRATE</span> edge it slightly on raw coverage. The one thing the data is unambiguous about: vowel-dump openers like ADIEU underperform badly (#217 of all starters). The full ranking is on our <a href="/best-starting-words/">best starting words</a> page.</p>
+        </section>
+
+        <section>
+            <span class="step-num">Habit 2</span>
+            <h2>Make Your Second Guess Do Real Work</h2>
+            <p>The most common intermediate-player mistake is chasing one yellow letter with guess two. Unless your opener landed 3+ hits, a second guess with <strong>five completely new letters</strong> almost always tells you more. The strongest fixed pair we've measured is <span class="word-inline">LATER → SONIC</span>: together they touch at least one letter in <strong>99.3%</strong> of all real answers, and three or more letters in 76%.</p>
+            <div class="tiles">
+                <span class="tile gray">S</span><span class="tile gray">O</span><span class="tile gray">N</span><span class="tile gray">I</span><span class="tile gray">C</span>
+            </div>
+            <p>From guess three onward, switch modes: now you solve, using everything you've learned.</p>
+        </section>
+
+        <section>
+            <span class="step-num">Habit 3</span>
+            <h2>Think in Frequencies, Not Hunches</h2>
+            <p>When choosing between candidate words, prefer the one built from common letters and common positions. The workhorse facts, from all 1,826 answers: <strong>E appears in 47%</strong> of answers and ends nearly one in five; <strong>A (40%) and R (36%)</strong> are next; <strong>15% of answers start with S</strong>; and Y — mediocre overall — is secretly the <strong>second-best final letter (14%)</strong>. Meanwhile J, Q, Z and X combined appear in under 7% of answers: never spend a scarce guess on them without evidence. More of these on the <a href="/stats/">stats &amp; facts</a> page.</p>
+        </section>
+
+        <section>
+            <span class="step-num">Habit 4</span>
+            <h2>Respect the Repeated Letter</h2>
+            <div class="callout warn">
+                <strong>31% of all real answers contain a repeated letter.</strong> Almost one game in three. If you never consider doubles, you will regularly find yourself with four greens and no idea why nothing fits.
+            </div>
+            <p>The tell: when several yellows/greens are placed but every candidate you try feels "used up," start doubling. LL, OO and EE are the most common pairs, and 13 answers have even used a letter three times (<span class="word-inline">ERROR, GEESE, PUPPY</span>…).</p>
+        </section>
+
+        <section>
+            <span class="step-num">Habit 5</span>
+            <h2>Never Guess a Plural</h2>
+            <p>Only <strong>1.5%</strong> of answers end in S — and essentially none of those are simple plurals (they're words like <span class="word-inline">CHAOS</span> and <span class="word-inline">FOCUS</span>). An S in the fifth slot on a hunch is close to a wasted guess. The same caution applies to -ED and -ER verb forms padded out to five letters.</p>
+        </section>
+
+        <section>
+            <span class="step-num">Habit 6</span>
+            <h2>Escape Word-Family Traps With One Probe</h2>
+            <p>Four greens and a blank first letter is the classic streak-killer. Land on <span class="word-inline">_ATCH</span> and there are still seven real possibilities: BATCH, CATCH, HATCH, LATCH, MATCH, PATCH, WATCH — more remaining candidates than remaining guesses.</p>
+            <div class="callout">
+                Instead of testing initials one at a time, <strong>spend one guess on a word packed with candidate first letters</strong>. From _ATCH, guessing something like <span class="word-inline">CLAMP</span> tests C, L, M and P simultaneously — one guess eliminates four branches. (On hard mode this is illegal, which is exactly why hard-mode players should bias toward green-heavy openers like SLATE from day one.)
+            </div>
+            <p>-IGHT, -OUND and -OWER are the other big families to watch for.</p>
+        </section>
+
+        <section>
+            <span class="step-num">Bonus</span>
+            <h2>Use the One Clue Nobody Else Has</h2>
+            <p>Wordle occasionally repeats an old answer. Our homepage tells you — spoiler-free — whether <a href="/">today's word has been played before</a>. If it has, the answer is sitting somewhere in the list you're looking at. And on the days nothing works, the <a href="/hint/">daily hint page</a> reveals clues one at a time, gentlest first, so you take exactly as much help as you need.</p>
+        </section>
+        </main>
+
+        <section class="seo-content">
+            <h2>Frequently Asked Questions</h2>
+            <details>
+                <summary>What is the best strategy for Wordle?</summary>
+                <p>Open with a proven high-coverage word like STARE, use guess two to test five new letters, prefer common letters and positions, and stay alert for repeated letters — they appear in 31% of all real answers.</p>
+            </details>
+            <details>
+                <summary>Is there a trick to winning Wordle every time?</summary>
+                <p>No guaranteed trick exists, but disciplined play makes losing rare — strong openers, information-dense second guesses, and avoiding known traps like plurals. Careful players solve well over 95% of puzzles.</p>
+            </details>
+            <details>
+                <summary>What is a good average number of guesses?</summary>
+                <p>Around 4.0 is solid for regular players; consistently under 3.7 is genuinely strong. The habits above are worth roughly half a guess per game for most people.</p>
+            </details>
+            <details>
+                <summary>Should I use a different starting word every day?</summary>
+                <p>Statistically it barely matters — but a fixed, proven opener removes a decision and guarantees consistent information. See the <a href="/best-starting-words/">full starter rankings</a>.</p>
+            </details>
+        </section>
+
+        <footer><a href="/">all past answers</a> · <a href="/hint/">today's hint</a> · <a href="/best-starting-words/">best starting words</a> · <a href="/stats/">stats &amp; facts</a> · <a href="/wordle-alternatives/">games like Wordle</a> · wordlelist.com</footer>
+    </div>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "46707338e53242e685de97acc0026ce1"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

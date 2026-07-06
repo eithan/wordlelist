@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle Statistics &amp; Fun Facts – Data From Every Real Answer</title>
+
+    <!-- SEO ─── -->
+    <meta name="description" content="Wordle statistics computed from all 1,826 real answers: how often letters repeat, the rarest letters, vowel patterns, the plural trap, and the words that break every rule.">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://wordlelist.com/stats/">
+
+    <!-- Open Graph ─── -->
+    <meta property="og:title" content="Wordle Statistics &amp; Fun Facts – Data From Every Real Answer">
+    <meta property="og:description" content="How often letters repeat, the rarest letters, vowel patterns, the plural trap, and the words that break every rule — from all 1,826 real Wordle answers.">
+    <meta property="og:image" content="https://wordlelist.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://wordlelist.com/stats/">
+    <meta property="og:type" content="article">
+
+    <!-- Twitter Card ─── -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Wordle Statistics &amp; Fun Facts">
+    <meta name="twitter:description" content="Data from all 1,826 real Wordle answers: repeats, rare letters, vowel patterns, and rule-breakers.">
+    <meta name="twitter:image" content="https://wordlelist.com/og-image.png">
+
+    <!-- Structured Data ─── -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Wordle Statistics & Fun Facts",
+        "url": "https://wordlelist.com/stats/",
+        "description": "Statistics and fun facts computed from every real Wordle answer ever played.",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Past Wordle Answers",
+            "url": "https://wordlelist.com/"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is the most common letter in Wordle answers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "E is the most common letter, appearing in 47% of all real Wordle answers, followed by A (40%) and R (36%). Nearly one in five answers ends in E."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How often do Wordle answers have repeated letters?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "About 31% of all real Wordle answers contain at least one repeated letter — almost one in three puzzles. LL, OO and EE are the most common adjacent double letters."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Has a Wordle answer ever had no vowels?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Six answers have contained no A, E, I, O or U — all leaning on Y: CRYPT, GLYPH, MYRRH, NYMPH, SHYLY and TRYST."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do Wordle answers ever end in S?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Rarely — only about 1.5% of all answers end in S, and simple plurals are essentially never used. Guessing a plural is one of the most common Wordle mistakes."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: clip;
+            max-width: 100%;
+        }
+
+        body {
+            overflow-x: hidden;
+            max-width: 100%;
+            position: relative;
+            background-color: #121213;
+            color: #d7dadc;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding: 1.25rem 1.5rem 1.5rem;
+            overscroll-behavior-x: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        /* ─── Header ─── */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        h1 {
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+            line-height: 1.2;
+        }
+
+        .title-wordle {
+            display: block;
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            padding-left: 0.22em;
+        }
+
+        .title-sub {
+            display: block;
+            font-size: clamp(1rem, 2.8vw, 1.4rem);
+            letter-spacing: 0.32em;
+            color: #ffffff;
+            margin-top: 0.2em;
+            padding-left: 0.32em;
+        }
+
+        .c-green  { color: #538d4e; }
+        .c-yellow { color: #c9b458; }
+        .c-light  { color: #d7dadc; }
+
+        .subtitle {
+            color: #818384;
+            font-size: 0.88rem;
+            letter-spacing: 0.04em;
+        }
+
+        .subtitle span { color: #d7dadc; font-weight: 600; }
+
+        .nav-links {
+            margin-top: 0.9rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            color: #818384;
+            font-size: 0.82rem;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a:hover { border-color: #538d4e; color: #d7dadc; }
+
+        /* ─── Intro ─── */
+        .intro {
+            margin: 0 auto 1.8rem;
+            text-align: center;
+            font-size: 0.92rem;
+            color: #818384;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+        }
+
+        .intro strong { color: #d7dadc; font-weight: 600; }
+        .intro a { color: #538d4e; }
+        .intro a:hover { color: #d7dadc; }
+
+        /* ─── Big-number chips ─── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 2.2rem;
+            animation: fadeIn 0.35s ease both;
+        }
+
+        .stat-card {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 1rem 0.9rem;
+            text-align: center;
+        }
+
+        .stat-card b {
+            display: block;
+            color: #538d4e;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-card.yellow b { color: #c9b458; }
+
+        .stat-card span {
+            color: #818384;
+            font-size: 0.78rem;
+            line-height: 1.4;
+            display: block;
+        }
+
+        /* ─── Sections ─── */
+        section { margin-bottom: 2.2rem; }
+
+        h2 {
+            color: #d7dadc;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.7rem;
+        }
+
+        section > p {
+            color: #818384;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 0.7rem;
+        }
+
+        section > p strong { color: #d7dadc; }
+        section a { color: #538d4e; }
+        section a:hover { color: #d7dadc; }
+
+        .word-inline {
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #d7dadc;
+        }
+
+        /* ─── Tables ─── */
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.55rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #2a2a2c;
+            white-space: nowrap;
+        }
+
+        th {
+            color: #818384;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: #161617;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        td.num { color: #818384; }
+        td.num strong { color: #538d4e; font-weight: 700; }
+        td.word-cell { font-weight: 800; letter-spacing: 0.13em; color: #d7dadc; }
+
+        .table-note {
+            color: #818384;
+            font-size: 0.78rem;
+            line-height: 1.6;
+            margin-top: 0.6rem;
+        }
+
+        /* ─── Letter chips ─── */
+        .letter-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin: 0.4rem 0 0.7rem;
+        }
+
+        .letter-chip {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            padding: 0.4rem 0.6rem;
+            text-align: center;
+            min-width: 3.4rem;
+        }
+
+        .letter-chip b {
+            display: block;
+            color: #538d4e;
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .letter-chip.yellow b { color: #c9b458; }
+
+        .letter-chip span {
+            color: #818384;
+            font-size: 0.72rem;
+        }
+
+        /* ─── FAQ ─── */
+        .seo-content {
+            margin: 2.5rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        .seo-content h2 { margin: 1.5rem 0 0.6rem; font-size: 1.05rem; }
+        .seo-content h2:first-child { margin-top: 0; }
+        .seo-content p { margin-bottom: 0.7rem; }
+        .seo-content a { color: #538d4e; }
+        .seo-content a:hover { color: #d7dadc; }
+        .seo-content details { margin-bottom: 0.5rem; }
+
+        .seo-content summary {
+            color: #d7dadc;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.4rem 0;
+        }
+
+        .seo-content summary:hover { color: #538d4e; }
+
+        .seo-content details p {
+            padding-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+        }
+
+        footer a { color: #818384; }
+        footer a:hover { color: #d7dadc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="title-wordle"><span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span></span>
+                <span class="title-sub">STATS &amp; FACTS</span>
+            </h1>
+            <p class="subtitle">computed from all <span>1,826</span> real Wordle answers</p>
+            <nav class="nav-links">
+                <a href="/">← All past answers</a>
+                <a href="/best-starting-words/">Best starting words</a>
+            </nav>
+        </header>
+
+        <p class="intro">Every number on this page is computed from the <a href="/">complete archive of real Wordle answers</a> — not a dictionary, not a guess list. The actual words that have appeared in the game, June 2021 through today.</p>
+
+        <div class="stat-grid">
+            <div class="stat-card"><b>1,826</b><span>answers played so far — one every day since June 2021</span></div>
+            <div class="stat-card yellow"><b>31%</b><span>of answers contain a repeated letter</span></div>
+            <div class="stat-card"><b>1 in 5</b><span>answers ends in the letter E</span></div>
+            <div class="stat-card yellow"><b>6</b><span>answers had no vowels at all (thanks, Y)</span></div>
+        </div>
+
+        <section>
+            <h2>Repeated Letters Are Everywhere</h2>
+            <p><strong>565 answers — 30.9%</strong> — contain at least one repeated letter. Almost one in three puzzles. If your guesses always use five different letters, nearly a third of all games are unwinnable by construction.</p>
+            <p>251 answers have an <strong>adjacent double</strong>. The most common:</p>
+            <div class="letter-strip">
+                <div class="letter-chip"><b>LL</b><span>49 words</span></div>
+                <div class="letter-chip"><b>OO</b><span>45 words</span></div>
+                <div class="letter-chip"><b>EE</b><span>39 words</span></div>
+                <div class="letter-chip"><b>SS</b><span>27 words</span></div>
+                <div class="letter-chip"><b>FF</b><span>16 words</span></div>
+                <div class="letter-chip"><b>TT</b><span>14 words</span></div>
+            </div>
+            <p>And 13 answers have used the same letter <strong>three times</strong>: <span class="word-inline">DADDY, EERIE, EMCEE, ERROR, FLUFF, GEESE, MOMMY, MUMMY, NANNY, POPPY, PUPPY, SASSY</span> and <span class="word-inline">SISSY</span>.</p>
+        </section>
+
+        <section>
+            <h2>The Vowel Distribution</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Vowels (A/E/I/O/U)</th><th>Answers</th><th>Share</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="num">0 vowels</td><td class="num">6</td><td class="num">0.3%</td></tr>
+                        <tr><td class="num">1 vowel</td><td class="num">561</td><td class="num">30.7%</td></tr>
+                        <tr><td class="num">2 vowels</td><td class="num"><strong>1,064</strong></td><td class="num"><strong>58.3%</strong></td></tr>
+                        <tr><td class="num">3 vowels</td><td class="num">192</td><td class="num">10.5%</td></tr>
+                        <tr><td class="num">4 vowels</td><td class="num">3</td><td class="num">0.2%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="table-note">The sweet spot is clearly two vowels. The six vowel-less answers all lean on Y: <span class="word-inline">CRYPT, GLYPH, MYRRH, NYMPH, SHYLY, TRYST</span>. Only three answers ever had four vowels: <span class="word-inline">AUDIO, EERIE, QUEUE</span>.</p>
+        </section>
+
+        <section>
+            <h2>First and Last Letters</h2>
+            <p><strong>S is king of the opening slot</strong> — 14.8% of all answers start with it, ahead of C (8.7%) and B (7.5%). No answer has <em>ever</em> started with X, and only two started with Z (<span class="word-inline">ZEBRA, ZESTY</span>).</p>
+            <p><strong>E dominates the final slot</strong> at 19.8%, followed by Y (13.9%) — surprisingly strong for a letter that's weak overall — then T (11.3%) and R (8.5%).</p>
+            <p>The famous <strong>plural trap</strong>: only <strong>1.5%</strong> of answers end in S, and simple plurals essentially never appear. If you're about to guess one, don't.</p>
+        </section>
+
+        <section>
+            <h2>The Rare Letters</h2>
+            <div class="letter-strip">
+                <div class="letter-chip yellow"><b>J</b><span>21 words · 1.2%</span></div>
+                <div class="letter-chip yellow"><b>Q</b><span>27 words · 1.5%</span></div>
+                <div class="letter-chip yellow"><b>Z</b><span>30 words · 1.6%</span></div>
+                <div class="letter-chip yellow"><b>X</b><span>32 words · 1.8%</span></div>
+                <div class="letter-chip yellow"><b>V</b><span>120 words · 6.6%</span></div>
+            </div>
+            <p>J is the rarest letter in Wordle history — just 21 appearances (<span class="word-inline">BANJO, EJECT, EMOJI, ENJOY, FJORD</span>…). And in every single Q answer, the Q is followed by U — the QU rule has never been broken.</p>
+        </section>
+
+        <section>
+            <h2>Word Families That Keep Coming Back</h2>
+            <p>Some endings are minefields. Seven answers share the <strong>-ATCH</strong> pattern (<span class="word-inline">BATCH, CATCH, HATCH, LATCH, MATCH, PATCH, WATCH</span>), and six each share <strong>-IGHT</strong>, <strong>-OUND</strong> and <strong>-OWER</strong>. When you hit one of these with four greens, guess a word that packs several candidate first letters instead of testing them one by one — our <a href="/how-to-win/">strategy guide</a> covers exactly this trap.</p>
+        </section>
+
+        <section>
+            <h2>One More for the Road</h2>
+            <p><strong>36 answers</strong> have their letters in perfect alphabetical order — words like <span class="word-inline">ABBEY, ADEPT, AGLOW</span> and <span class="word-inline">ALLOY</span>. None has ever been in reverse alphabetical order… yet.</p>
+            <p>Want to put these numbers to work? See the <a href="/best-starting-words/">best starting words</a> ranked against this same archive, or check whether any word has <a href="/">already been an answer</a>.</p>
+        </section>
+
+        <section class="seo-content">
+            <h2>Frequently Asked Questions</h2>
+            <details>
+                <summary>What is the most common letter in Wordle answers?</summary>
+                <p>E — it appears in 47% of all real answers, followed by A (40%) and R (36%). Nearly one in five answers ends in E.</p>
+            </details>
+            <details>
+                <summary>How often do Wordle answers have repeated letters?</summary>
+                <p>About 31% of all answers contain at least one repeated letter. LL, OO and EE are the most common doubles — see the full breakdown above.</p>
+            </details>
+            <details>
+                <summary>Has a Wordle answer ever had no vowels?</summary>
+                <p>Six times: CRYPT, GLYPH, MYRRH, NYMPH, SHYLY and TRYST — all carried by Y.</p>
+            </details>
+            <details>
+                <summary>Do Wordle answers ever end in S?</summary>
+                <p>Only about 1.5% do, and simple plurals essentially never appear. It's one of the most common traps — read more in our <a href="/how-to-win/">strategy guide</a>.</p>
+            </details>
+        </section>
+
+        <footer><a href="/">all past answers</a> · <a href="/hint/">today's hint</a> · <a href="/best-starting-words/">best starting words</a> · <a href="/how-to-win/">how to win</a> · <a href="/wordle-alternatives/">games like Wordle</a> · wordlelist.com</footer>
+    </div>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "46707338e53242e685de97acc0026ce1"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
