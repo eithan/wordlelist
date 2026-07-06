@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle Solver – Filter Every Possible Answer, Spoiler-Smart</title>
+
+    <!-- SEO ─── -->
+    <meta name="description" content="Free Wordle solver: enter your guesses, tap tiles to set colors, and see every word that still fits. The only solver that knows whether today's answer has been played before — and rules out impossible words automatically.">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://wordlelist.com/solver/">
+
+    <!-- Open Graph ─── -->
+    <meta property="og:title" content="Wordle Solver – Filter Every Possible Answer, Spoiler-Smart">
+    <meta property="og:description" content="Enter your guesses, tap tiles to set colors, and see every word that still fits — with impossible words ruled out using today's played-before clue.">
+    <meta property="og:image" content="https://wordlelist.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://wordlelist.com/solver/">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card ─── -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Wordle Solver – Spoiler-Smart">
+    <meta name="twitter:description" content="See every word that still fits your board — with impossible words ruled out using today's played-before clue.">
+    <meta name="twitter:image" content="https://wordlelist.com/og-image.png">
+
+    <!-- Structured Data ─── -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Wordle Solver",
+        "url": "https://wordlelist.com/solver/",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "description": "A free Wordle solver that filters all valid Wordle words by your guess feedback and rules out impossible words using the played-before status of today's answer.",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Past Wordle Answers",
+            "url": "https://wordlelist.com/"
+        }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How do I use this Wordle solver?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Type the guesses you have already played into the grid, then tap each tile to cycle its color between gray, yellow and green until it matches your real board. The list below updates instantly with every word that still fits."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What makes this solver different from other Wordle solvers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "It knows — spoiler-free — whether today's answer has ever been played before. On most days the answer is brand new, which means all 1,800+ past answers are impossible and get ruled out automatically. No other solver has this data."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does the solver spoil today's Wordle answer?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No. The solver only uses a yes/no fact — whether today's word has been played before — never the answer itself. The words it shows are determined entirely by the guesses you enter."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How does the solver handle repeated letters?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "It simulates Wordle's exact coloring rules, including the tricky duplicate cases — for example, a gray tile for a letter that is yellow elsewhere correctly means the answer contains exactly one copy of that letter."
+                }
+            }
+        ]
+    }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: clip;
+            max-width: 100%;
+        }
+
+        body {
+            overflow-x: hidden;
+            max-width: 100%;
+            position: relative;
+            background-color: #121213;
+            color: #d7dadc;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding: 1.25rem 1.5rem 1.5rem;
+            overscroll-behavior-x: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        /* ─── Header ─── */
+        header {
+            text-align: center;
+            margin-bottom: 1.6rem;
+            padding-bottom: 1.3rem;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        h1 {
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+            line-height: 1.2;
+        }
+
+        .title-wordle {
+            display: block;
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            padding-left: 0.22em;
+        }
+
+        .title-sub {
+            display: block;
+            font-size: clamp(1rem, 2.8vw, 1.4rem);
+            letter-spacing: 0.32em;
+            color: #ffffff;
+            margin-top: 0.2em;
+            padding-left: 0.32em;
+        }
+
+        .c-green  { color: #538d4e; }
+        .c-yellow { color: #c9b458; }
+        .c-light  { color: #d7dadc; }
+
+        .nav-links {
+            margin-top: 0.9rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            color: #818384;
+            font-size: 0.82rem;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a:hover { border-color: #538d4e; color: #d7dadc; }
+
+        /* ─── Intro ─── */
+        .intro {
+            margin: 0 auto 1.4rem;
+            text-align: center;
+            font-size: 0.92rem;
+            color: #818384;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+        }
+
+        .intro strong { color: #d7dadc; font-weight: 600; }
+        .intro a { color: #538d4e; }
+        .intro a:hover { color: #d7dadc; }
+
+        /* ─── Clue banner ─── */
+        .banner {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            margin: 0 auto 1.4rem;
+            text-align: center;
+            font-size: 0.88rem;
+            color: #d7dadc;
+            letter-spacing: 0.02em;
+            min-height: 3rem;
+            visibility: hidden;
+        }
+
+        .banner.played, .banner.fresh { visibility: visible; }
+        .banner.played { border-color: #538d4e; }
+        .banner.fresh  { border-color: #c9b458; }
+        .banner strong { font-weight: 700; }
+
+        /* ─── Grid ─── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .board {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.35s ease both;
+        }
+
+        .row { display: flex; gap: 0.35rem; }
+
+        .tile {
+            width: 3.1rem;
+            height: 3.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+            font-size: 1.6rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #ffffff;
+            background: #121213;
+            border: 2px solid #3a3a3c;
+            border-radius: 4px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.12s ease, border-color 0.12s ease;
+            padding: 0;
+        }
+
+        .tile.cursor { border-color: #818384; }
+        .tile.st0.filled { background: #3a3a3c; border-color: #3a3a3c; }
+        .tile.st1 { background: #c9b458; border-color: #c9b458; }
+        .tile.st2 { background: #538d4e; border-color: #538d4e; }
+
+        @media (max-width: 420px) {
+            .tile { width: 2.7rem; height: 2.7rem; font-size: 1.35rem; }
+        }
+
+        .board-hint {
+            text-align: center;
+            color: #818384;
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+            margin-bottom: 1rem;
+        }
+
+        /* ─── Keyboard ─── */
+        .kb {
+            max-width: 500px;
+            margin: 0 auto 1.2rem;
+            user-select: none;
+        }
+
+        .kb-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.3rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .key {
+            flex: 1;
+            max-width: 2.8rem;
+            height: 3.2rem;
+            border: none;
+            border-radius: 4px;
+            background: #818384;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .key:active { background: #6e7071; }
+        .key.wide { max-width: 4.6rem; flex: 1.6; font-size: 0.75rem; letter-spacing: 0.04em; }
+
+        @media (max-width: 420px) {
+            .key { height: 2.9rem; font-size: 0.85rem; }
+        }
+
+        /* ─── Controls ─── */
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.4rem;
+            font-size: 0.85rem;
+            color: #818384;
+        }
+
+        .toggle-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+        }
+
+        .toggle-wrap input {
+            width: 1.05rem;
+            height: 1.05rem;
+            accent-color: #538d4e;
+            cursor: pointer;
+        }
+
+        /* ─── Results ─── */
+        .results-head {
+            text-align: center;
+            color: #818384;
+            font-size: 0.9rem;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.9rem;
+            min-height: 1.3em;
+        }
+
+        .results-head strong { color: #d7dadc; font-weight: 700; }
+        .results-head .ruled { color: #c9b458; }
+
+        .picks {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.1rem;
+        }
+
+        .pick-word {
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            color: #ffffff;
+            background: #538d4e;
+            border-radius: 4px;
+            padding: 0.35rem 0.6rem;
+            font-size: 0.95rem;
+        }
+
+        .picks-label {
+            width: 100%;
+            text-align: center;
+            color: #818384;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        #words {
+            line-height: 2.2;
+            text-align: center;
+            max-width: 720px;
+            margin: 0 auto;
+            overflow-wrap: break-word;
+            min-height: 8rem;
+        }
+
+        .w {
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: 0.12em;
+            display: inline;
+        }
+
+        .w.out {
+            text-decoration: line-through;
+            opacity: 0.35;
+        }
+
+        .more {
+            color: #818384;
+            font-style: italic;
+            font-size: 0.85rem;
+            letter-spacing: 0.04em;
+        }
+
+        .empty {
+            color: #818384;
+            font-style: italic;
+            padding: 1.5rem 0;
+            letter-spacing: 0.05em;
+        }
+
+        .legend {
+            text-align: center;
+            color: #818384;
+            font-size: 0.76rem;
+            letter-spacing: 0.03em;
+            margin-top: 1rem;
+        }
+
+        .legend .out-demo { text-decoration: line-through; opacity: 0.5; }
+
+        /* ─── SEO Content / FAQ ─── */
+        .seo-content {
+            margin: 2.5rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        .seo-content h2 { color: #d7dadc; font-size: 1.05rem; font-weight: 700; margin: 1.5rem 0 0.6rem; letter-spacing: 0.03em; }
+        .seo-content h2:first-child { margin-top: 0; }
+        .seo-content p { margin-bottom: 0.7rem; }
+        .seo-content a { color: #538d4e; }
+        .seo-content a:hover { color: #d7dadc; }
+        .seo-content details { margin-bottom: 0.5rem; }
+        .seo-content summary { color: #d7dadc; font-weight: 600; cursor: pointer; padding: 0.4rem 0; }
+        .seo-content summary:hover { color: #538d4e; }
+        .seo-content details p { padding-left: 1rem; margin-top: 0.3rem; }
+
+        /* ─── Footer ─── */
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+        }
+
+        footer a { color: #818384; }
+        footer a:hover { color: #d7dadc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="title-wordle"><span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span></span>
+                <span class="title-sub">SOLVER</span>
+            </h1>
+            <nav class="nav-links">
+                <a href="/">← All past answers</a>
+                <a href="/hint/">Today's hint</a>
+            </nav>
+        </header>
+
+        <p class="intro">Recreate your board: type your guesses, then <strong>tap each tile</strong> to match its color. Every word that still fits appears below — with words that <strong>can't</strong> be today's answer crossed out, thanks to our <a href="/">played-before archive</a>.</p>
+
+        <div id="banner" class="banner" aria-hidden="true"></div>
+
+        <div class="board" id="board"></div>
+        <p class="board-hint">tap a filled tile to cycle: gray → yellow → green</p>
+
+        <div class="kb" id="kb"></div>
+
+        <div class="controls">
+            <label class="toggle-wrap"><input type="checkbox" id="useClue" checked> use today's played-before clue</label>
+            <button class="nav-links-btn key wide" id="resetBtn" style="max-width:6rem;height:2.2rem;background:#3a3a3c;border-radius:8px">Reset</button>
+        </div>
+
+        <p class="results-head" id="resultsHead">&nbsp;</p>
+        <div class="picks" id="picks" hidden></div>
+        <div id="words"><p class="empty">Loading word list…</p></div>
+        <p class="legend"><span class="out-demo">crossed-out words</span> can't be today's answer based on whether it has been played before</p>
+
+        <section class="seo-content">
+            <h2>A Wordle Solver With a Clue Nobody Else Has</h2>
+            <p>Every Wordle solver can filter words by your greens, yellows and grays. This one knows something extra: whether <strong>today's answer has ever been played before</strong>. Most days it hasn't — which means every one of the 1,800+ <a href="/">past Wordle answers</a> is impossible and gets crossed out automatically. On the rare repeat day, the logic flips: only past answers remain. Either way the candidate list shrinks dramatically, and it never uses the answer itself — just a yes/no fact.</p>
+            <p>Suggestions are ranked by letter coverage across the remaining candidates, the same method behind our <a href="/best-starting-words/">best starting words</a> analysis. Want to get better without a solver? Read the <a href="/how-to-win/">data-backed strategy guide</a>, or take it one clue at a time on the <a href="/hint/">daily hint page</a>.</p>
+
+            <h2>Frequently Asked Questions</h2>
+            <details>
+                <summary>How do I use this Wordle solver?</summary>
+                <p>Type the guesses you've already played (keyboard or the on-screen keys), then tap each tile to cycle its color until it matches your real board. Results update instantly. Incomplete rows are ignored.</p>
+            </details>
+            <details>
+                <summary>What makes this solver different?</summary>
+                <p>The played-before clue. We maintain the complete archive of every Wordle answer, so this solver can rule out words no other tool can — without spoiling anything.</p>
+            </details>
+            <details>
+                <summary>Does the solver spoil today's answer?</summary>
+                <p>No. It uses only a yes/no fact — whether today's word has been played before — never the answer itself. What you see is determined entirely by the guesses you enter. Uncheck "use today's played-before clue" to disable it (e.g., for practice puzzles or other Wordle-like games).</p>
+            </details>
+            <details>
+                <summary>How are repeated letters handled?</summary>
+                <p>The solver simulates Wordle's exact coloring rules. A gray tile for a letter that's yellow or green elsewhere correctly means "no more copies of this letter" — the case most solvers get wrong.</p>
+            </details>
+        </section>
+
+        <footer><a href="/">all past answers</a> · <a href="/hint/">today's hint</a> · <a href="/best-starting-words/">best starting words</a> · <a href="/stats/">stats &amp; facts</a> · <a href="/how-to-win/">how to win</a> · <a href="/wordle-alternatives/">games like Wordle</a> · wordlelist.com</footer>
+    </div>
+
+    <script>
+    (function () {
+        var ROWS = 6, COLS = 5;
+        var MAX_RENDER = 300, MAX_OUT_RENDER = 100;
+
+        /* ── state ── */
+        var letters = [];   // letters[r][c] = 'A'..'Z' or ''
+        var states  = [];   // states[r][c]  = 0 gray | 1 yellow | 2 green
+        for (var r = 0; r < ROWS; r++) { letters.push(['','','','','']); states.push([0,0,0,0,0]); }
+
+        var solverWords   = null;   // full guessable list
+        var playedSet     = null;   // words played before today's puzzle
+        var playedBefore  = null;   // boolean: is today's answer a repeat?
+
+        /* ── build board ── */
+        var board = document.getElementById('board');
+        var tiles = [];
+        for (var r = 0; r < ROWS; r++) {
+            var rowEl = document.createElement('div');
+            rowEl.className = 'row';
+            var rowTiles = [];
+            for (var c = 0; c < COLS; c++) {
+                var t = document.createElement('button');
+                t.className = 'tile st0';
+                t.setAttribute('aria-label', 'row ' + (r+1) + ' letter ' + (c+1));
+                t.dataset.r = r; t.dataset.c = c;
+                rowEl.appendChild(t);
+                rowTiles.push(t);
+            }
+            board.appendChild(rowEl);
+            tiles.push(rowTiles);
+        }
+
+        /* ── build keyboard ── */
+        var kb = document.getElementById('kb');
+        [['Q','W','E','R','T','Y','U','I','O','P'],
+         ['A','S','D','F','G','H','J','K','L'],
+         ['⌫','Z','X','C','V','B','N','M']].forEach(function (keys) {
+            var rowEl = document.createElement('div');
+            rowEl.className = 'kb-row';
+            keys.forEach(function (k) {
+                var b = document.createElement('button');
+                b.className = 'key' + (k === '⌫' ? ' wide' : '');
+                b.textContent = k;
+                b.setAttribute('aria-label', k === '⌫' ? 'backspace' : k);
+                b.addEventListener('click', function () { k === '⌫' ? doBackspace() : doLetter(k); });
+                rowEl.appendChild(b);
+            });
+            kb.appendChild(rowEl);
+        });
+
+        /* ── input handling ── */
+        function nextEmpty() {
+            for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++)
+                if (!letters[r][c]) return { r: r, c: c };
+            return null;
+        }
+
+        function lastFilled() {
+            for (var r = ROWS - 1; r >= 0; r--) for (var c = COLS - 1; c >= 0; c--)
+                if (letters[r][c]) return { r: r, c: c };
+            return null;
+        }
+
+        function doLetter(ch) {
+            var p = nextEmpty();
+            if (!p) return;
+            letters[p.r][p.c] = ch;
+            states[p.r][p.c] = 0;
+            refresh();
+        }
+
+        function doBackspace() {
+            var p = lastFilled();
+            if (!p) return;
+            letters[p.r][p.c] = '';
+            states[p.r][p.c] = 0;
+            refresh();
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            if (e.key === 'Backspace') { e.preventDefault(); doBackspace(); }
+            else if (/^[a-zA-Z]$/.test(e.key)) doLetter(e.key.toUpperCase());
+        });
+
+        board.addEventListener('click', function (e) {
+            var t = e.target.closest('.tile');
+            if (!t || !letters[t.dataset.r][t.dataset.c]) return;
+            var r = t.dataset.r, c = t.dataset.c;
+            states[r][c] = (states[r][c] + 1) % 3;
+            refresh();
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', function () {
+            for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+                letters[r][c] = ''; states[r][c] = 0;
+            }
+            refresh();
+        });
+
+        document.getElementById('useClue').addEventListener('change', refresh);
+
+        /* ── Wordle feedback simulation (exact duplicate-letter rules) ── */
+        function feedback(guess, answer) {
+            var res = [0,0,0,0,0], counts = {}, i, ch;
+            for (i = 0; i < 5; i++) {
+                if (guess[i] === answer[i]) res[i] = 2;
+                else { ch = answer[i]; counts[ch] = (counts[ch] || 0) + 1; }
+            }
+            for (i = 0; i < 5; i++) {
+                if (res[i] !== 2 && counts[guess[i]] > 0) { res[i] = 1; counts[guess[i]]--; }
+            }
+            return res[0]*10000 + res[1]*1000 + res[2]*100 + res[3]*10 + res[4];
+        }
+
+        function completeRows() {
+            var rows = [];
+            for (var r = 0; r < ROWS; r++) {
+                if (letters[r].every(function (ch) { return ch; })) {
+                    rows.push({
+                        word: letters[r].join(''),
+                        pat: states[r][0]*10000 + states[r][1]*1000 + states[r][2]*100 + states[r][3]*10 + states[r][4]
+                    });
+                }
+            }
+            return rows;
+        }
+
+        /* ── candidate scoring: letter coverage over remaining possibles ── */
+        function topPicks(possible) {
+            var freq = {}, i, w, ch;
+            for (i = 0; i < possible.length; i++) {
+                var seen = {};
+                w = possible[i];
+                for (var j = 0; j < 5; j++) {
+                    ch = w[j];
+                    if (!seen[ch]) { freq[ch] = (freq[ch] || 0) + 1; seen[ch] = 1; }
+                }
+            }
+            var scored = possible.map(function (word) {
+                var s = 0, seen = {};
+                for (var j = 0; j < 5; j++) {
+                    var c = word[j];
+                    if (!seen[c]) { s += freq[c] || 0; seen[c] = 1; }
+                }
+                return [word, s];
+            });
+            scored.sort(function (a, b) { return b[1] - a[1]; });
+            return scored.slice(0, 5).map(function (x) { return x[0]; });
+        }
+
+        /* ── render ── */
+        function refreshBoard() {
+            var cur = nextEmpty();
+            for (var r = 0; r < ROWS; r++) for (var c = 0; c < COLS; c++) {
+                var t = tiles[r][c];
+                t.textContent = letters[r][c];
+                t.className = 'tile st' + states[r][c] +
+                    (letters[r][c] ? ' filled' : '') +
+                    (cur && cur.r === r && cur.c === c ? ' cursor' : '');
+            }
+        }
+
+        function refresh() {
+            refreshBoard();
+            if (!solverWords) return;
+
+            var rows = completeRows();
+            var possible = solverWords;
+            for (var k = 0; k < rows.length; k++) {
+                var g = rows[k].word, p = rows[k].pat;
+                possible = possible.filter(function (w) { return feedback(g, w) === p; });
+            }
+
+            /* played-before clue: which candidates can't be today's answer? */
+            var useClue = document.getElementById('useClue').checked && playedBefore !== null && playedSet;
+            var out = [];
+            if (useClue) {
+                var split = [];
+                possible.forEach(function (w) {
+                    var isPlayed = playedSet.has(w);
+                    if (playedBefore ? !isPlayed : isPlayed) out.push(w);
+                    else split.push(w);
+                });
+                possible = split;
+            }
+
+            /* header */
+            var head = document.getElementById('resultsHead');
+            head.innerHTML = '<strong>' + possible.length.toLocaleString('en-US') + '</strong> possible word' +
+                (possible.length === 1 ? '' : 's') +
+                (useClue && out.length ? ' <span class="ruled">· ' + out.length.toLocaleString('en-US') + ' ruled out by today\'s clue</span>' : '');
+
+            /* top picks */
+            var picksEl = document.getElementById('picks');
+            if (possible.length > 2 && rows.length > 0) {
+                picksEl.hidden = false;
+                picksEl.innerHTML = '<span class="picks-label">Top picks</span>' +
+                    topPicks(possible).map(function (w) { return '<span class="pick-word">' + w + '</span>'; }).join('');
+            } else {
+                picksEl.hidden = true;
+            }
+
+            /* word list */
+            var wordsEl = document.getElementById('words');
+            if (!possible.length && !out.length) {
+                wordsEl.innerHTML = '<p class="empty">No words match that board — double-check your colors.</p>';
+                return;
+            }
+            var colors = ['c-green', 'c-yellow', 'c-light'];
+            var html = possible.slice(0, MAX_RENDER).map(function (w, i) {
+                return '<span class="w ' + colors[i % 3] + '">' + w + '</span>';
+            }).join(' ');
+            if (possible.length > MAX_RENDER) {
+                html += ' <span class="more">+ ' + (possible.length - MAX_RENDER).toLocaleString('en-US') + ' more…</span>';
+            }
+            if (useClue && out.length) {
+                html += (html ? '<br>' : '') + out.slice(0, MAX_OUT_RENDER).map(function (w) {
+                    return '<span class="w out c-light">' + w + '</span>';
+                }).join(' ');
+                if (out.length > MAX_OUT_RENDER) {
+                    html += ' <span class="more">+ ' + (out.length - MAX_OUT_RENDER).toLocaleString('en-US') + ' more ruled out…</span>';
+                }
+            }
+            wordsEl.innerHTML = html;
+        }
+
+        /* ── local date, same as homepage ── */
+        function getLocalDate() {
+            var d = new Date();
+            return d.getFullYear() + '-' +
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                   String(d.getDate()).padStart(2, '0');
+        }
+
+        /* ── load data ──
+         *  The solver list is required; the played-before clue is optional
+         *  enhancement — if any of its files fail, the solver still works.
+         */
+        fetch('/solver-words.txt', { cache: 'default' })
+            .then(function (r) { return r.text(); })
+            .then(function (txt) {
+                solverWords = txt.trim().split('\n')
+                    .map(function (w) { return w.trim().toUpperCase(); })
+                    .filter(function (w) { return w.length === 5; });
+                refresh();
+            })
+            .catch(function () {
+                document.getElementById('words').innerHTML =
+                    '<p class="empty">Could not load the word list — please refresh.</p>';
+            });
+
+        Promise.all([
+            fetch('/words.txt',   { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('/current.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('/prior.txt',   { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('/safe.txt',    { cache: 'no-store' }).then(function (r) { return r.text(); }).catch(function () { return ''; }),
+            fetch('/meta.json',   { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return null; })
+        ]).then(function (res) {
+            var base = res[0].trim().split('\n')
+                .map(function (w) { return w.trim().toUpperCase(); })
+                .filter(function (w) { return w.length === 5; });
+            var currentWord = res[1].trim().toUpperCase();
+            var priorWord   = res[2].trim().toUpperCase();
+            var safeWord    = res[3].trim().toUpperCase();
+            var meta        = res[4];
+
+            if (safeWord.length === 5 && base.indexOf(safeWord) === -1) base.push(safeWord);
+
+            /* timezone gate — identical to homepage */
+            var localDate  = getLocalDate();
+            var wordleDate = meta ? meta.wordle_date : localDate;
+            var answer;
+            if (localDate >= wordleDate) {
+                answer = currentWord;
+                if (base.indexOf(priorWord) === -1) base.push(priorWord);
+            } else {
+                answer = priorWord;
+            }
+
+            playedSet    = new Set(base);
+            playedBefore = playedSet.has(answer);
+            /* NOTE: `answer` is never used beyond this boolean. */
+
+            var banner = document.getElementById('banner');
+            if (playedBefore) {
+                banner.className = 'banner played';
+                banner.innerHTML = 'Today\'s clue: the answer <strong>has been played before</strong> — only past answers are possible.';
+            } else {
+                banner.className = 'banner fresh';
+                banner.innerHTML = 'Today\'s clue: the answer has <strong>never been played</strong> — all past answers are crossed out.';
+            }
+            banner.removeAttribute('aria-hidden');
+            refresh();
+        }).catch(function () { /* clue unavailable — solver works without it */ });
+    })();
+    </script>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "46707338e53242e685de97acc0026ce1"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>

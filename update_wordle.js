@@ -209,6 +209,12 @@ function updateSitemap() {
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
+  <url>
+    <loc>https://wordlelist.com/solver/</loc>
+    <lastmod>2026-07-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>
 `;
     fs.writeFileSync(`${REPO_DIR}/sitemap.xml`, sitemap);
