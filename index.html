@@ -22,6 +22,7 @@
     <meta property="og:image:height" content="630">
     <meta property="og:url" content="https://wordlelist.com/">
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Wordlelist">
 
     <!-- Twitter Card ─── -->
     <meta name="twitter:card" content="summary_large_image">
@@ -459,6 +460,25 @@
             word-spacing: 0.2em;
         }
 
+        /* ─── Solver promo strip ─── */
+        .promo-strip {
+            display: block;
+            margin: -1.25rem -1.5rem 1.25rem;
+            padding: 0.45rem 1rem;
+            text-align: center;
+            background: #1a1a1b;
+            border-bottom: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .promo-strip strong { color: #538d4e; font-weight: 700; }
+        .promo-strip:hover { color: #d7dadc; }
+        .promo-strip:hover strong { color: #6aaa64; }
+
         /* ─── Footer ─── */
         footer {
             text-align: center;
@@ -476,6 +496,7 @@
     </style>
 </head>
 <body>
+    <a class="promo-strip" href="/solver/">New: <strong>Wordle Solver</strong> — see every word that still fits your board&nbsp;→</a>
     <div class="container">
         <header>
             <h1>
@@ -547,7 +568,7 @@
             </details>
         </section>
 
-        <footer><nav class="footer-nav"><a href="/hint/">Today's hint</a> · <a href="/best-starting-words/">Best starting words</a></nav>All past Wordle answers · updated daily · wordlelist.com · Last updated <!-- DATE:START -->07/06/2026<!-- DATE:END --></footer>
+        <footer><nav class="footer-nav"><a href="/hint/">Today's hint</a> · <a href="/solver/">Solver</a> · <a href="/best-starting-words/">Best starting words</a> · <a href="/how-to-win/">How to win</a> · <a href="/stats/">Stats</a> · <a href="/wordle-alternatives/">Games like Wordle</a></nav>All past Wordle answers · updated daily · wordlelist.com · Last updated <!-- DATE:START -->07/06/2026<!-- DATE:END --></footer>
     </div>
 
     <script>
