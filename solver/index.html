@@ -307,6 +307,14 @@
             background: #d7dadc;
             animation: caretBlink 1.1s step-end infinite;
         }
+
+        /* touch devices: no caret until the keyboard is actually up
+           (board gets .kb while the hidden input has focus). Desktop
+           keeps it always on — keys work there without focus. */
+        @media (hover: none) {
+            .board:not(.kb) .tile.cursor { animation: none; }
+            .board:not(.kb) .tile.cursor::after { display: none; }
+        }
         .tile.st0.filled { background: #3a3a3c; border-color: #3a3a3c; }
         .tile.st1 { background: #c9b458; border-color: #c9b458; }
         .tile.st2 { background: #538d4e; border-color: #538d4e; }
@@ -691,6 +699,10 @@
             }
         }
         ghost.addEventListener('focus', scrollBoardUp);
+
+        /* caret visibility gate for touch devices (see CSS @media block) */
+        ghost.addEventListener('focus', function () { board.classList.add('kb'); });
+        ghost.addEventListener('blur',  function () { board.classList.remove('kb'); });
 
         function keepCursorRowVisible() {
             var grid = computeGrid(), visible = visibleCount(grid);
