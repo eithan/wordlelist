@@ -191,6 +191,51 @@
         .intro a { color: #538d4e; }
         .intro a:hover { color: #d7dadc; }
 
+        /* ? that reveals the full instructions */
+        .help-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.2rem;
+            height: 1.2rem;
+            margin-left: 0.25rem;
+            vertical-align: middle;
+            border: 1px solid #3a3a3c;
+            border-radius: 50%;
+            background: transparent;
+            color: #818384;
+            font-family: inherit;
+            font-size: 0.74rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .help-toggle:hover,
+        .help-toggle[aria-expanded="true"] { border-color: #538d4e; color: #d7dadc; }
+
+        .help-tip {
+            max-width: 560px;
+            margin: 0 auto 1.4rem;
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 0.85rem 1.15rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #818384;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+        }
+
+        .help-tip[hidden] { display: none; }
+        .help-tip strong { color: #d7dadc; font-weight: 600; }
+        .help-tip a { color: #538d4e; }
+        .help-tip a:hover { color: #d7dadc; }
+
         /* ─── Clue banner ─── */
         .banner {
             background: #1a1a1b;
@@ -259,7 +304,27 @@
             user-select: none;
         }
 
-        .row-num.spacer { visibility: hidden; }
+        /* subtle × to clear a row — dim like the row number until hovered */
+        .row-clear {
+            width: 1.1rem;
+            flex: 0 0 1.1rem;
+            margin-left: 0.15rem;
+            background: none;
+            border: 0;
+            color: #3a3a3c;
+            font-family: inherit;
+            font-size: 1.15rem;
+            font-weight: 400;
+            line-height: 1;
+            text-align: center;
+            cursor: pointer;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: color 0.15s ease;
+        }
+
+        .row-clear:hover { color: #c9b458; }
 
         .tile {
             width: 3.1rem;
@@ -506,7 +571,8 @@
             </nav>
         </header>
 
-        <p class="intro">Recreate your board: <strong>tap the row and type</strong> your guess, then tap each letter to match its color. The list below filters live as you go — words that <strong>can't</strong> be today's answer are crossed out, thanks to our <a href="/">played-before archive</a>.</p>
+        <p class="intro">Recreate your board to see what still fits.<button type="button" class="help-toggle" id="helpToggle" aria-label="How it works" aria-expanded="false" aria-controls="helpTip">?</button></p>
+        <div class="help-tip" id="helpTip" role="note" hidden>Recreate your board: <strong>tap the row and type</strong> your guess, then tap each letter to match its color. The list below filters live as you go — words that <strong>can't</strong> be today's answer are crossed out, thanks to our <a href="/">played-before archive</a>.</div>
 
         <div id="banner" class="banner" aria-hidden="true"></div>
 
@@ -633,9 +699,13 @@
                 rowEl.appendChild(t);
                 rowTiles.push(t);
             }
-            var spacer = document.createElement('span');
-            spacer.className = 'row-num spacer';
-            rowEl.appendChild(spacer);
+            var clearBtn = document.createElement('button');
+            clearBtn.className = 'row-clear';
+            clearBtn.type = 'button';
+            clearBtn.setAttribute('aria-label', 'clear row ' + (br + 1));
+            clearBtn.textContent = '×';
+            clearBtn.dataset.r = br;
+            rowEl.appendChild(clearBtn);
             board.appendChild(rowEl);
             tiles.push(rowTiles);
         }
@@ -684,9 +754,10 @@
         }
 
         /* tapping a top pick drops the whole word into the active row and
-           carries greens forward — same as finishing a typed guess. The word
-           already satisfies every green (picks come from the possible list),
-           so known-green positions stay green and the rest start gray. */
+           carries greens forward — same as finishing a typed guess. Any
+           position pinned green by a completed row above stays green when the
+           pick's letter matches (picks come from the possible list, so it
+           always does); every other letter starts gray. */
         function applyPick(word) {
             selected = null;
             propagateGreens();
@@ -698,11 +769,17 @@
             if (target === -1) {
                 if (visible < MAX_ROWS) target = visible; else return;   /* board full */
             }
+            var green = ['', '', '', '', ''];
+            for (var gr = 0; gr < target; gr++) {
+                for (var gc = 0; gc < COLS; gc++) {
+                    if (letters[gr][gc] && states[gr][gc] === 2) green[gc] = letters[gr][gc];
+                }
+            }
             for (var c = 0; c < COLS; c++) {
-                var keepGreen = states[target][c] === 2 && prefilled[target][c];
+                var keepGreen = green[c] && word[c] === green[c];
                 letters[target][c] = word[c];
                 states[target][c] = keepGreen ? 2 : 0;
-                prefilled[target][c] = false;
+                prefilled[target][c] = keepGreen;
             }
             refresh();
             keepCursorRowVisible();
@@ -764,7 +841,25 @@
             else if (/^[a-zA-Z]$/.test(e.key)) { e.preventDefault(); doLetter(e.key.toUpperCase()); }
         });
 
+        /* clear a whole row via its × button. Rows below slide up to fill the
+           gap, so a non-first row visually disappears; the first row, with
+           nothing above to shift down, just empties in place. */
+        function clearRow(r) {
+            selected = null;
+            for (var rr = r; rr < MAX_ROWS - 1; rr++) {
+                letters[rr]  = letters[rr + 1].slice();
+                states[rr]   = states[rr + 1].slice();
+                prefilled[rr] = prefilled[rr + 1].slice();
+            }
+            letters[MAX_ROWS - 1]  = ['', '', '', '', ''];
+            states[MAX_ROWS - 1]   = [0, 0, 0, 0, 0];
+            prefilled[MAX_ROWS - 1] = [false, false, false, false, false];
+            refresh();
+        }
+
         board.addEventListener('click', function (e) {
+            var clr = e.target.closest('.row-clear');
+            if (clr) { clearRow(+clr.dataset.r); return; }
             var t = e.target.closest('.tile');
             if (!t) return;
             var r = +t.dataset.r, c = +t.dataset.c;
@@ -782,6 +877,14 @@
             selected = { r: r, c: c };
             states[r][c] = (states[r][c] + 1) % 3;
             refresh();
+        });
+
+        var helpToggle = document.getElementById('helpToggle');
+        var helpTip = document.getElementById('helpTip');
+        helpToggle.addEventListener('click', function () {
+            var show = helpTip.hasAttribute('hidden');
+            if (show) helpTip.removeAttribute('hidden'); else helpTip.setAttribute('hidden', '');
+            helpToggle.setAttribute('aria-expanded', show ? 'true' : 'false');
         });
 
         document.getElementById('picks').addEventListener('click', function (e) {
@@ -912,7 +1015,11 @@
         function refreshBoard(grid, visible) {
             var cur = nextEmpty(grid, visible);
             for (var r = 0; r < MAX_ROWS; r++) {
-                tiles[r][0].parentNode.className = 'row' + (r < visible ? '' : ' hidden');
+                var rowEl = tiles[r][0].parentNode;
+                rowEl.className = 'row' + (r < visible ? '' : ' hidden');
+                var hasContent = grid[r].some(function (x) { return x.ch; });
+                var clr = rowEl.querySelector('.row-clear');
+                if (clr) clr.style.visibility = hasContent ? 'visible' : 'hidden';
                 for (var c = 0; c < COLS; c++) {
                     var t = tiles[r][c], cell = grid[r][c];
                     t.textContent = cell.ch;
