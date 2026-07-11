@@ -388,10 +388,20 @@
             letter-spacing: 0.15em;
             color: #ffffff;
             background: #538d4e;
+            border: 0;
             border-radius: 4px;
             padding: 0.35rem 0.6rem;
+            font-family: inherit;
             font-size: 0.95rem;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background 0.15s ease, transform 0.1s ease;
         }
+
+        .pick-word:hover { background: #63a35c; }
+        .pick-word:active { transform: scale(0.94); }
 
         .picks-label {
             width: 100%;
@@ -673,6 +683,31 @@
             refresh();
         }
 
+        /* tapping a top pick drops the whole word into the active row and
+           carries greens forward — same as finishing a typed guess. The word
+           already satisfies every green (picks come from the possible list),
+           so known-green positions stay green and the rest start gray. */
+        function applyPick(word) {
+            selected = null;
+            propagateGreens();
+            var grid = computeGrid(), visible = visibleCount(grid);
+            var target = -1;
+            for (var r = 0; r < visible; r++) {
+                if (!grid[r].every(function (x) { return x.ch; })) { target = r; break; }
+            }
+            if (target === -1) {
+                if (visible < MAX_ROWS) target = visible; else return;   /* board full */
+            }
+            for (var c = 0; c < COLS; c++) {
+                var keepGreen = states[target][c] === 2 && prefilled[target][c];
+                letters[target][c] = word[c];
+                states[target][c] = keepGreen ? 2 : 0;
+                prefilled[target][c] = false;
+            }
+            refresh();
+            keepCursorRowVisible();
+        }
+
         /* ── native keyboard via hidden input ──
          *  Desktop: document keydown handles keys directly (preventDefault
          *  stops the ghost input from double-firing). Mobile: keydown often
@@ -749,6 +784,11 @@
             refresh();
         });
 
+        document.getElementById('picks').addEventListener('click', function (e) {
+            var el = e.target.closest('.pick-word');
+            if (el && el.dataset.word) applyPick(el.dataset.word);
+        });
+
         document.getElementById('resetBtn').addEventListener('click', function () {
             selected = null;
             for (var r = 0; r < MAX_ROWS; r++) for (var c = 0; c < COLS; c++) {
@@ -822,11 +862,11 @@
          *  remaining candidates) plus positional frequency, selected
          *  GREEDILY so each pick is scored mostly on letters the earlier
          *  picks don't already probe — five varied words instead of five
-         *  near-clones. Guesses are drawn from every word consistent with
-         *  the board (including clue-ruled-out ones — they can't BE the
-         *  answer but are still fine information guesses in normal mode),
-         *  and words that have been real Wordle answers get a boost so
-         *  picks favor common words over obscure letter-dumps.
+         *  near-clones. Guesses are drawn only from the still-possible
+         *  words (never the clue-ruled-out ones — tapping a pick should
+         *  never enter a word that can't be today's answer), and words that
+         *  have been real Wordle answers get a boost so picks favor common
+         *  words over obscure letter-dumps.
          */
         var STARTERS = ['STARE', 'LATER', 'SONIC', 'RHINO', 'CLOUD'];
 
@@ -919,7 +959,7 @@
                 picksEl.hidden = false;
                 picksEl.innerHTML = '<span class="picks-label">' +
                     (cons.hasInput ? 'Top picks' : 'Strong openers') + '</span>' +
-                    topPicks(possible, possible.concat(out), cons.hasInput).map(function (w) { return '<span class="pick-word">' + w + '</span>'; }).join('');
+                    topPicks(possible, possible, cons.hasInput).map(function (w) { return '<button type="button" class="pick-word" data-word="' + w + '">' + w + '</button>'; }).join('');
             } else {
                 picksEl.hidden = true;
                 picksEl.innerHTML = '';   /* never leave stale picks behind */
