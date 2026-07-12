@@ -593,7 +593,7 @@
         <section class="seo-content">
             <h2>A Wordle Solver With a Clue Nobody Else Has</h2>
             <p>Every Wordle solver can filter words by your greens, yellows and grays. This one knows something extra: whether <strong>today's answer has ever been played before</strong>. Most days it hasn't — which means every one of the 1,800+ <a href="/">past Wordle answers</a> is impossible and gets crossed out automatically. On the rare repeat day, the logic flips: only past answers remain. Either way the candidate list shrinks dramatically, and it never uses the answer itself — just a yes/no fact.</p>
-            <p>Suggestions are ranked by letter coverage across the remaining candidates, the same method behind our <a href="/best-starting-words/">best starting words</a> analysis. Want to get better without a solver? Read the <a href="/how-to-win/">data-backed strategy guide</a>, or take it one clue at a time on the <a href="/hint/">daily hint page</a>.</p>
+            <p>Suggestions surface the most common English words still consistent with your board, so the picks are words you'll actually recognize rather than obscure letter-dumps. For the strongest opening moves, see our <a href="/best-starting-words/">best starting words</a> analysis. Want to get better without a solver? Read the <a href="/how-to-win/">data-backed strategy guide</a>, or take it one clue at a time on the <a href="/hint/">daily hint page</a>.</p>
 
             <h2>Frequently Asked Questions</h2>
             <details>
@@ -631,6 +631,7 @@
         }
 
         var solverWords  = null;
+        var freqRank     = {};   /* word → index in solver-words.txt (ordered most-common-first) */
         var playedSet    = null;
         var playedBefore = null;
 
@@ -754,10 +755,14 @@
         }
 
         /* tapping a top pick drops the whole word into the active row and
-           carries greens forward — same as finishing a typed guess. Any
-           position pinned green by a completed row above stays green when the
-           pick's letter matches (picks come from the possible list, so it
-           always does); every other letter starts gray. */
+           carries the clues forward — same as finishing a typed guess. From
+           the completed rows above: a position pinned GREEN stays green when
+           the pick repeats that letter there, and any letter marked YELLOW
+           (present, but somewhere else) is pre-colored yellow wherever it
+           appears in the pick — UNLESS that letter has since been placed green,
+           in which case its spot is already known and repeats stay gray rather
+           than falsely implying a second copy. Green wins a position over
+           yellow; everything else starts gray. All are editable defaults. */
         function applyPick(word) {
             selected = null;
             propagateGreens();
@@ -769,17 +774,24 @@
             if (target === -1) {
                 if (visible < MAX_ROWS) target = visible; else return;   /* board full */
             }
-            var green = ['', '', '', '', ''];
+            var green = ['', '', '', '', ''], yellow = {};
             for (var gr = 0; gr < target; gr++) {
                 for (var gc = 0; gc < COLS; gc++) {
-                    if (letters[gr][gc] && states[gr][gc] === 2) green[gc] = letters[gr][gc];
+                    if (!letters[gr][gc]) continue;
+                    if (states[gr][gc] === 2) green[gc] = letters[gr][gc];
+                    else if (states[gr][gc] === 1) yellow[letters[gr][gc]] = true;
                 }
             }
+            /* a letter already placed green is accounted for — don't auto-yellow
+               its repeats as if a second copy were known to exist */
+            for (var gk = 0; gk < COLS; gk++) if (green[gk]) delete yellow[green[gk]];
             for (var c = 0; c < COLS; c++) {
-                var keepGreen = green[c] && word[c] === green[c];
-                letters[target][c] = word[c];
-                states[target][c] = keepGreen ? 2 : 0;
-                prefilled[target][c] = keepGreen;
+                var ch = word[c], st = 0;
+                if (green[c] && ch === green[c]) st = 2;
+                else if (yellow[ch]) st = 1;
+                letters[target][c] = ch;
+                states[target][c] = st;
+                prefilled[target][c] = st !== 0;
             }
             refresh();
             keepCursorRowVisible();
@@ -842,11 +854,35 @@
         });
 
         /* clear a whole row via its × button. Rows below slide up to fill the
-           gap, so a non-first row visually disappears; the first row, with
-           nothing above to shift down, just empties in place. */
+           gap, so a non-first row disappears; a lone first row just empties.
+           The × ALWAYS clears — even when a green is involved, which needs two
+           extra steps so the carry logic can't block or instantly undo it:
+             1. If the clicked row is only an auto-carried green (incomplete,
+                nothing user-typed to keep), decline future carries into that
+                slot so propagateGreens doesn't refill it.
+             2. Strip transient carried greens from active rows before the
+                shift, so none get dragged upward. Greens the user kept inside
+                a completed guess are left untouched. */
         function clearRow(r) {
             selected = null;
-            for (var rr = r; rr < MAX_ROWS - 1; rr++) {
+
+            var declineCarry = false, rowComplete = true, c, i, rr;
+            for (c = 0; c < COLS; c++) {
+                if (prefilled[r][c]) declineCarry = true;
+                if (!letters[r][c]) rowComplete = false;
+            }
+            if (rowComplete) declineCarry = false;
+
+            for (i = 0; i < MAX_ROWS; i++) {
+                var complete = true;
+                for (c = 0; c < COLS; c++) if (!letters[i][c]) complete = false;
+                if (complete) continue;   /* keep greens the user kept in a real guess */
+                for (c = 0; c < COLS; c++) if (prefilled[i][c]) {
+                    letters[i][c] = ''; states[i][c] = 0; prefilled[i][c] = false;
+                }
+            }
+
+            for (rr = r; rr < MAX_ROWS - 1; rr++) {
                 letters[rr]  = letters[rr + 1].slice();
                 states[rr]   = states[rr + 1].slice();
                 prefilled[rr] = prefilled[rr + 1].slice();
@@ -854,6 +890,9 @@
             letters[MAX_ROWS - 1]  = ['', '', '', '', ''];
             states[MAX_ROWS - 1]   = [0, 0, 0, 0, 0];
             prefilled[MAX_ROWS - 1] = [false, false, false, false, false];
+
+            if (declineCarry) prefilled[r] = [true, true, true, true, true];
+
             refresh();
         }
 
@@ -955,60 +994,28 @@
             return true;
         }
 
-        /* ── candidate scoring ──
+        /* ── candidate picks ──
          *  Empty board: curated openers, consistent with our own
          *  best-starting-words analysis (STARE = best all-round single,
          *  LATER → SONIC = strongest measured pair, RHINO from a runner-up
          *  pair, CLOUD for U/D coverage) — varied letters, all real words.
          *
-         *  With input: coverage (distinct-letter frequency over the
-         *  remaining candidates) plus positional frequency, selected
-         *  GREEDILY so each pick is scored mostly on letters the earlier
-         *  picks don't already probe — five varied words instead of five
-         *  near-clones. Guesses are drawn only from the still-possible
-         *  words (never the clue-ruled-out ones — tapping a pick should
-         *  never enter a word that can't be today's answer), and words that
-         *  have been real Wordle answers get a boost so picks favor common
-         *  words over obscure letter-dumps.
+         *  With input: popularity-first — the most common English words
+         *  still consistent with the board, so suggestions are recognizable
+         *  rather than obscure letter-dumps. solver-words.txt is ordered
+         *  most-common-first, so freqRank (a word's index in it) IS the
+         *  popularity signal — lower means more common — and no frequency
+         *  data ships beyond that ordering. Guesses are drawn only from the
+         *  still-possible words (never clue-ruled-out ones — tapping a pick
+         *  must never enter a word that can't be today's answer).
          */
         var STARTERS = ['STARE', 'LATER', 'SONIC', 'RHINO', 'CLOUD'];
 
         function topPicks(possible, guessPool, hasInput) {
             if (!hasInput) return STARTERS;
-
-            var freq = {}, pfreq = [{},{},{},{},{}], i, j, ch;
-            for (i = 0; i < possible.length; i++) {
-                var seen = {}, w = possible[i];
-                for (j = 0; j < 5; j++) {
-                    ch = w[j];
-                    pfreq[j][ch] = (pfreq[j][ch] || 0) + 1;
-                    if (!seen[ch]) { freq[ch] = (freq[ch] || 0) + 1; seen[ch] = 1; }
-                }
-            }
-
-            var picks = [], picked = {}, used = {};
-            var n = Math.min(5, guessPool.length);
-            while (picks.length < n) {
-                var best = null, bestScore = -1;
-                for (i = 0; i < guessPool.length; i++) {
-                    var word = guessPool[i];
-                    if (picked[word]) continue;
-                    var s = 0, seen2 = {};
-                    for (j = 0; j < 5; j++) {
-                        var c = word[j];
-                        var novelty = used[c] ? 0.2 : 1;   /* letters already probed are worth little */
-                        s += (pfreq[j][c] || 0) * novelty;
-                        if (!seen2[c]) { s += (freq[c] || 0) * 2 * novelty; seen2[c] = 1; }
-                    }
-                    if (playedSet && playedSet.has(word)) s *= 1.6;   /* real answers = common words */
-                    if (s > bestScore) { bestScore = s; best = word; }
-                }
-                if (!best) break;
-                picks.push(best);
-                picked[best] = 1;
-                for (j = 0; j < 5; j++) used[best[j]] = 1;
-            }
-            return picks;
+            return guessPool.slice()
+                .sort(function (a, b) { return freqRank[a] - freqRank[b]; })
+                .slice(0, Math.min(5, guessPool.length));
         }
 
         /* ── render ── */
@@ -1017,7 +1024,12 @@
             for (var r = 0; r < MAX_ROWS; r++) {
                 var rowEl = tiles[r][0].parentNode;
                 rowEl.className = 'row' + (r < visible ? '' : ' hidden');
-                var hasContent = grid[r].some(function (x) { return x.ch; });
+                /* show × only when the row holds something the user entered —
+                   a carried green alone (prefilled) isn't worth a clear button */
+                var hasContent = false;
+                for (var hc = 0; hc < COLS; hc++) {
+                    if (letters[r][hc] && !prefilled[r][hc]) { hasContent = true; break; }
+                }
                 var clr = rowEl.querySelector('.row-clear');
                 if (clr) clr.style.visibility = hasContent ? 'visible' : 'hidden';
                 for (var c = 0; c < COLS; c++) {
@@ -1116,6 +1128,11 @@
                 solverWords = txt.trim().split('\n')
                     .map(function (w) { return w.trim().toUpperCase(); })
                     .filter(function (w) { return w.length === 5; });
+                /* file order = popularity rank (most common first) */
+                freqRank = {};
+                for (var i = 0; i < solverWords.length; i++) {
+                    if (freqRank[solverWords[i]] === undefined) freqRank[solverWords[i]] = i;
+                }
                 refresh();
             })
             .catch(function () {
