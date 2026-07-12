@@ -1118,6 +1118,27 @@
                    String(d.getDate()).padStart(2, '0');
         }
 
+        /* ── freshness check (same pattern as homepage / hint) ──
+         *  On revisit with a stale Safari tab, if wordle_date changed since
+         *  this page was first served, hard-reload once so all data — and any
+         *  redeployed HTML / versioned word list — comes back fresh.
+         */
+        (function freshness() {
+            var stored = sessionStorage.getItem('wl_solver_date');
+            fetch('/meta.json?_=' + Date.now(), { cache: 'no-store' })
+                .then(function (r) { return r.json(); })
+                .then(function (meta) {
+                    if (!meta || !meta.wordle_date) return;
+                    if (stored && stored !== meta.wordle_date) {
+                        sessionStorage.setItem('wl_solver_date', meta.wordle_date);
+                        location.reload();
+                    } else {
+                        sessionStorage.setItem('wl_solver_date', meta.wordle_date);
+                    }
+                })
+                .catch(function () { /* network error — proceed */ });
+        })();
+
         /* ── load data ──
          *  The solver list is required; the played-before clue is optional
          *  enhancement — if any of its files fail, the solver still works.
