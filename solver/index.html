@@ -1122,7 +1122,10 @@
          *  The solver list is required; the played-before clue is optional
          *  enhancement — if any of its files fail, the solver still works.
          */
-        fetch('/solver-words.txt', { cache: 'default' })
+        /* ?v= busts returning visitors' cache when the list's ORDER changes
+           (the file is otherwise heavily cacheable). Bump this number every
+           time you re-sort / regenerate solver-words.txt. */
+        fetch('/solver-words.txt?v=2', { cache: 'default' })
             .then(function (r) {
                 if (!r.ok) throw new Error('solver-words.txt HTTP ' + r.status);
                 return r.text();
