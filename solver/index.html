@@ -1123,7 +1123,10 @@
          *  enhancement — if any of its files fail, the solver still works.
          */
         fetch('/solver-words.txt', { cache: 'default' })
-            .then(function (r) { return r.text(); })
+            .then(function (r) {
+                if (!r.ok) throw new Error('solver-words.txt HTTP ' + r.status);
+                return r.text();
+            })
             .then(function (txt) {
                 solverWords = txt.trim().split('\n')
                     .map(function (w) { return w.trim().toUpperCase(); })
@@ -1133,12 +1136,16 @@
                 for (var i = 0; i < solverWords.length; i++) {
                     if (freqRank[solverWords[i]] === undefined) freqRank[solverWords[i]] = i;
                 }
-                refresh();
             })
             .catch(function () {
-                document.getElementById('words').innerHTML =
-                    '<p class="empty">Could not load the word list — please refresh.</p>';
-            });
+                /* only a genuine load failure shows this — a later render error
+                   must not masquerade as "couldn't load the word list" */
+                if (!solverWords || !solverWords.length) {
+                    document.getElementById('words').innerHTML =
+                        '<p class="empty">Could not load the word list — please refresh.</p>';
+                }
+            })
+            .then(function () { if (solverWords && solverWords.length) refresh(); });
 
         Promise.all([
             fetch('/words.txt',   { cache: 'no-store' }).then(function (r) { return r.text(); }),
