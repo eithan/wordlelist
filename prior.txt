@@ -1,1 +1,1 @@
-CLACK
+STOUT
