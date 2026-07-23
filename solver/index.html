@@ -58,7 +58,7 @@
                 "name": "How do I use this Wordle helper?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Tap the board and type the guesses you have already played, then tap each tile to cycle its color between gray, yellow and green until it matches your real board. The recommended guesses update instantly as you type and set colors — green letters even pre-fill your next row automatically, and you can edit or clear them if you don't replay them (not everyone plays hard mode)."
+                    "text": "Tap the board and type the guesses you have already played, then tap each tile to cycle its color between gray, yellow and green until it matches your real board. The recommended guesses update instantly as you type and set colors — and the clues you have already earned carry into the next row automatically, with green letters locked in place and yellow letters kept at least yellow."
                 }
             },
             {
@@ -384,6 +384,7 @@
         .tile.st1 { background: #c9b458; border-color: #c9b458; }
         .tile.st2 { background: #538d4e; border-color: #538d4e; }
         .tile.sel { border-color: #d7dadc; }   /* tapped tile — backspace clears it */
+        .tile.locked { cursor: default; }      /* carried green — clear the row instead */
 
         @media (max-width: 420px) {
             .tile { width: 2.7rem; height: 2.7rem; font-size: 1.35rem; }
@@ -499,6 +500,32 @@
             opacity: 0.35;
         }
 
+        /* Few candidates left: the recommended-guesses strip has dropped away,
+           so the list itself becomes the pick UI — bigger, tappable, same
+           three-color rotation. Colors stay on .w so these still read as the
+           word list rather than a second row of buttons. */
+        .w-pick {
+            font-family: inherit;
+            font-size: 1.5rem;
+            letter-spacing: 0.16em;
+            background: transparent;
+            border: 1px solid #3a3a3c;
+            border-radius: 6px;
+            padding: 0.3rem 0.55rem 0.3rem 0.7rem;
+            margin: 0.15rem 0.2rem;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+        }
+
+        .w-pick:hover { border-color: #538d4e; background: #1a1a1b; }
+        .w-pick:active { transform: scale(0.96); }
+
+        @media (max-width: 420px) {
+            .w-pick { font-size: 1.25rem; letter-spacing: 0.12em; }
+        }
+
         .more {
             color: #818384;
             font-style: italic;
@@ -579,7 +606,7 @@
         <div class="board" id="board">
             <input id="ghost" class="ghost" type="text" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-label="type your guess" tabindex="-1">
         </div>
-        <p class="board-hint">tap a letter to cycle: gray → yellow → green · greens pre-fill the next row — tap to change</p>
+        <p class="board-hint">tap a letter to cycle: gray → yellow → green · greens carry down locked — use × to clear a row</p>
 
         <div class="controls">
             <button class="reset-btn" id="resetBtn">Reset</button>
@@ -598,7 +625,7 @@
             <h2>Frequently Asked Questions</h2>
             <details>
                 <summary>How do I use this Wordle helper?</summary>
-                <p>Tap the board and type a guess you've played, then tap each tile to cycle its color until it matches your real board. The recommendations update instantly as you type: greens and yellows apply the moment you set them, and gray letters count once their row is complete. When you finish a row, a new one appears with your green letters pre-filled as defaults — tap or backspace to change them if you didn't replay them (no hard mode required).</p>
+                <p>Tap the board and type a guess you've played, then tap each tile to cycle its color until it matches your real board. The recommendations update instantly as you type: greens and yellows apply the moment you set them, and gray letters count once their row is complete. When you finish a row, a new one appears carrying the clues you've already earned: green letters locked into place, and any letter you marked yellow held at least yellow. Use the × beside a row to clear it.</p>
             </details>
             <details>
                 <summary>What makes this different from other solvers?</summary>
@@ -621,13 +648,25 @@
     (function () {
         var MAX_ROWS = 6, COLS = 5;
         var MAX_RENDER = 300, MAX_OUT_RENDER = 100;
+        /* below this many candidates the recommended-guesses strip is pointless
+           (the whole list is readable), and the list turns tappable instead */
+        var PICKS_MIN = 10;
 
-        /* ── state ── */
-        var letters = [], states = [], prefilled = [];
+        /* ── state ──
+         *  ctrl[r][c] records who owns each cell, which decides whether the
+         *  green-carry may write to it:
+         *    FREE  — empty and unclaimed; a carried green may land here
+         *    AUTO  — holds a carried green; re-derived from the row above on
+         *            every refresh, so edits upstream flow down
+         *    OWNED — the user typed, recolored or deliberately cleared it;
+         *            the carry never touches it again
+         */
+        var FREE = 0, AUTO = 1, OWNED = 2;
+        var letters = [], states = [], ctrl = [];
         for (var r = 0; r < MAX_ROWS; r++) {
             letters.push(['','','','','']);
             states.push([0,0,0,0,0]);
-            prefilled.push([false,false,false,false,false]);
+            ctrl.push([FREE,FREE,FREE,FREE,FREE]);
         }
 
         var solverWords  = null;
@@ -647,25 +686,89 @@
             return grid;
         }
 
-        /* greens carry into the next row as editable DEFAULTS (not locks —
-           many people don't play hard mode). Each target cell is prefilled
-           at most once, so deleting or recoloring a default sticks. */
+        /* greens carry into the next row as LOCKED clues: a letter you've
+           placed is known, so it can't be recolored or backspaced away on its
+           own — clearing the whole row (×) is the way out.
+
+           This runs top-down on every refresh and RE-DERIVES each AUTO cell
+           from the row above rather than filling it once. So recoloring or
+           retyping a letter in an earlier row flows straight down: the carried
+           copy follows the change, and disappears when the green does. Cells
+           the user owns are skipped entirely, and because it sweeps rows in
+           order, a change in row 1 reaches row 3 within the same pass. */
         function propagateGreens() {
             for (var r = 0; r < MAX_ROWS - 1; r++) {
-                var complete = true, greens = 0;
-                for (var c = 0; c < COLS; c++) {
+                var complete = true, greens = 0, c;
+                for (c = 0; c < COLS; c++) {
                     if (!letters[r][c]) complete = false;
                     else if (states[r][c] === 2) greens++;
                 }
                 /* skip incomplete rows, rows with nothing to carry, and a
                    fully-green (solved) row — no point spawning more rows */
-                if (!complete || greens === 0 || greens === COLS) continue;
+                var carries = complete && greens > 0 && greens < COLS;
                 for (c = 0; c < COLS; c++) {
-                    if (states[r][c] === 2 && !letters[r + 1][c] && !prefilled[r + 1][c]) {
-                        letters[r + 1][c] = letters[r][c];
-                        states[r + 1][c] = 2;
-                        prefilled[r + 1][c] = true;
+                    if (ctrl[r + 1][c] === OWNED) continue;
+                    var want = carries && states[r][c] === 2 ? letters[r][c] : '';
+                    if (want) {
+                        /* claim empty cells, and keep existing AUTO cells in sync */
+                        if (ctrl[r + 1][c] === AUTO || !letters[r + 1][c]) {
+                            letters[r + 1][c] = want;
+                            states[r + 1][c] = 2;
+                            ctrl[r + 1][c] = AUTO;
+                        }
+                    } else if (ctrl[r + 1][c] === AUTO) {
+                        /* the green that put this here is gone — so is this */
+                        letters[r + 1][c] = '';
+                        states[r + 1][c] = 0;
+                        ctrl[r + 1][c] = FREE;
                     }
+                }
+            }
+        }
+
+        /* ── clues carried down from the completed rows above `upTo` ──
+         *  pinned[c] — a letter locked green at that column
+         *  yellow    — letters known to be in the answer somewhere, minus any
+         *              already pinned green: once a letter's position is known,
+         *              a repeat of it elsewhere proves nothing about a 2nd copy
+         */
+        function priorClues(upTo) {
+            var pinned = ['', '', '', '', ''], yellow = {}, r, c;
+            for (r = 0; r < upTo; r++) {
+                var complete = true;
+                for (c = 0; c < COLS; c++) if (!letters[r][c]) complete = false;
+                if (!complete) continue;   /* a half-typed row states nothing yet */
+                for (c = 0; c < COLS; c++) {
+                    if (states[r][c] === 2) pinned[c] = letters[r][c];
+                    else if (states[r][c] === 1) yellow[letters[r][c]] = true;
+                }
+            }
+            for (c = 0; c < COLS; c++) if (pinned[c]) delete yellow[pinned[c]];
+            return { pinned: pinned, yellow: yellow };
+        }
+
+        /* A letter shown yellow earlier is in the answer, so it can't come back
+           gray — EXCEPT when this row guesses it more than once. With repeats,
+           one copy can legitimately be gray (the answer holds fewer copies than
+           you guessed), and that case is exactly what the duplicate-letter rules
+           exist to capture. So the floor applies only to a lone occurrence. */
+        function forcedYellow(r, c, clues) {
+            if (ctrl[r][c] === AUTO) return false;   /* carried green — already locked */
+            var ch = letters[r][c];
+            if (!ch || !clues.yellow[ch]) return false;
+            var n = 0;
+            for (var i = 0; i < COLS; i++) if (letters[r][i] === ch) n++;
+            return n === 1;
+        }
+
+        /* Raise any gray that a prior yellow rules out. Runs on every refresh,
+           so marking a letter yellow in an earlier row lifts it in the rows
+           below without the user having to redo them. */
+        function enforceYellows() {
+            for (var r = 0; r < MAX_ROWS; r++) {
+                var clues = priorClues(r);
+                for (var c = 0; c < COLS; c++) {
+                    if (states[r][c] === 0 && forcedYellow(r, c, clues)) states[r][c] = 1;
                 }
             }
         }
@@ -721,9 +824,16 @@
             return null;
         }
 
-        function lastUserFilled(grid, visible) {
-            for (var r = visible - 1; r >= 0; r--) for (var c = COLS - 1; c >= 0; c--)
-                if (grid[r][c].ch) return { r: r, c: c };
+        /* What the next backspace deletes: the last letter the user actually
+           entered, working upward. Carried greens are locked clues and are
+           skipped entirely — they leave only with their row (×) or when the
+           green that produced them is changed. */
+        function backspaceTarget(grid, visible) {
+            for (var r = visible - 1; r >= 0; r--) {
+                for (var c = COLS - 1; c >= 0; c--) {
+                    if (grid[r][c].ch && ctrl[r][c] !== AUTO) return { r: r, c: c };
+                }
+            }
             return null;
         }
 
@@ -734,6 +844,7 @@
             if (!p) return;
             letters[p.r][p.c] = ch;
             states[p.r][p.c] = 0;
+            ctrl[p.r][p.c] = OWNED;
             refresh();
             keepCursorRowVisible();
         }
@@ -741,16 +852,21 @@
         function doBackspace() {
             var grid = computeGrid(), visible = visibleCount(grid);
             var p = null;
-            /* a tapped tile takes priority — backspace clears that box */
-            if (selected && selected.r < visible && grid[selected.r][selected.c].ch) {
+            /* a tapped tile takes priority — backspace clears that box (never a
+               locked carried green, which can't be selected in the first place) */
+            if (selected && selected.r < visible && grid[selected.r][selected.c].ch &&
+                ctrl[selected.r][selected.c] !== AUTO) {
                 p = selected;
             } else {
-                p = lastUserFilled(grid, visible);
+                p = backspaceTarget(grid, visible);
             }
             selected = null;
             if (!p) return;
             letters[p.r][p.c] = '';
             states[p.r][p.c] = 0;
+            /* released back to the carry: a green pinned at this column is a
+               locked clue, so it should be free to reclaim the empty slot */
+            ctrl[p.r][p.c] = FREE;
             refresh();
         }
 
@@ -791,7 +907,10 @@
                 else if (yellow[ch]) st = 1;
                 letters[target][c] = ch;
                 states[target][c] = st;
-                prefilled[target][c] = st !== 0;
+                /* the whole word is a deliberate entry, same as typing it —
+                   except at a locked carry, which stays locked (the pick
+                   already matches it, or it wouldn't be a candidate) */
+                if (ctrl[target][c] !== AUTO) ctrl[target][c] = OWNED;
             }
             refresh();
             keepCursorRowVisible();
@@ -866,33 +985,31 @@
         function clearRow(r) {
             selected = null;
 
-            var declineCarry = false, rowComplete = true, c, i, rr;
+            /* An incomplete row holding carried greens isn't a guess the user
+               wrote — clearing it means "I don't want this row", so the carry
+               must not immediately rebuild it. Marking the slots OWNED after
+               the shift declines it. A complete guess carries no such meaning:
+               the rows below simply move up and the carry re-derives. */
+            var declineCarry = false, rowComplete = true, c, rr;
             for (c = 0; c < COLS; c++) {
-                if (prefilled[r][c]) declineCarry = true;
+                if (ctrl[r][c] === AUTO) declineCarry = true;
                 if (!letters[r][c]) rowComplete = false;
             }
             if (rowComplete) declineCarry = false;
 
-            for (i = 0; i < MAX_ROWS; i++) {
-                var complete = true;
-                for (c = 0; c < COLS; c++) if (!letters[i][c]) complete = false;
-                if (complete) continue;   /* keep greens the user kept in a real guess */
-                for (c = 0; c < COLS; c++) if (prefilled[i][c]) {
-                    letters[i][c] = ''; states[i][c] = 0; prefilled[i][c] = false;
-                }
-            }
-
             for (rr = r; rr < MAX_ROWS - 1; rr++) {
-                letters[rr]  = letters[rr + 1].slice();
-                states[rr]   = states[rr + 1].slice();
-                prefilled[rr] = prefilled[rr + 1].slice();
+                letters[rr] = letters[rr + 1].slice();
+                states[rr]  = states[rr + 1].slice();
+                ctrl[rr]    = ctrl[rr + 1].slice();
             }
-            letters[MAX_ROWS - 1]  = ['', '', '', '', ''];
-            states[MAX_ROWS - 1]   = [0, 0, 0, 0, 0];
-            prefilled[MAX_ROWS - 1] = [false, false, false, false, false];
+            letters[MAX_ROWS - 1] = ['', '', '', '', ''];
+            states[MAX_ROWS - 1]  = [0, 0, 0, 0, 0];
+            ctrl[MAX_ROWS - 1]    = [FREE, FREE, FREE, FREE, FREE];
 
-            if (declineCarry) prefilled[r] = [true, true, true, true, true];
+            if (declineCarry) ctrl[r] = [OWNED, OWNED, OWNED, OWNED, OWNED];
 
+            /* anything dragged upward is reconciled against its new
+               predecessor by propagateGreens on the way through refresh */
             refresh();
         }
 
@@ -912,9 +1029,18 @@
                 refresh();
                 return;
             }
+            /* a carried green is a locked clue, not a suggestion — it can't be
+               recolored or deleted on its own. Clearing the whole row (×) is
+               the way out. */
+            if (ctrl[r][c] === AUTO) { selected = null; refresh(); return; }
             /* filled tile: cycle color and arm it for targeted backspace */
             selected = { r: r, c: c };
-            states[r][c] = (states[r][c] + 1) % 3;
+            var next = (states[r][c] + 1) % 3;
+            /* skip gray where a prior yellow rules it out, so the cycle never
+               lands on a state that refresh would immediately undo */
+            if (next === 0 && forcedYellow(r, c, priorClues(r))) next = 1;
+            states[r][c] = next;
+            ctrl[r][c] = OWNED;
             refresh();
         });
 
@@ -931,10 +1057,16 @@
             if (el && el.dataset.word) applyPick(el.dataset.word);
         });
 
+        /* the word list is tappable too once it's short enough (.w-pick) */
+        document.getElementById('words').addEventListener('click', function (e) {
+            var el = e.target.closest('.w-pick');
+            if (el && el.dataset.word) applyPick(el.dataset.word);
+        });
+
         document.getElementById('resetBtn').addEventListener('click', function () {
             selected = null;
             for (var r = 0; r < MAX_ROWS; r++) for (var c = 0; c < COLS; c++) {
-                letters[r][c] = ''; states[r][c] = 0; prefilled[r][c] = false;
+                letters[r][c] = ''; states[r][c] = 0; ctrl[r][c] = FREE;
             }
             refresh();
         });
@@ -1024,11 +1156,11 @@
             for (var r = 0; r < MAX_ROWS; r++) {
                 var rowEl = tiles[r][0].parentNode;
                 rowEl.className = 'row' + (r < visible ? '' : ' hidden');
-                /* show × only when the row holds something the user entered —
-                   a carried green alone (prefilled) isn't worth a clear button */
+                /* × on any row with letters in it, carried greens included —
+                   a row the user didn't ask for still needs a way out */
                 var hasContent = false;
                 for (var hc = 0; hc < COLS; hc++) {
-                    if (letters[r][hc] && !prefilled[r][hc]) { hasContent = true; break; }
+                    if (letters[r][hc]) { hasContent = true; break; }
                 }
                 var clr = rowEl.querySelector('.row-clear');
                 if (clr) clr.style.visibility = hasContent ? 'visible' : 'hidden';
@@ -1037,6 +1169,7 @@
                     t.textContent = cell.ch;
                     t.className = 'tile st' + cell.st +
                         (cell.ch ? ' filled' : '') +
+                        (ctrl[r][c] === AUTO ? ' locked' : '') +
                         (selected && selected.r === r && selected.c === c ? ' sel' : '') +
                         (cur && cur.r === r && cur.c === c ? ' cursor' : '');
                 }
@@ -1045,6 +1178,7 @@
 
         function refresh() {
             propagateGreens();
+            enforceYellows();
             var grid = computeGrid(), visible = visibleCount(grid);
             refreshBoard(grid, visible);
             if (!solverWords) return;
@@ -1074,7 +1208,7 @@
             /* top picks — in lockstep with the possible list; pointless when
                the list is short enough to just read */
             var picksEl = document.getElementById('picks');
-            if (possible.length >= 10) {
+            if (possible.length >= PICKS_MIN) {
                 picksEl.hidden = false;
                 picksEl.innerHTML = '<span class="picks-label">' +
                     (cons.hasInput ? 'Recommended next guesses' : 'Recommended openers') + '</span>' +
@@ -1091,7 +1225,16 @@
                 return;
             }
             var colors = ['c-green', 'c-yellow', 'c-light'];
+            /* once the picks strip is gone these ARE the recommendations, so
+               make them big and tappable. Only the still-possible words —
+               tapping a ruled-out word would enter a word that can't be the
+               answer, so those stay plain crossed-out text below. */
+            var tappable = possible.length > 0 && possible.length < PICKS_MIN;
             var html = possible.slice(0, MAX_RENDER).map(function (w, i) {
+                if (tappable) {
+                    return '<button type="button" class="w w-pick ' + colors[i % 3] +
+                           '" data-word="' + w + '">' + w + '</button>';
+                }
                 return '<span class="w ' + colors[i % 3] + '">' + w + '</span>';
             }).join(' ');
             if (possible.length > MAX_RENDER) {
