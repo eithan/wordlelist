@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordle Solver – Filter Every Possible Answer, Spoiler-Smart</title>
+    <title>Wordle Helper | Smart Hints, Solver &amp; Word Finder</title>
 
     <!-- SEO ─── -->
-    <meta name="description" content="Free Wordle solver: enter your guesses, tap tiles to set colors, and see every word that still fits. The only solver that knows whether today's answer has been played before — and rules out impossible words automatically.">
+    <meta name="description" content="Free Wordle helper: enter your green, yellow and gray letters and see recommended next guesses. The only solver that knows whether today's answer has been played before — and rules out impossible words automatically.">
     <link rel="icon" href="/favicon.ico" sizes="any">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
@@ -15,8 +15,8 @@
     <link rel="canonical" href="https://wordlelist.com/solver/">
 
     <!-- Open Graph ─── -->
-    <meta property="og:title" content="Wordle Solver – Filter Every Possible Answer, Spoiler-Smart">
-    <meta property="og:description" content="Enter your guesses, tap tiles to set colors, and see every word that still fits — with impossible words ruled out using today's played-before clue.">
+    <meta property="og:title" content="Wordle Helper – Smart Hints &amp; Word Finder">
+    <meta property="og:description" content="Enter your green, yellow and gray letters and see recommended next guesses — with impossible words ruled out using today's played-before clue.">
     <meta property="og:image" content="https://wordlelist.com/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -26,8 +26,8 @@
 
     <!-- Twitter Card ─── -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Wordle Solver – Spoiler-Smart">
-    <meta name="twitter:description" content="See every word that still fits your board — with impossible words ruled out using today's played-before clue.">
+    <meta name="twitter:title" content="Wordle Helper – Spoiler-Smart">
+    <meta name="twitter:description" content="See recommended next guesses for your board — with impossible words ruled out using today's played-before clue.">
     <meta name="twitter:image" content="https://wordlelist.com/og-image.png">
 
     <!-- Structured Data ─── -->
@@ -35,12 +35,12 @@
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Wordle Solver",
+        "name": "Wordle Helper",
         "url": "https://wordlelist.com/solver/",
         "applicationCategory": "GameApplication",
         "operatingSystem": "Any",
         "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-        "description": "A free Wordle solver that filters all valid Wordle words by your guess feedback and rules out impossible words using the played-before status of today's answer.",
+        "description": "A free Wordle helper and solver that recommends next guesses from your green, yellow and gray letters, and rules out impossible words using the played-before status of today's answer.",
         "isPartOf": {
             "@type": "WebSite",
             "name": "Past Wordle Answers",
@@ -55,15 +55,15 @@
         "mainEntity": [
             {
                 "@type": "Question",
-                "name": "How do I use this Wordle solver?",
+                "name": "How do I use this Wordle helper?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "Tap the board and type the guesses you have already played, then tap each tile to cycle its color between gray, yellow and green until it matches your real board. The word list filters instantly as you type and set colors — green letters even pre-fill your next row automatically, and you can edit or clear them if you don't replay them (not everyone plays hard mode)."
+                    "text": "Tap the board and type the guesses you have already played, then tap each tile to cycle its color between gray, yellow and green until it matches your real board. The recommended guesses update instantly as you type and set colors — green letters even pre-fill your next row automatically, and you can edit or clear them if you don't replay them (not everyone plays hard mode)."
                 }
             },
             {
                 "@type": "Question",
-                "name": "What makes this solver different from other Wordle solvers?",
+                "name": "What makes this helper different from other Wordle solvers?",
                 "acceptedAnswer": {
                     "@type": "Answer",
                     "text": "It knows — spoiler-free — whether today's answer has ever been played before. On most days the answer is brand new, which means all 1,800+ past answers are impossible and get ruled out automatically. No other solver has this data."
@@ -71,15 +71,15 @@
             },
             {
                 "@type": "Question",
-                "name": "Does the solver spoil today's Wordle answer?",
+                "name": "Does the helper spoil today's Wordle answer?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "No. The solver only uses a yes/no fact — whether today's word has been played before — never the answer itself. The words it shows are determined entirely by the guesses you enter."
+                    "text": "No. It only uses a yes/no fact — whether today's word has been played before — never the answer itself. The words it recommends are determined entirely by the guesses you enter."
                 }
             },
             {
                 "@type": "Question",
-                "name": "How does the solver handle repeated letters?",
+                "name": "How does the helper handle repeated letters?",
                 "acceptedAnswer": {
                     "@type": "Answer",
                     "text": "It simulates Wordle's exact coloring rules, including the tricky duplicate cases — for example, a gray tile for a letter that is yellow elsewhere correctly means the answer contains exactly one copy of that letter."
@@ -563,7 +563,7 @@
         <header>
             <h1>
                 <span class="title-wordle"><span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span></span>
-                <span class="title-sub">SOLVER</span>
+                <span class="title-sub">HELPER</span>
             </h1>
             <nav class="nav-links">
                 <a href="/">← All past answers</a>
@@ -571,7 +571,7 @@
             </nav>
         </header>
 
-        <p class="intro">Recreate your board to see what still fits.<button type="button" class="help-toggle" id="helpToggle" aria-label="How it works" aria-expanded="false" aria-controls="helpTip">?</button></p>
+        <p class="intro">Enter your green, yellow and gray letters to see recommended next guesses.<button type="button" class="help-toggle" id="helpToggle" aria-label="How it works" aria-expanded="false" aria-controls="helpTip">?</button></p>
         <div class="help-tip" id="helpTip" role="note" hidden>Recreate your board: <strong>tap the row and type</strong> your guess, then tap each letter to match its color. The list below filters live as you go — words that <strong>can't</strong> be today's answer are crossed out, thanks to our <a href="/">played-before archive</a>.</div>
 
         <div id="banner" class="banner" aria-hidden="true"></div>
@@ -591,26 +591,26 @@
         <p class="legend"><span class="out-demo">crossed-out words</span> can't be today's answer based on whether it has been played before</p>
 
         <section class="seo-content">
-            <h2>A Wordle Solver With a Clue Nobody Else Has</h2>
+            <h2>A Wordle Helper With a Clue No Solver Has</h2>
             <p>Every Wordle solver can filter words by your greens, yellows and grays. This one knows something extra: whether <strong>today's answer has ever been played before</strong>. Most days it hasn't — which means every one of the 1,800+ <a href="/">past Wordle answers</a> is impossible and gets crossed out automatically. On the rare repeat day, the logic flips: only past answers remain. Either way the candidate list shrinks dramatically, and it never uses the answer itself — just a yes/no fact.</p>
-            <p>Suggestions surface the most common English words still consistent with your board, so the picks are words you'll actually recognize rather than obscure letter-dumps. For the strongest opening moves, see our <a href="/best-starting-words/">best starting words</a> analysis. Want to get better without a solver? Read the <a href="/how-to-win/">data-backed strategy guide</a>, or take it one clue at a time on the <a href="/hint/">daily hint page</a>.</p>
+            <p>Recommended guesses surface the most common English words still consistent with your board, so the picks are words you'll actually recognize rather than obscure letter-dumps. For the strongest opening moves, see our <a href="/best-starting-words/">best starting words</a> analysis. Want to get better without any help? Read the <a href="/how-to-win/">data-backed strategy guide</a>, or take it one clue at a time on the <a href="/hint/">daily hint page</a>.</p>
 
             <h2>Frequently Asked Questions</h2>
             <details>
-                <summary>How do I use this Wordle solver?</summary>
-                <p>Tap the board and type a guess you've played, then tap each tile to cycle its color until it matches your real board. The list filters instantly as you type: greens and yellows apply the moment you set them, and gray letters count once their row is complete. When you finish a row, a new one appears with your green letters pre-filled as defaults — tap or backspace to change them if you didn't replay them (no hard mode required).</p>
+                <summary>How do I use this Wordle helper?</summary>
+                <p>Tap the board and type a guess you've played, then tap each tile to cycle its color until it matches your real board. The recommendations update instantly as you type: greens and yellows apply the moment you set them, and gray letters count once their row is complete. When you finish a row, a new one appears with your green letters pre-filled as defaults — tap or backspace to change them if you didn't replay them (no hard mode required).</p>
             </details>
             <details>
-                <summary>What makes this solver different?</summary>
-                <p>The played-before clue. We maintain the complete archive of every Wordle answer, so this solver can rule out words no other tool can — without spoiling anything.</p>
+                <summary>What makes this different from other solvers?</summary>
+                <p>The played-before clue. We maintain the complete archive of every Wordle answer, so this helper can rule out words no other tool can — without spoiling anything.</p>
             </details>
             <details>
-                <summary>Does the solver spoil today's answer?</summary>
+                <summary>Does it spoil today's answer?</summary>
                 <p>No. It uses only a yes/no fact — whether today's word has been played before — never the answer itself. What you see is determined entirely by the guesses you enter.</p>
             </details>
             <details>
                 <summary>How are repeated letters handled?</summary>
-                <p>The solver simulates Wordle's exact coloring rules. A gray tile for a letter that's yellow or green elsewhere correctly means "no more copies of this letter" — the case most solvers get wrong.</p>
+                <p>It simulates Wordle's exact coloring rules. A gray tile for a letter that's yellow or green elsewhere correctly means "no more copies of this letter" — the case most solvers get wrong.</p>
             </details>
         </section>
 
@@ -1067,8 +1067,8 @@
 
             /* header */
             var head = document.getElementById('resultsHead');
-            head.innerHTML = '<strong>' + possible.length.toLocaleString('en-US') + '</strong> possible word' +
-                (possible.length === 1 ? '' : 's') +
+            head.innerHTML = '<strong>' + possible.length.toLocaleString('en-US') + '</strong> ' +
+                (possible.length === 1 ? 'word still fits' : 'words still fit') +
                 (useClue && out.length ? ' <span class="ruled">' + out.length.toLocaleString('en-US') + ' ruled out by today\'s clue</span>' : '');
 
             /* top picks — in lockstep with the possible list; pointless when
@@ -1077,7 +1077,7 @@
             if (possible.length >= 10) {
                 picksEl.hidden = false;
                 picksEl.innerHTML = '<span class="picks-label">' +
-                    (cons.hasInput ? 'Top picks' : 'Strong openers') + '</span>' +
+                    (cons.hasInput ? 'Recommended next guesses' : 'Recommended openers') + '</span>' +
                     topPicks(possible, possible, cons.hasInput).map(function (w) { return '<button type="button" class="pick-word" data-word="' + w + '">' + w + '</button>'; }).join('');
             } else {
                 picksEl.hidden = true;
