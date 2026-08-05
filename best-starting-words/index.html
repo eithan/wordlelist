@@ -88,10 +88,26 @@
             },
             {
                 "@type": "Question",
+                "name": "Does the best Wordle starting word change in hard mode?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The word doesn't, but the plan does. Hard mode forbids a free second opener, so the two-word combo becomes illegal. Lead with a single green-heavy word like SOARE or STARE that locks letters in place and leaves the most legal follow-up guesses, rather than a coverage-only word like ROATE."
+                }
+            },
+            {
+                "@type": "Question",
                 "name": "What are the best two Wordle starting words to play together?",
                 "acceptedAnswer": {
                     "@type": "Answer",
                     "text": "LATER followed by SONIC is the strongest measured combination: together they cover an average of 3.08 letters per answer, and 99.3% of all real Wordle answers contain at least one of their ten letters."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Should I start with a word that has never been a Wordle answer?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Only if you are chasing the one-guess win. Because an answer almost never repeats, a word that has already been used can never win on the first guess today. To hunt it, open with an unused word like ROATE, SOARE or SANER, ideally one whose letters are common in the positions the still-unused answers use. That edge shrinks over time as fewer answers remain unused. If you only care about winning in as few guesses as possible, a proven word like STARE offers better average coverage."
                 }
             },
             {
@@ -381,6 +397,63 @@
             font-size: 0.72rem;
         }
 
+        /* ─── Strategy cards ─── */
+        .strat-axis {
+            color: #818384;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            margin: 1.3rem 0 0.6rem;
+        }
+
+        .strat-axis:first-of-type { margin-top: 0.5rem; }
+
+        .strat-grid {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        @media (min-width: 560px) {
+            .strat-grid { grid-template-columns: 1fr 1fr; }
+        }
+
+        .strat-card {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 1rem 1.15rem;
+        }
+
+        .strat-card h3 {
+            color: #d7dadc;
+            font-size: 0.92rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.45rem;
+        }
+
+        .strat-card p {
+            color: #818384;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .strat-card strong { color: #d7dadc; }
+        .strat-card .strat-pick { color: #538d4e; font-weight: 700; letter-spacing: 0.04em; }
+
+        .strat-foot {
+            color: #818384;
+            font-size: 0.85rem;
+            line-height: 1.65;
+            margin-top: 0.8rem;
+        }
+
+        .strat-foot strong { color: #d7dadc; }
+        .strat-foot a { color: #538d4e; }
+        .strat-foot a:hover { color: #d7dadc; }
+
         /* ─── FAQ ─── */
         .seo-content {
             margin: 2.5rem auto 0;
@@ -490,6 +563,37 @@
         </section>
 
         <section>
+            <h2>Match Your Strategy to the Game</h2>
+            <p>Two things change the best play: how strict your game is, and whether today's answer has been used before. Here's the pick for each.</p>
+
+            <p class="strat-axis">Hard mode vs. free play</p>
+            <div class="strat-grid">
+                <div class="strat-card">
+                    <h3>Free play</h3>
+                    <p>You can fire two openers back-to-back and ignore the first word's colors — which unlocks the two-word opening below. Bank ten letters, then start solving. <span class="strat-pick">LATER → SONIC</span>.</p>
+                </div>
+                <div class="strat-card">
+                    <h3>Hard mode</h3>
+                    <p>Every guess must reuse your greens and yellows, so a throwaway second word is illegal. Lead with one green-heavy opener that pins letters and keeps the most legal follow-ups open. <span class="strat-pick">SOARE (0.69 greens) or STARE</span>. Coverage-only words like ROATE can strand you with few valid guesses.</p>
+                </div>
+            </div>
+
+            <p class="strat-axis">Your starter: a used word vs. an unused one</p>
+            <div class="strat-grid">
+                <div class="strat-card">
+                    <h3>Used word · bank the average</h3>
+                    <p>STARE, LATER and ALERT have all been answers, so they can't win today — but the one-guess win is a long shot from any word. What a proven repeat gives you instead is the best, most consistent coverage across the whole field: the highest-value play if you just want to win in as few guesses as possible. You give up almost nothing, because the odds you'd have hit it in one were tiny to begin with.</p>
+                </div>
+                <div class="strat-card">
+                    <h3>Unused word · chase the one-guess win</h3>
+                    <p>Only a word that has <strong>never been an answer</strong> can score the magical one-guess win. That's the whole reason to open with an unused word like ROATE, SOARE or SANER instead of a proven repeat.</p>
+                    <p>And you tune one differently: don't score its letters against past answers — score each one by how often it lands in <strong>that exact slot among the answers still unused</strong>. That's what builds <strong>SANER</strong>: S, A and E each top their column, and even N and R are chosen for the unused pool rather than raw coverage — the full position-by-position breakdown is under the table below.</p>
+                </div>
+            </div>
+            <p class="strat-foot"><strong>The catch:</strong> this edge has an expiry date. Every day the unused pool shrinks, so both the odds of a one-guess win and an unused word's positional advantage slowly fade — in time the move becomes "avoid anything used in the last few years," not "anything unused at all." Whichever you pick, our <a href="/">homepage flags — spoiler-free — whether today's answer has been used before</a>.</p>
+        </section>
+
+        <section>
             <h2>The Best Two-Word Opening</h2>
             <p>Prefer to bank information with two fixed openers? The strongest measured pair is <strong>LATER → SONIC</strong>:</p>
             <div class="tiles" style="justify-content:flex-start">
@@ -540,6 +644,7 @@
                 </table>
             </div>
             <p class="table-note">This is why SOARE lands so many greens: S-1, A-3 and E-5 are all top slots. One in five answers ends in E, and Y — weak overall — is the second-best final letter thanks to words like DODGY and PARTY.</p>
+            <p class="table-note"><strong>SANER, position by position:</strong> S is the most common opener, A the most common 2nd letter, E the most common 4th — the three column leaders you see above — plus N as the 6th-most-common 3rd letter and R the 3rd-most-common 5th. Three of its five letters top their slot outright. STARE, by the same yardstick, ranks 1st, 11th, 2nd, 9th and 2nd — only its S leads a column. The reconciliation: this table ranks every <em>past</em> answer, which is why N and R fall outside its top three; SANER is scored against the answers still <strong>unused</strong>, where a 3rd-position N and a final R rank higher — and where a never-played word keeps its shot at the one-guess win. Those unused-pool figures are computed separately from the all-answers percentages shown in the table above.</p>
         </section>
 
         <section>
@@ -559,8 +664,16 @@
                 <p>No — ADIEU ranks around #217 against real answers (1.51 letters hit). Common consonants like R, T, S and L narrow the field faster than a fourth vowel does.</p>
             </details>
             <details>
+                <summary>Does the best starting word change in hard mode?</summary>
+                <p>The word doesn't, but the plan does. Hard mode forbids a free second opener, so drop the two-word combo and lead with one green-heavy word like <strong>SOARE</strong> or <strong>STARE</strong> that locks letters in place and leaves the most legal follow-up guesses.</p>
+            </details>
+            <details>
                 <summary>What are the best two starting words to play together?</summary>
                 <p><strong>LATER → SONIC</strong>: 3.08 letters covered per answer on average, and 99.3% of all real Wordle answers contain at least one of their ten letters.</p>
+            </details>
+            <details>
+                <summary>Should I start with a word that's never been a Wordle answer?</summary>
+                <p>Only if you're chasing the one-guess win — since an answer almost never repeats, a used word can't win today. To hunt it, open with an unused word like <strong>ROATE</strong>, <strong>SOARE</strong> or <strong>SANER</strong>, ideally one whose letters are common in the positions the still-unused answers use. The edge fades as the unused pool shrinks. If you only care about winning in few guesses, a proven word like STARE has better average coverage.</p>
             </details>
             <details>
                 <summary>Do the best starting words change over time?</summary>
