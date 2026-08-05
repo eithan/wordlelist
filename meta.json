@@ -1,4 +1,11 @@
 {
   "wordle_date": "2026-08-06",
-  "ran_at": "2026-08-05T15:00:02.482Z"
+  "ran_at": "2026-08-05T15:00:02.482Z",
+  "fresh_openers": [
+    "ROATE",
+    "ORATE",
+    "SOARE",
+    "AROSE",
+    "TARES"
+  ]
 }

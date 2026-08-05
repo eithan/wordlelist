@@ -479,6 +479,9 @@
             text-transform: uppercase;
         }
 
+        /* a second opener strip sits a little below the first */
+        .picks-label.stacked { margin-top: 0.55rem; }
+
         #words {
             line-height: 2.2;
             text-align: center;
@@ -673,6 +676,7 @@
         var freqRank     = {};   /* word → index in solver-words.txt (ordered most-common-first) */
         var playedSet    = null;
         var playedBefore = null;
+        var freshOpeners = null;   /* meta.fresh_openers: best openers that have never been an answer */
 
         function computeGrid() {
             var grid = [];
@@ -1127,10 +1131,12 @@
         }
 
         /* ── candidate picks ──
-         *  Empty board: curated openers, consistent with our own
-         *  best-starting-words analysis (STARE = best all-round single,
-         *  LATER → SONIC = strongest measured pair, RHINO from a runner-up
-         *  pair, CLOUD for U/D coverage) — varied letters, all real words.
+         *  Empty board: the "Best all-round openers" row — curated, consistent
+         *  with our own best-starting-words analysis (STARE = best all-round
+         *  single, LATER → SONIC = strongest measured pair, RHINO from a
+         *  runner-up pair, CLOUD for U/D coverage) — varied letters, all real
+         *  words. On days whose answer has never been played, a "Never played
+         *  before openers" row (meta.fresh_openers, from the cron) sits above it.
          *
          *  With input: popularity-first — the most common English words
          *  still consistent with the board, so suggestions are recognizable
@@ -1148,6 +1154,15 @@
             return guessPool.slice()
                 .sort(function (a, b) { return freqRank[a] - freqRank[b]; })
                 .slice(0, Math.min(5, guessPool.length));
+        }
+
+        /* one labelled strip of tappable word buttons; `stacked` adds a little
+           gap so a second strip reads as its own group */
+        function pickRow(label, words, stacked) {
+            return '<span class="picks-label' + (stacked ? ' stacked' : '') + '">' + label + '</span>' +
+                words.map(function (w) {
+                    return '<button type="button" class="pick-word" data-word="' + w + '">' + w + '</button>';
+                }).join('');
         }
 
         /* ── render ── */
@@ -1210,9 +1225,23 @@
             var picksEl = document.getElementById('picks');
             if (possible.length >= PICKS_MIN) {
                 picksEl.hidden = false;
-                picksEl.innerHTML = '<span class="picks-label">' +
-                    (cons.hasInput ? 'Recommended next guesses' : 'Recommended openers') + '</span>' +
-                    topPicks(possible, possible, cons.hasInput).map(function (w) { return '<button type="button" class="pick-word" data-word="' + w + '">' + w + '</button>'; }).join('');
+                if (cons.hasInput) {
+                    picksEl.innerHTML = pickRow('Recommended next guesses',
+                        topPicks(possible, possible, true), false);
+                } else {
+                    /* empty board — opener rows. Always show the all-round
+                       openers. When today's answer is known to have NEVER been
+                       played, add a row on top of openers that have themselves
+                       never been an answer, so they keep a shot at the one-guess
+                       win. When the answer HAS been played (or is unknown) that
+                       row would just duplicate the all-round set, so it's omitted. */
+                    var rows = '';
+                    if (playedBefore === false && freshOpeners && freshOpeners.length >= 5) {
+                        rows += pickRow('Never played before openers', freshOpeners.slice(0, 5), false);
+                    }
+                    rows += pickRow('Best all-round openers', STARTERS, rows !== '');
+                    picksEl.innerHTML = rows;
+                }
             } else {
                 picksEl.hidden = true;
                 picksEl.innerHTML = '';   /* never leave stale picks behind */
@@ -1345,6 +1374,13 @@
             playedSet    = new Set(base);
             playedBefore = playedSet.has(answer);
             /* NOTE: `answer` is never used beyond this boolean. */
+
+            /* the cron writes the five best openers that have never been an
+               answer; only shown when today's answer has never been played. */
+            freshOpeners = (meta && Array.isArray(meta.fresh_openers))
+                ? meta.fresh_openers.map(function (w) { return String(w).trim().toUpperCase(); })
+                                    .filter(function (w) { return w.length === 5; })
+                : null;
 
             var banner = document.getElementById('banner');
             if (playedBefore) {

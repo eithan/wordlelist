@@ -72,6 +72,43 @@ function addWordToList(word) {
     log(`Added "${word}" to words.txt  (${words.length} words)`);
 }
 
+/* ── fresh (never-played) openers ──
+ *  The best opening words that have never themselves been a Wordle answer, so
+ *  they keep a shot at the one-guess win on a day whose answer has never been
+ *  played. MASTER_OPENERS is ranked best-first by coverage against the real-
+ *  answer archive (same basis as the /best-starting-words/ page); the live
+ *  list is the top five not yet in words.txt. Several near the top are valid
+ *  guesses that have never been answers (ROATE, ORATE, SOARE, TARES, SANER,
+ *  NARES, SERAI) and so can never drop off — there are always at least five.
+ *
+ *  Per the daily contract we recompute ONLY when a word on the current list
+ *  has just become a past answer; otherwise the saved list carries forward
+ *  untouched.
+ */
+const MASTER_OPENERS = [
+    'ROATE', 'ORATE', 'SOARE', 'RAISE', 'ARISE', 'IRATE', 'AROSE', 'STARE',
+    'SNARE', 'TRACE', 'CRATE', 'SLATE', 'CRANE', 'STALE', 'TARES', 'RATES',
+    'TEARS', 'LATER', 'ALTER', 'ALERT', 'SANER', 'NARES', 'LEARN', 'LASER',
+    'REACT', 'CATER', 'ROAST', 'SAINT', 'STAIN', 'SLANT', 'LEAST', 'STEAL',
+    'PARSE', 'SPARE', 'SERAI'
+];
+
+function computeFreshOpeners(existing) {
+    const played = new Set(
+        fs.readFileSync(`${REPO_DIR}/words.txt`, 'utf-8').trim().split('\n')
+          .map(w => w.trim().toUpperCase())
+    );
+    const stale = !Array.isArray(existing) || existing.length < 5 ||
+                  existing.some(w => played.has(String(w).toUpperCase()));
+    if (!stale) {
+        log(`Fresh openers unchanged: ${existing.join(', ')}`);
+        return existing;
+    }
+    const fresh = MASTER_OPENERS.filter(w => !played.has(w)).slice(0, 5);
+    log(`Fresh openers recomputed → ${fresh.join(', ')}`);
+    return fresh;
+}
+
 /* ── NYT API fetch ── */
 function fetchWordleAPI(date) {
     // date = "YYYY-MM-DD"
@@ -277,8 +314,15 @@ async function main() {
         log(`⚠️  NYT API failed: ${e.message} — current.txt unchanged.`);
     }
 
-    /* 8. meta.json */
-    const meta = { wordle_date: wordleDate, ran_at: new Date().toISOString() };
+    /* 8. meta.json — carry the fresh-openers list forward, recomputing it only
+       when a word on it has just become a past answer (computeFreshOpeners). */
+    let prevMeta = null;
+    try { prevMeta = JSON.parse(fs.readFileSync(`${REPO_DIR}/meta.json`, 'utf-8')); } catch (_) {}
+    const meta = {
+        wordle_date: wordleDate,
+        ran_at: new Date().toISOString(),
+        fresh_openers: computeFreshOpeners(prevMeta && prevMeta.fresh_openers)
+    };
     fs.writeFileSync(`${REPO_DIR}/meta.json`, JSON.stringify(meta, null, 2) + '\n');
 
     /* 9. inject static word list + update sitemap */
