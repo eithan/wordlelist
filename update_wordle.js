@@ -72,6 +72,62 @@ function addWordToList(word) {
     log(`Added "${word}" to words.txt  (${words.length} words)`);
 }
 
+/* ── answer history (drives the played-date tooltip) ──
+ *  Record the word rotating into safe.txt this run at the top of answers.txt
+ *  (the file is ordered newest-first), then rebuild played-dates.json. The
+ *  puzzle number and date come from the current newest entry (max number + 1,
+ *  its date + 1 day), so the history advances one entry per run in lockstep
+ *  with the rotation — no network call, and it stays exactly one day behind the
+ *  live puzzle, so today's answer never reaches the public JSON.
+ */
+function appendHistory(word) {
+    const histPath = `${REPO_DIR}/answers.txt`;
+    if (!fs.existsSync(histPath)) { log('⚠️  answers.txt missing — skipping history append'); return; }
+
+    word = word.trim().toUpperCase();
+    const raw   = fs.readFileSync(histPath, 'utf-8');
+    const lines = raw.split('\n');
+
+    // Locate the newest entry (highest puzzle number) and the first data-line
+    // index, independent of file ordering.
+    let maxNum = -1, maxDate = null, maxWord = null, firstDataIdx = -1;
+    for (let i = 0; i < lines.length; i++) {
+        const t = lines[i].trim();
+        if (!t || t.startsWith('#')) continue;
+        if (firstDataIdx === -1) firstDataIdx = i;
+        const p = t.split(/\s+/);
+        const n = parseInt((p[1] || '').replace(/[^\d]/g, ''), 10);
+        const m = (p[2] || '').replace(/[^\d/]/g, '').match(/^(\d{2})\/(\d{2})\/(\d{2})$/);
+        if (isNaN(n) || !m) continue;
+        if (n > maxNum) { maxNum = n; maxDate = m; maxWord = p[0].toUpperCase(); }
+    }
+    if (maxNum === -1) { log('⚠️  answers.txt has no parseable data lines — skipping history append'); return; }
+
+    if (maxWord === word) { log(`History already at "${word}" (#${maxNum}) — skipping append`); return; }
+
+    // next date = newest date + 1 day (UTC arithmetic avoids DST edge cases)
+    const d = new Date(Date.UTC(2000 + parseInt(maxDate[3], 10), parseInt(maxDate[1], 10) - 1, parseInt(maxDate[2], 10)));
+    d.setUTCDate(d.getUTCDate() + 1);
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    const yy = String(d.getUTCFullYear() % 100).padStart(2, '0');
+
+    const newLine = `${word} ${maxNum + 1} ${mm}/${dd}/${yy}`;
+    lines.splice(firstDataIdx, 0, newLine);   // insert at top of data (newest-first)
+    fs.writeFileSync(histPath, lines.join('\n'));
+    log(`Recorded in answers.txt: ${newLine}`);
+
+    try {
+        // required lazily so a missing build script degrades to a logged
+        // warning instead of killing the whole daily update at load time
+        const { build: buildPlayedDates } = require('./build_played_dates.js');
+        const r = buildPlayedDates();
+        log(`Rebuilt played-dates.json: ${r.words} words, ${r.bytes} bytes`);
+    } catch (e) {
+        log(`⚠️  played-dates.json rebuild failed: ${e.message}`);
+    }
+}
+
 /* ── fresh (never-played) openers ──
  *  The best opening words that have never themselves been a Wordle answer, so
  *  they keep a shot at the one-guess win on a day whose answer has never been
@@ -298,6 +354,9 @@ async function main() {
     fs.writeFileSync(`${REPO_DIR}/prior.txt`, currentWord);
     log(`Rotated prior.txt = ${currentWord}`);
 
+    /* 5b. record the now-safe word in the answer history + rebuild tooltip data */
+    appendHistory(priorWord);
+
     /* 6. wordle_date = today in UTC+14 (the new puzzle's date) */
     const utcPlus14   = new Date(Date.now() + 14 * 60 * 60 * 1000);
     const wordleDate  = utcPlus14.toISOString().split('T')[0];   // YYYY-MM-DD
@@ -330,7 +389,7 @@ async function main() {
     updateSitemap();
 
     /* 10. commit + push */
-    run('git add words.txt safe.txt prior.txt current.txt meta.json index.html sitemap.xml');
+    run('git add words.txt safe.txt prior.txt current.txt meta.json index.html sitemap.xml answers.txt played-dates.json');
     try {
         run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + ' (REDACTED newWord)' : ' (word fetch failed)'}"` );
     } catch (_) {
