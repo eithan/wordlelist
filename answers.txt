@@ -2,6 +2,7 @@
 # Format: WORD PUZZLE# MM/DD/YY   (trailing @ = repeat answer)
 # Puzzle numbers with a/b suffix = NYT changed the answer mid-day (two valid words that date).
 # This file drives played-dates.json via build_played_dates.js and is appended to daily by update_wordle.js.
+GRIPE 1874 08/06/26
 POSIT 1873 08/05/26
 MOTIF 1872 08/04/26
 REPLY 1871 08/03/26
