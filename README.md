@@ -22,21 +22,35 @@ The site fetches all four files at load time. If a visitor's local date is on or
 3. Fetches the new answer from the NYT API → `current.txt`.
 4. Writes `meta.json` with the new `wordle_date`.
 5. Commits and pushes to `main` (GitHub Pages auto-deploys).
+6. Polls the Pages build to completion and posts the deploy result (✅/❌) to Discord.
+
+### Deploy notifications
+
+GitHub's repo webhook already posts each commit to Discord, but Discord's `/github` compat endpoint silently drops `deployment_status` / `page_build` events, so the deploy result never appears. After pushing, the script polls `gh api repos/eithan/wordlelist/pages/builds/latest` until the build for the just-pushed commit reaches a terminal state, then posts a native Discord message with the outcome.
+
+Set the target webhook via env var (either the base URL or the GitHub-compat `…/github` form — the trailing `/github` is stripped automatically):
+
+```
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/<id>/<token>
+```
+
+If `DISCORD_WEBHOOK_URL` is unset the step is skipped. The whole notification is best-effort — any failure (missing `gh`, poll timeout, Discord down) is logged and swallowed, so it never blocks the daily update.
 
 ### Scheduling
 
-The job must run at **10:00 UTC** every day. That is midnight in UTC+14 (Line Islands / Kiritimati) — the earliest timezone on Earth. Running at this time ensures the new puzzle word is available the moment any user on the planet sees a new day.
+The job runs daily at **10:00 CST** — the host's local time (cron interprets its schedule in the machine's timezone, so `0 10` fires at 10:00 local, not UTC). This lands the new puzzle word well before the NYT reset, and comfortably ahead of the day rolling over across the timezones where the site's traffic actually is.
 
 ```
-0 10 * * * /usr/bin/node /path/to/update_wordle.js >> /tmp/wordlelist_update.log 2>&1
+0 10 * * * DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/<id>/<token> /usr/bin/node /path/to/update_wordle.js >> /tmp/wordlelist_update.log 2>&1
 ```
 
 Add it with `crontab -e`.
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org) 18+
-- [GitHub CLI](https://cli.github.com) (`gh`) authenticated with a token that has write access to this repo. The script uses `gh auth token` to set up the push URL automatically.
+- [Node.js](https://nodejs.org) 20 or 24 (LTS)
+- **SSH access to GitHub** — the script pulls and pushes over SSH (`git@github.com:eithan/wordlelist.git`), so the host needs a key authorized on the repo. For cron, use a passphrase-less key and make sure `github.com` is in `~/.ssh/known_hosts` (non-interactive SSH can't answer a host-key prompt).
+- [GitHub CLI](https://cli.github.com) (`gh`) authenticated — used for the post-deploy Pages build poll (`gh api …`), not for git auth.
 
 ### Logs
 

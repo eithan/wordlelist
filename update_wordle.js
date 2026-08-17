@@ -34,8 +34,9 @@ const fs           = require('fs');
 const https        = require('https');
 
 /* ── config ── */
-const REPO_DIR = '/home/eithan/wordlelist';
-const LOG_FILE = '/tmp/wordlelist_update.log';
+const REPO_DIR  = '/home/eithan/wordlelist';
+const REPO_SLUG = 'eithan/wordlelist';
+const LOG_FILE  = '/tmp/wordlelist_update.log';
 
 /* ── helpers ── */
 function log(msg) {
@@ -46,6 +47,63 @@ function log(msg) {
 
 function run(cmd) {
     return execSync(cmd, { cwd: REPO_DIR, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+/* ── deploy notification ──
+ *  GitHub's push webhook already posts commits to Discord, but Discord's
+ *  /github compat endpoint silently drops deployment_status / page_build
+ *  events — so the deploy result never shows up there. After pushing we poll
+ *  the Pages build to a terminal state (matched to the commit we just pushed)
+ *  and post a native Discord message ourselves.
+ *
+ *  Everything here is best-effort: any failure is logged and swallowed so a
+ *  hiccup in notification never blocks or fails the daily update.
+ */
+function notifyDiscord(payload) {
+    let url = process.env.DISCORD_WEBHOOK_URL;
+    if (!url) { log('⚠️  DISCORD_WEBHOOK_URL not set — skipping deploy notify'); return Promise.resolve(); }
+    url = url.replace(/\/github\/?$/, '');   // native Discord endpoint, not the GH-compat one
+
+    return new Promise((resolve) => {
+        try {
+            const u    = new URL(url);
+            const body = JSON.stringify(payload);
+            const req  = https.request({
+                hostname: u.hostname,
+                path:     u.pathname + u.search,
+                method:   'POST',
+                headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+            }, (res) => {
+                if (res.statusCode >= 300) log(`⚠️  Discord notify HTTP ${res.statusCode}`);
+                res.resume();
+                res.on('end', resolve);
+            });
+            req.on('error', (e) => { log(`⚠️  Discord notify failed: ${e.message}`); resolve(); });
+            req.write(body);
+            req.end();
+        } catch (e) { log(`⚠️  Discord notify error: ${e.message}`); resolve(); }
+    });
+}
+
+/* Poll the Pages build until it reaches a terminal state for the pushed commit.
+ * Returns the build object, or {status:'timeout'|'unknown'} if it can't resolve. */
+async function waitForPagesDeploy(sha, { timeoutMs = 180000, intervalMs = 10000 } = {}) {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+        let build;
+        try {
+            build = JSON.parse(run(`gh api repos/${REPO_SLUG}/pages/builds/latest`));
+        } catch (e) {
+            log(`⚠️  pages build poll failed: ${e.message}`);
+            return { status: 'unknown' };
+        }
+        const terminal = build.status === 'built' || build.status === 'errored';
+        if (terminal && build.commit === sha) return build;   // our commit's build finished
+        await sleep(intervalMs);
+    }
+    return { status: 'timeout' };
 }
 
 /* ── git ── */
@@ -397,6 +455,29 @@ async function main() {
     }
     run('git push origin main');
     log('Pushed ✓');
+
+    /* 11. wait for GitHub Pages to redeploy, then message Discord natively.
+     *  Rendered as a green/red embed under the name "GitHub API" — deliberately
+     *  distinct from the "GitHub" push messages, since this one is posted by us. */
+    const sha   = run('git rev-parse HEAD');
+    const build = await waitForPagesDeploy(sha);
+    const ok    = build.status === 'built';
+    const state = ok ? 'succeeded'
+                : build.status === 'errored' ? 'failed'
+                : `unresolved (${build.status})`;
+    const detail = build.error && build.error.message ? `\n${build.error.message}` : '';
+    const color  = ok ? 0x2ea043 : build.status === 'errored' ? 0xd1242f : 0xbf8700;   // green / red / amber
+    log(`Deploy status: ${build.status}`);
+    await notifyDiscord({
+        username:   'GitHub API',
+        avatar_url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
+        embeds: [{
+            title:       `Pages deploy ${state}`,
+            description: `[\`${sha.slice(0, 7)}\`](https://github.com/${REPO_SLUG}/commit/${sha}) · ${wordleDate}${detail}`,
+            url:         `https://github.com/${REPO_SLUG}/deployments`,
+            color
+        }]
+    });
 
     log('=== Wordle updater DONE ===\n');
 }
