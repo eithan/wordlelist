@@ -36,13 +36,12 @@ const https        = require('https');
 /* ── config ── */
 const REPO_DIR  = '/home/eithan/wordlelist';
 const REPO_SLUG = 'eithan/wordlelist';
-const LOG_FILE  = '/tmp/wordlelist_update.log';
 
 /* ── helpers ── */
 function log(msg) {
-    const line = `[${new Date().toISOString()}] ${msg}`;
-    console.log(line);
-    try { fs.appendFileSync(LOG_FILE, line + '\n'); } catch (_) {}
+    // stdout only — the cron line redirects it to the log file (>> … 2>&1).
+    // Running standalone, output just goes to the terminal.
+    console.log(`[${new Date().toISOString()}] ${msg}`);
 }
 
 function run(cmd) {
@@ -74,7 +73,12 @@ function notifyDiscord(payload) {
                 hostname: u.hostname,
                 path:     u.pathname + u.search,
                 method:   'POST',
-                headers:  { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) }
+                headers:  {
+                    'Content-Type':   'application/json',
+                    'Content-Length': Buffer.byteLength(body),
+                    // Discord's edge (Cloudflare) can 403 a request with no User-Agent.
+                    'User-Agent':     'wordlelist-deploy-bot/1.0 (+https://wordlelist.com)'
+                }
             }, (res) => {
                 if (res.statusCode >= 300) log(`⚠️  Discord notify HTTP ${res.statusCode}`);
                 res.resume();
