@@ -476,7 +476,7 @@ async function main() {
         username: 'GitHub API',
         avatar_url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
         embeds: [{
-            title: `${REPO_SLUG} -- Pages deploy ${state}`,
+            title: `${REPO_SLUG} — Pages deploy ${state}`,
             description: `[\`${sha.slice(0, 7)}\`](https://github.com/${REPO_SLUG}/commit/${sha}) · ${wordleDate}${detail}`,
             url: `https://github.com/${REPO_SLUG}/deployments`,
             color
