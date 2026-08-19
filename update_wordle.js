@@ -30,11 +30,11 @@
 'use strict';
 
 const { execSync } = require('child_process');
-const fs           = require('fs');
-const https        = require('https');
+const fs = require('fs');
+const https = require('https');
 
 /* ── config ── */
-const REPO_DIR  = '/home/eithan/wordlelist';
+const REPO_DIR = '/home/eithan/wordlelist';
 const REPO_SLUG = 'eithan/wordlelist';
 
 /* ── helpers ── */
@@ -67,17 +67,17 @@ function notifyDiscord(payload) {
 
     return new Promise((resolve) => {
         try {
-            const u    = new URL(url);
+            const u = new URL(url);
             const body = JSON.stringify(payload);
-            const req  = https.request({
+            const req = https.request({
                 hostname: u.hostname,
-                path:     u.pathname + u.search,
-                method:   'POST',
-                headers:  {
-                    'Content-Type':   'application/json',
+                path: u.pathname + u.search,
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                     'Content-Length': Buffer.byteLength(body),
                     // Discord's edge (Cloudflare) can 403 a request with no User-Agent.
-                    'User-Agent':     'wordlelist-deploy-bot/1.0 (+https://wordlelist.com)'
+                    'User-Agent': 'wordlelist-deploy-bot/1.0 (+https://wordlelist.com)'
                 }
             }, (res) => {
                 if (res.statusCode >= 300) log(`⚠️  Discord notify HTTP ${res.statusCode}`);
@@ -124,7 +124,7 @@ function gitSetup() {
 
 /* ── words.txt ── */
 function addWordToList(word) {
-    const p     = `${REPO_DIR}/words.txt`;
+    const p = `${REPO_DIR}/words.txt`;
     const words = fs.readFileSync(p, 'utf-8').trim().split('\n').map(w => w.trim());
     word = word.trim().toUpperCase();
     if (words.includes(word)) { log(`"${word}" already in words.txt`); return; }
@@ -147,7 +147,7 @@ function appendHistory(word) {
     if (!fs.existsSync(histPath)) { log('⚠️  answers.txt missing — skipping history append'); return; }
 
     word = word.trim().toUpperCase();
-    const raw   = fs.readFileSync(histPath, 'utf-8');
+    const raw = fs.readFileSync(histPath, 'utf-8');
     const lines = raw.split('\n');
 
     // Locate the newest entry (highest puzzle number) and the first data-line
@@ -214,10 +214,10 @@ const MASTER_OPENERS = [
 function computeFreshOpeners(existing) {
     const played = new Set(
         fs.readFileSync(`${REPO_DIR}/words.txt`, 'utf-8').trim().split('\n')
-          .map(w => w.trim().toUpperCase())
+            .map(w => w.trim().toUpperCase())
     );
     const stale = !Array.isArray(existing) || existing.length < 5 ||
-                  existing.some(w => played.has(String(w).toUpperCase()));
+        existing.some(w => played.has(String(w).toUpperCase()));
     if (!stale) {
         log(`Fresh openers unchanged: ${existing.join(', ')}`);
         return existing;
@@ -239,8 +239,8 @@ function fetchWordleAPI(date) {
         }, res => {
             if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode} from ${url}`));
             let data = '';
-            res.on('data',  c => data += c);
-            res.on('end',   () => {
+            res.on('data', c => data += c);
+            res.on('end', () => {
                 try { resolve(JSON.parse(data)); }
                 catch (e) { reject(new Error(`Bad JSON: ${e.message}`)); }
             });
@@ -255,7 +255,7 @@ function fetchWordleAPI(date) {
 function injectWordList() {
     const indexPath = `${REPO_DIR}/index.html`;
     const wordsPath = `${REPO_DIR}/words.txt`;
-    const safePath  = `${REPO_DIR}/safe.txt`;
+    const safePath = `${REPO_DIR}/safe.txt`;
 
     // Build the word set: words.txt + safe.txt (both always safe to show publicly)
     const baseWords = fs.readFileSync(wordsPath, 'utf-8').trim().split('\n')
@@ -274,19 +274,19 @@ function injectWordList() {
     const block = `<p class="static-wordlist">${baseWords.join(' ')}</p>`;
 
     // Last updated date in MM/DD/YYYY format (UTC)
-    const now   = new Date();
-    const mm    = String(now.getUTCMonth() + 1).padStart(2, '0');
-    const dd    = String(now.getUTCDate()).padStart(2, '0');
-    const yyyy  = now.getUTCFullYear();
+    const now = new Date();
+    const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(now.getUTCDate()).padStart(2, '0');
+    const yyyy = now.getUTCFullYear();
     const dateStr = `${mm}/${dd}/${yyyy}`;
 
     let html = fs.readFileSync(indexPath, 'utf-8');
 
     // ── inject word list ──
     const startMarker = '<!-- WORDS:START -->';
-    const endMarker   = '<!-- WORDS:END -->';
+    const endMarker = '<!-- WORDS:END -->';
     const startIdx = html.indexOf(startMarker);
-    const endIdx   = html.indexOf(endMarker);
+    const endIdx = html.indexOf(endMarker);
 
     if (startIdx === -1 || endIdx === -1) {
         log('⚠️  Word list markers not found in index.html — skipping injection');
@@ -305,9 +305,9 @@ function injectWordList() {
 
     // ── inject last updated date ──
     const dateStart = '<!-- DATE:START -->';
-    const dateEnd   = '<!-- DATE:END -->';
+    const dateEnd = '<!-- DATE:END -->';
     const dateStartIdx = html.indexOf(dateStart);
-    const dateEndIdx   = html.indexOf(dateEnd);
+    const dateEndIdx = html.indexOf(dateEnd);
 
     if (dateStartIdx !== -1 && dateEndIdx !== -1) {
         html =
@@ -326,7 +326,7 @@ function injectWordList() {
 function updateSitemap() {
     const today = new Date().toISOString().split('T')[0];
     const sitemap =
-`<?xml version="1.0" encoding="UTF-8"?>
+        `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://wordlelist.com/</loc>
@@ -397,10 +397,10 @@ async function main() {
     }
 
     /* 2. read state */
-    const safePath    = `${REPO_DIR}/safe.txt`;
-    const priorWord   = fs.readFileSync(`${REPO_DIR}/prior.txt`,   'utf-8').trim().toUpperCase();
+    const safePath = `${REPO_DIR}/safe.txt`;
+    const priorWord = fs.readFileSync(`${REPO_DIR}/prior.txt`, 'utf-8').trim().toUpperCase();
     const currentWord = fs.readFileSync(`${REPO_DIR}/current.txt`, 'utf-8').trim().toUpperCase();
-    const safeWord    = fs.existsSync(safePath) ? fs.readFileSync(safePath, 'utf-8').trim().toUpperCase() : null;
+    const safeWord = fs.existsSync(safePath) ? fs.readFileSync(safePath, 'utf-8').trim().toUpperCase() : null;
     log(`State  →  safe: ${safeWord || '(none)'}  |  prior: ${priorWord}  |  current: ${currentWord}`);
 
     /* 3. add safe word to words.txt (it's 2 days old, safe for all timezones) */
@@ -420,8 +420,8 @@ async function main() {
     appendHistory(priorWord);
 
     /* 6. wordle_date = today in UTC+14 (the new puzzle's date) */
-    const utcPlus14   = new Date(Date.now() + 14 * 60 * 60 * 1000);
-    const wordleDate  = utcPlus14.toISOString().split('T')[0];   // YYYY-MM-DD
+    const utcPlus14 = new Date(Date.now() + 14 * 60 * 60 * 1000);
+    const wordleDate = utcPlus14.toISOString().split('T')[0];   // YYYY-MM-DD
     log(`wordle_date = ${wordleDate}`);
 
     /* 7. fetch new word from NYT API */
@@ -438,7 +438,7 @@ async function main() {
     /* 8. meta.json — carry the fresh-openers list forward, recomputing it only
        when a word on it has just become a past answer (computeFreshOpeners). */
     let prevMeta = null;
-    try { prevMeta = JSON.parse(fs.readFileSync(`${REPO_DIR}/meta.json`, 'utf-8')); } catch (_) {}
+    try { prevMeta = JSON.parse(fs.readFileSync(`${REPO_DIR}/meta.json`, 'utf-8')); } catch (_) { }
     const meta = {
         wordle_date: wordleDate,
         ran_at: new Date().toISOString(),
@@ -453,7 +453,7 @@ async function main() {
     /* 10. commit + push */
     run('git add words.txt safe.txt prior.txt current.txt meta.json index.html sitemap.xml answers.txt played-dates.json');
     try {
-        run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + ' (REDACTED newWord)' : ' (word fetch failed)'}"` );
+        run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + ' (REDACTED newWord)' : ' (word fetch failed)'}"`);
     } catch (_) {
         log('Nothing to commit');
     }
@@ -463,22 +463,22 @@ async function main() {
     /* 11. wait for GitHub Pages to redeploy, then message Discord natively.
      *  Rendered as a green/red embed under the name "GitHub API" — deliberately
      *  distinct from the "GitHub" push messages, since this one is posted by us. */
-    const sha   = run('git rev-parse HEAD');
+    const sha = run('git rev-parse HEAD');
     const build = await waitForPagesDeploy(sha);
-    const ok    = build.status === 'built';
+    const ok = build.status === 'built';
     const state = ok ? 'succeeded'
-                : build.status === 'errored' ? 'failed'
-                : `unresolved (${build.status})`;
+        : build.status === 'errored' ? 'failed'
+            : `unresolved (${build.status})`;
     const detail = build.error && build.error.message ? `\n${build.error.message}` : '';
-    const color  = ok ? 0x2ea043 : build.status === 'errored' ? 0xd1242f : 0xbf8700;   // green / red / amber
+    const color = ok ? 0x2ea043 : build.status === 'errored' ? 0xd1242f : 0xbf8700;   // green / red / amber
     log(`Deploy status: ${build.status}`);
     await notifyDiscord({
-        username:   'GitHub API',
+        username: 'GitHub API',
         avatar_url: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png',
         embeds: [{
-            title:       `Pages deploy ${state}`,
+            title: `${REPO_SLUG} -- Pages deploy ${state}`,
             description: `[\`${sha.slice(0, 7)}\`](https://github.com/${REPO_SLUG}/commit/${sha}) · ${wordleDate}${detail}`,
-            url:         `https://github.com/${REPO_SLUG}/deployments`,
+            url: `https://github.com/${REPO_SLUG}/deployments`,
             color
         }]
     });
