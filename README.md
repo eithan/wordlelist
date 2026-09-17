@@ -56,6 +56,22 @@ Add it with `crontab -e`.
 
 The script appends to `/tmp/wordlelist_update.log`. If the NYT API call fails for any reason, `current.txt` is left unchanged and the site keeps working with the previous word — nothing breaks.
 
+## Solver word list
+
+The helper at `/solver/` ranks its suggestions by **answer likelihood**, not raw English word frequency. Frequency alone put JESUS, PENIS and WIVES above MESSY and RINSE — common words, but NYT doesn't use plurals or crude words as answers.
+
+- **`solver-words-freq.txt`** — every allowed guess, in popularity order. The source of truth for the frequency signal; never overwritten.
+- **`solver-words.txt`** — generated. Same words sorted most-likely-answer first, behind a `# prior b0 b1` header holding the curve that converts a word's position back into a probability. The solver reads that header, so ordering and curve can't drift apart.
+- **`build_solver_words.js`** — regenerates the above. It learns the likelihood from `words.txt` (every past answer) by logistic regression over four signals: popularity rank, plural-looking S ending (not -SS/-US), ends in ED, and ends in A, I or O. Plural-looking words almost never become answers (1 in 270 among the most common words), and words ending in A/I/O — mostly names, places, brands and slang like MARIA, INDIA, HONDA, GONNA — do so at less than half the rate their popularity predicts, so the data does most of the work. A short `BLOCK` list in the script demotes (never removes) crude words and brands.
+
+```
+node build_solver_words.js
+```
+
+Re-run it after answers accumulate if you want the ordering to reflect them, then bump the `?v=` on the solver's `solver-words.txt` fetch so returning visitors pick up the new order.
+
+At pick time the solver scores each candidate by how evenly its feedback would split the words still possible (where letter placement and letter frequency come in), plus the chance of being done within two guesses — the word is the answer, or its feedback leaves a group whose likeliest word is — plus a bonus for being a plausible answer right now. Backtested over the 900 most recent answers in three windows of 300, with the curve fitted only on answers older than each window: **3.42 guesses average vs 3.51** for popularity-first, with plurals in the suggestion strip falling from 3% to under 1%.
+
 ## Features
 
 - 🔍 **Search** — Instantly filter through all past answers

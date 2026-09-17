@@ -623,7 +623,7 @@
         <section class="seo-content">
             <h2>A Wordle Helper With a Clue No Solver Has</h2>
             <p>Every Wordle solver can filter words by your greens, yellows and grays. This one knows something extra: whether <strong>today's answer has ever been played before</strong>. Most days it hasn't — which means every one of the 1,800+ <a href="/">past Wordle answers</a> is impossible and gets crossed out automatically. On the rare repeat day, the logic flips: only past answers remain. Either way the candidate list shrinks dramatically, and it never uses the answer itself — just a yes/no fact.</p>
-            <p>Recommended guesses surface the most common English words still consistent with your board, so the picks are words you'll actually recognize rather than obscure letter-dumps. For the strongest opening moves, see our <a href="/best-starting-words/">best starting words</a> analysis. Want to get better without any help? Read the <a href="/how-to-win/">data-backed strategy guide</a>, or take it one clue at a time on the <a href="/hint/">daily hint page</a>.</p>
+            <p>Recommended guesses balance two things: how likely a word is to be the answer — learned from every past answer, which is why plurals and past-tense words rank low — and how well it splits the words still left, so a wrong guess still narrows the field. The picks stay words you'll actually recognize rather than obscure letter-dumps. For the strongest opening moves, see our <a href="/best-starting-words/">best starting words</a> analysis. Want to get better without any help? Read the <a href="/how-to-win/">data-backed strategy guide</a>, or take it one clue at a time on the <a href="/hint/">daily hint page</a>.</p>
 
             <h2>Frequently Asked Questions</h2>
             <details>
@@ -673,7 +673,11 @@
         }
 
         var solverWords  = null;
-        var freqRank     = {};   /* word → index in solver-words.txt (ordered most-common-first) */
+        var freqRank     = {};   /* word → index in solver-words.txt (most-likely-answer first) */
+        /* curve turning that index into P(word is the answer), fitted by
+           build_solver_words.js and shipped in the list's "# prior" header.
+           These are the fallback values for a header-less list. */
+        var priorB0 = 19.367180, priorB1 = -2.653485;
         var playedSet    = null;
         var playedBefore = null;
         var freshOpeners = null;   /* meta.fresh_openers: best openers that have never been an answer */
@@ -1138,22 +1142,141 @@
          *  words. On days whose answer has never been played, a "Never played
          *  before openers" row (meta.fresh_openers, from the cron) sits above it.
          *
-         *  With input: popularity-first — the most common English words
-         *  still consistent with the board, so suggestions are recognizable
-         *  rather than obscure letter-dumps. solver-words.txt is ordered
-         *  most-common-first, so freqRank (a word's index in it) IS the
-         *  popularity signal — lower means more common — and no frequency
-         *  data ships beyond that ordering. Guesses are drawn only from the
-         *  still-possible words (never clue-ruled-out ones — tapping a pick
-         *  must never enter a word that can't be today's answer).
+         *  With input: two things make a guess good, and we need both.
+         *
+         *    likelihood — could this actually be today's answer? Sorting on
+         *      this alone (what we used to do, via raw English word frequency)
+         *      offered JESUS, PENIS and WIVES above MESSY and RINSE: common
+         *      words, but NYT doesn't use plurals or crude words.
+         *      solver-words.txt is now ordered most-likely-answer first, with
+         *      those forms already demoted, so freqRank feeds priorOf().
+         *
+         *    narrowing — how evenly does the guess split what's left? Each
+         *      candidate answer would return some color pattern; a guess whose
+         *      patterns spread the field thin teaches the most. This is where
+         *      letter placement and letter frequency get accounted for, and it
+         *      falls out of the split rather than being scored separately.
+         *
+         *  Narrowing alone recommends NOSER and SILTY — technically optimal,
+         *  unrecognizable in practice — so the score is narrowing plus a
+         *  likelihood bonus, which keeps plausible words on top, plus the
+         *  chance of being done within two guesses: this word is the answer,
+         *  or its feedback leaves a group whose likeliest word is. That last
+         *  term is what separates two guesses that split the field equally
+         *  well — it prefers the one whose groups each have a clear favourite
+         *  to follow up with.
+         *
+         *  That one score orders the whole visible list, and the picks strip
+         *  is simply its first five, so the two can never disagree. Only the
+         *  words actually rendered (MAX_RENDER) get scored; the hidden
+         *  "+ N more" tail keeps likelihood order. Scoring every candidate
+         *  took seconds per keystroke on a wide-open board. Words are drawn
+         *  only from the still-possible set (never clue-ruled-out ones —
+         *  tapping a pick must never enter a word that can't be today's
+         *  answer).
+         *
+         *  Backtested over the 900 most recent answers in three windows of
+         *  300, the likelihood curve fitted only on answers older than each
+         *  window: 3.42 guesses average vs 3.51 for popularity-first, with
+         *  plurals among the suggested words falling from 3% to under 1%.
          */
         var STARTERS = ['STARE', 'LATER', 'SONIC', 'RHINO', 'CLOUD'];
 
-        function topPicks(possible, guessPool, hasInput) {
-            if (!hasInput) return STARTERS;
-            return guessPool.slice()
-                .sort(function (a, b) { return freqRank[a] - freqRank[b]; })
-                .slice(0, Math.min(5, guessPool.length));
+        var PICK_SPLIT_MAX = 800;   /* candidates the split is measured against */
+        var PICK_LAMBDA    = 2;     /* likelihood's pull against narrowing */
+        var PICK_TWO_STEP  = 2;     /* weight of P(solved within two guesses) */
+
+        function priorOf(w) {
+            var i = freqRank[w];
+            if (i === undefined) return 0;
+            var z = priorB0 + priorB1 * Math.log(i + 1);
+            if (z < -30) z = -30; else if (z > 30) z = 30;
+            return 1 / (1 + Math.exp(-z));
+        }
+
+        /* ── fast pattern for scoring ──
+         *  Same rules as feedback(), but on letter codes into reused typed
+         *  arrays, returning a base-3 index (0–242) so pattern masses live in
+         *  a flat array. Scoring runs a few hundred thousand of these per
+         *  keystroke; feedback()'s per-call object would make that sluggish on
+         *  a phone. */
+        var wordCode = {};   /* word → Uint8Array of 0–25 letter codes */
+        var patCount = new Int8Array(26), patRes = new Uint8Array(5), patMass = new Float64Array(243), patBest = new Float64Array(243);
+
+        function codeOf(w) {
+            var c = wordCode[w];
+            if (!c) {
+                c = new Uint8Array(5);
+                for (var i = 0; i < 5; i++) c[i] = w.charCodeAt(i) - 65;
+                wordCode[w] = c;
+            }
+            return c;
+        }
+
+        function patternIndex(g, a) {
+            var i;
+            for (i = 0; i < 5; i++) {
+                if (g[i] === a[i]) patRes[i] = 2;
+                else { patRes[i] = 0; patCount[a[i]]++; }
+            }
+            for (i = 0; i < 5; i++) {
+                if (patRes[i] === 0 && patCount[g[i]] > 0) { patRes[i] = 1; patCount[g[i]]--; }
+            }
+            for (i = 0; i < 5; i++) patCount[a[i]] = 0;
+            return patRes[0] * 81 + patRes[1] * 27 + patRes[2] * 9 + patRes[3] * 3 + patRes[4];
+        }
+
+        /* orders the still-possible words best guess first. `possible`
+           arrives in file order, i.e. most likely answer first. */
+        function rankPossible(possible) {
+            var n = possible.length, i, j;
+            if (n <= 1) return possible.slice();
+
+            /* measure splits against the likeliest candidates: they carry
+               nearly all the probability mass, and it bounds the work on a
+               wide-open board */
+            var field = possible.slice(0, PICK_SPLIT_MAX);
+            var fieldCode = [], fieldPr = new Float64Array(field.length), Z = 0;
+            for (j = 0; j < field.length; j++) {
+                fieldCode.push(codeOf(field[j]));
+                fieldPr[j] = priorOf(field[j]);
+                Z += fieldPr[j];
+            }
+            if (!Z) return possible.slice();   /* no signal — keep file order */
+
+            var head = possible.slice(0, MAX_RENDER), scored = [];
+            for (i = 0; i < head.length; i++) {
+                var g = codeOf(head[i]);
+                patMass.fill(0);
+                patBest.fill(0);
+                for (j = 0; j < fieldCode.length; j++) {
+                    var p = patternIndex(g, fieldCode[j]);
+                    patMass[p] += fieldPr[j];
+                    if (fieldPr[j] > patBest[p]) patBest[p] = fieldPr[j];
+                }
+                /* bits: how evenly the feedback splits the field.
+                   twoStep: P(this is the answer) + P(the feedback leaves a
+                   group whose likeliest word is) — index 242 is all-green,
+                   i.e. this word itself, so it's the pg term, not a group */
+                var pg = priorOf(head[i]) / Z, bits = 0, twoStep = pg;
+                for (var k = 0; k < 243; k++) {
+                    if (patMass[k] > 0) {
+                        var q = patMass[k] / Z;
+                        bits -= q * Math.log(q) / Math.LN2;
+                        if (k !== 242) twoStep += patBest[k] / Z;
+                    }
+                }
+                /* + a nudge for being a plausible answer right now: it grows as
+                   the field shrinks, so late guesses favour actually winning */
+                scored.push({
+                    w: head[i],
+                    s: bits + PICK_LAMBDA * Math.log(1 + pg * field.length) / Math.LN2 + PICK_TWO_STEP * twoStep,
+                    i: i
+                });
+            }
+            /* ties keep likelihood order, whatever the engine's sort does */
+            scored.sort(function (a, b) { return (b.s - a.s) || (a.i - b.i); });
+            return scored.map(function (x) { return x.w; }).concat(possible.slice(MAX_RENDER));
         }
 
         /* one labelled strip of tappable word buttons; `stacked` adds a little
@@ -1220,14 +1343,19 @@
                 (possible.length === 1 ? 'word still fits' : 'words still fit') +
                 (useClue && out.length ? ' <span class="ruled">' + out.length.toLocaleString('en-US') + ' ruled out by today\'s clue</span>' : '');
 
+            /* with input, one order for everything: the list is ranked best
+               guess first and the picks strip is just its head. Below
+               PICKS_MIN the strip is gone and the list IS the
+               recommendations, already in that order. */
+            if (cons.hasInput) possible = rankPossible(possible);
+
             /* top picks — in lockstep with the possible list; pointless when
                the list is short enough to just read */
             var picksEl = document.getElementById('picks');
             if (possible.length >= PICKS_MIN) {
                 picksEl.hidden = false;
                 if (cons.hasInput) {
-                    picksEl.innerHTML = pickRow('Recommended next guesses',
-                        topPicks(possible, possible, true), false);
+                    picksEl.innerHTML = pickRow('Recommended next guesses', possible.slice(0, 5), false);
                 } else {
                     /* empty board — opener rows. Always show the all-round
                        openers. When today's answer is known to have NEVER been
@@ -1318,16 +1446,28 @@
         /* ?v= busts returning visitors' cache when the list's ORDER changes
            (the file is otherwise heavily cacheable). Bump this number every
            time you re-sort / regenerate solver-words.txt. */
-        fetch('/solver-words.txt?v=2', { cache: 'default' })
+        fetch('/solver-words.txt?v=7', { cache: 'default' })
             .then(function (r) {
                 if (!r.ok) throw new Error('solver-words.txt HTTP ' + r.status);
                 return r.text();
             })
             .then(function (txt) {
-                solverWords = txt.trim().split('\n')
+                var lines = txt.trim().split('\n');
+                /* "# prior b0 b1" header: the position → P(answer) curve that
+                   build_solver_words.js fitted for THIS ordering, so the two
+                   can't drift apart. Any other non-5-letter line is ignored. */
+                for (var h = 0; h < lines.length; h++) {
+                    var m = lines[h].trim().match(/^#\s*prior\s+(-?[\d.]+)\s+(-?[\d.]+)$/);
+                    if (m) {
+                        var b0 = parseFloat(m[1]), b1 = parseFloat(m[2]);
+                        if (isFinite(b0) && isFinite(b1)) { priorB0 = b0; priorB1 = b1; }
+                        break;
+                    }
+                }
+                solverWords = lines
                     .map(function (w) { return w.trim().toUpperCase(); })
-                    .filter(function (w) { return w.length === 5; });
-                /* file order = popularity rank (most common first) */
+                    .filter(function (w) { return /^[A-Z]{5}$/.test(w); });
+                /* file order = answer likelihood (most likely first) */
                 freqRank = {};
                 for (var i = 0; i < solverWords.length; i++) {
                     if (freqRank[solverWords[i]] === undefined) freqRank[solverWords[i]] = i;
