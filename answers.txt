@@ -2,6 +2,7 @@
 # Format: WORD PUZZLE# MM/DD/YY   (trailing @ = repeat answer)
 # Puzzle numbers with a/b suffix = NYT changed the answer mid-day (two valid words that date).
 # This file drives played-dates.json via build_played_dates.js and is appended to daily by update_wordle.js.
+PAGER 1920 09/21/26
 SHONE 1919 09/20/26
 WAKEN 1918 09/19/26
 SNOWY 1917 09/18/26
