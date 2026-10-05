@@ -13,7 +13,7 @@ Browse all 1,690+ past Wordle words, search for specific words, and see whether 
 
 The site fetches all four files at load time. If a visitor's local date is on or after `wordle_date` they see the new puzzle (answer = `current.txt`); otherwise they're still on yesterday's (answer = `prior.txt`). A banner tells them whether today's word has been played before — if so the word list is flat; if not, it glows.
 
-## Daily update job
+## Daily update job 
 
 `update_wordle.js` keeps everything in sync. Each run it:
 
