@@ -52,10 +52,10 @@ Add it with `crontab -e`.
 `/hint/` picks each visitor's puzzle with JavaScript, so on its own its HTML never changes. `stamp_hint.js` writes the US Eastern puzzle number and date into the page's title, descriptions, social tags, JSON-LD and subtitle (between the `HINT-STAMP` and `HINT-DATE` markers), so search engines see a page dated for today. It holds the number and date only, never anything about the answer. It runs on its own at Eastern midnight, then pulls, stamps, and commits and pushes `hint/index.html` if it changed:
 
 ```
-5 23 * * * /usr/bin/node /path/to/stamp_hint.js >> /tmp/wordlelist_update.log 2>&1
+5 23 * * * cd /path/to/wordlelist && git pull --ff-only && node stamp_hint.js >> /tmp/wordlelist_update.log 2>&1
 ```
 
-`23:05` Central is `00:05` Eastern all year (both zones change clocks together). `node stamp_hint.js --local` stamps the file without touching git.
+`23:05` Central is `00:05` Eastern all year (both zones change clocks together). Pull before running, as the daily job's entry does, so cron runs the latest `stamp_hint.js` (on a fresh checkout the file may not exist yet). `node stamp_hint.js --local` stamps the file without touching git.
 
 ### Prerequisites
 
