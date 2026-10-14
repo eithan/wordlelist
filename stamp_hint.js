@@ -13,7 +13,8 @@
  *
  * Two callers:
  *   - cron at 00:05 Eastern (23:05 Central) runs this file directly, which
- *     pulls, stamps, and commits + pushes hint/index.html if it changed;
+ *     pulls, stamps, and commits + pushes hint/index.html if it changed,
+ *     then pings IndexNow once the new title is live;
  *   - update_wordle.js calls stamp() as a catch-up in case that run missed.
  * Idempotent: if the page already shows today's puzzle, nothing changes.
  *
@@ -97,21 +98,27 @@ function stamp(now = new Date()) {
 if (require.main === module) {
     const local = process.argv.includes('--local');
     const run = cmd => execSync(cmd, { cwd: REPO_DIR, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
-    try {
+    (async () => {
         if (!local) run('git pull --rebase origin main');
         const r = stamp();
-        if (!r.changed) { log(`Hint already stamped #${r.num} (${r.date}) — nothing to do`); process.exit(0); }
+        if (!r.changed) { log(`Hint already stamped #${r.num} (${r.date}) — nothing to do`); return; }
         log(`Stamped hint page: Wordle #${r.num} (${r.date})`);
-        if (!local) {
-            run('git add hint/index.html');
-            run(`git commit -m "Hint stamp: Wordle #${r.num} (${r.date})"`);
-            run('git push origin main');
-            log('Pushed ✓');
+        if (local) return;
+        run('git add hint/index.html');
+        run(`git commit -m "Hint stamp: Wordle #${r.num} (${r.date})"`);
+        run('git push origin main');
+        log('Pushed ✓');
+
+        // once the new title is live, tell IndexNow (Bing etc.) — best-effort
+        try {
+            const indexnow = require('./indexnow.js');
+            const url = 'https://wordlelist.com/hint/';
+            if (await indexnow.waitForLive(url, `Wordle Hint Today #${r.num} (`)) await indexnow.submit([url], log);
+            else log('⚠️  IndexNow: /hint/ not live after 10 min — skipping');
+        } catch (e) {
+            log(`⚠️  IndexNow failed: ${e.message}`);
         }
-    } catch (e) {
-        log(`FATAL: ${e.message}`);
-        process.exit(1);
-    }
+    })().catch(e => { log(`FATAL: ${e.message}`); process.exit(1); });
 }
 
 module.exports = { stamp };

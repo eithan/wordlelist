@@ -21,9 +21,10 @@ The site fetches all four files at load time. If a visitor's local date is on or
 2. Rotates `current.txt` → `prior.txt`.
 3. Fetches the new answer from the NYT API → `current.txt`.
 4. Writes `meta.json` with the new `wordle_date`.
-5. Rebuilds what's derived from the answer history (`played-dates.json`, the `/repeats/` page via `build_repeats.js`), the homepage word list and the sitemap, and catches up the `/hint/` stamp if its midnight run missed (see [Hint page stamp](#hint-page-stamp)).
+5. Rebuilds what's derived from the answers: `played-dates.json`, the `/repeats/` page (`build_repeats.js`), the homepage word list, the numbers on `/stats/`, `/best-starting-words/` and `/how-to-win/` (`build_stats.js`) and the sitemap. It also catches up the `/hint/` stamp if its midnight run missed (see [Hint page stamp](#hint-page-stamp)).
 6. Commits and pushes to `main` (GitHub Pages auto-deploys).
 7. Polls the Pages build to completion and posts the deploy result (✅/❌) to Discord.
+8. Once the deploy is live, sends the pages that commit changed to IndexNow (see [IndexNow](#indexnow)).
 
 ### Deploy notifications
 
@@ -57,6 +58,10 @@ Add it with `crontab -e`.
 
 `23:05` Central is `00:05` Eastern all year (both zones change clocks together). Pull before running, as the daily job's entry does, so cron runs the latest `stamp_hint.js` (on a fresh checkout the file may not exist yet). `node stamp_hint.js --local` stamps the file without touching git.
 
+### IndexNow
+
+`indexnow.js` tells Bing, and the other engines that share IndexNow submissions, which pages changed, so they recrawl them right away. Google doesn't use IndexNow. The daily job sends the `index.html` files its commit touched once the deploy is live, and `stamp_hint.js` sends `/hint/` once the new title is live. Ownership is proven by the key file at the site root (`acc502f509699474b465aa544e3afed2.txt`, whose contents are the key), so it must stay published. Results go to the log as `IndexNow: N URLs → HTTP 200/202`; a 403 means the key file couldn't be fetched. Submissions also show in Bing Webmaster Tools under IndexNow.
+
 ### Prerequisites
 
 - [Node.js](https://nodejs.org) 20 or 24 (LTS)
@@ -66,6 +71,16 @@ Add it with `crontab -e`.
 ### Logs
 
 The script appends to `/tmp/wordlelist_update.log`. If the NYT API call fails for any reason, `current.txt` is left unchanged and the site keeps working with the previous word — nothing breaks.
+
+## Stats pages
+
+`build_stats.js` recomputes every number on `/stats/`, `/best-starting-words/` and `/how-to-win/` from the past answers (`words.txt` + `safe.txt`, the same list the homepage shows). Each value sits between `<!--v:key-->…<!--/v-->` markers in the page, and a value can be plain text or generated HTML: table rows, letter chips, the ItemList JSON-LD. The counts in each page's `<head>` descriptions are refreshed by pattern, and each FAQ JSON-LD block (between `FAQ-LD` markers) is rebuilt from that page's visible FAQ.
+
+Starters are ranked from every past answer plus nine well-known openers that have never been answers (ROATE, ORATE, SOARE, AROSE, TEARS, RATES, ADIEU, SANER, SALET), by average letters hit with greens as the tiebreak. Copy that names a winner, such as "J is the rarest letter" or "STARE lands the most greens", is checked on every run. Anything that stops being true is logged as `⚠️  stats copy: …` so the sentence can be fixed by hand.
+
+```
+node build_stats.js
+```
 
 ## Repeat tracker
 

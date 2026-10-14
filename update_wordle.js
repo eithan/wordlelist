@@ -96,7 +96,7 @@ function notifyDiscord(payload) {
 
 /* Poll the Pages build until it reaches a terminal state for the pushed commit.
  * Returns the build object, or {status:'timeout'|'unknown'} if it can't resolve. */
-async function waitForPagesDeploy(sha, { timeoutMs = 180000, intervalMs = 10000 } = {}) {
+async function waitForPagesDeploy(sha, { timeoutMs = 600000, intervalMs = 10000 } = {}) {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
         let build;
@@ -198,6 +198,23 @@ function appendHistory(word) {
         log(`Rebuilt repeats/index.html: ${r.repeats} repeats through #${r.through}`);
     } catch (e) {
         log(`⚠️  repeats/index.html rebuild failed: ${e.message}`);
+    }
+}
+
+/* ── stats pages ──
+ *  build_stats.js recomputes every number on /stats/, /best-starting-words/
+ *  and /how-to-win/ from the answer list. Warnings mean a sentence that
+ *  names a winner ("J is the rarest letter") stopped being true and needs a
+ *  hand edit; the numbers themselves are already updated.
+ */
+function buildStatsPages() {
+    try {
+        const { build } = require('./build_stats.js');
+        const r = build();
+        log(`Stats pages: ${r.answers} answers, changed ${r.changed.join(', ') || 'nothing'}`);
+        r.warnings.forEach(w => log(`⚠️  stats copy: ${w}`));
+    } catch (e) {
+        log(`⚠️  stats pages rebuild failed: ${e.message}`);
     }
 }
 
@@ -373,20 +390,20 @@ function updateSitemap() {
   </url>
   <url>
     <loc>https://wordlelist.com/best-starting-words/</loc>
-    <lastmod>2026-07-06</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://wordlelist.com/stats/</loc>
-    <lastmod>2026-07-06</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://wordlelist.com/how-to-win/</loc>
-    <lastmod>2026-07-06</lastmod>
-    <changefreq>monthly</changefreq>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
@@ -477,15 +494,19 @@ async function main() {
     };
     fs.writeFileSync(`${REPO_DIR}/meta.json`, JSON.stringify(meta, null, 2) + '\n');
 
-    /* 9. inject static word list + update sitemap + catch up the hint stamp */
+    /* 9. inject static word list, recompute the stats pages, update sitemap,
+          catch up the hint stamp */
     injectWordList();
+    buildStatsPages();
     updateSitemap();
     stampHint();
 
     /* 10. commit + push */
-    run('git add words.txt safe.txt prior.txt current.txt meta.json index.html sitemap.xml answers.txt played-dates.json repeats/index.html hint/index.html');
+    run('git add words.txt safe.txt prior.txt current.txt meta.json index.html sitemap.xml answers.txt played-dates.json repeats/index.html hint/index.html stats/index.html best-starting-words/index.html how-to-win/index.html');
+    let committed = false;
     try {
         run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + ' (REDACTED newWord)' : ' (word fetch failed)'}"`);
+        committed = true;
     } catch (_) {
         log('Nothing to commit');
     }
@@ -514,6 +535,16 @@ async function main() {
             color
         }]
     });
+
+    /* 12. once live, tell IndexNow (Bing etc.) which pages this commit changed */
+    if (committed && ok) {
+        try {
+            const indexnow = require('./indexnow.js');
+            await indexnow.submit(indexnow.pageUrls(run('git diff --name-only HEAD~1 HEAD').split('\n')), log);
+        } catch (e) {
+            log(`⚠️  IndexNow failed: ${e.message}`);
+        }
+    }
 
     log('=== Wordle updater DONE ===\n');
 }

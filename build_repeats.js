@@ -287,4 +287,4 @@ if (require.main === module) {
     console.log(`Wrote repeats/index.html: ${r.repeats} repeats, history through #${r.through}`);
 }
 
-module.exports = { build };
+module.exports = { build, readHistory, stats };
