@@ -11,7 +11,10 @@
  *   4. Rotate: current.txt  →  prior.txt
  *   5. Fetch new answer from NYT API  →  current.txt
  *   6. Write meta.json with wordle_date  (= today's date in UTC+14)
- *   7. git commit + push
+ *   7. Rebuild pages derived from the history (played-dates.json,
+ *      repeats/index.html), the homepage word list and sitemap, and catch up
+ *      the hint page stamp (stamp_hint.js also runs on its own at midnight ET)
+ *   8. git commit + push
  *
  * Timing note:
  *   Words are delayed by 1 extra day before adding to words.txt to ensure
@@ -188,6 +191,28 @@ function appendHistory(word) {
     } catch (e) {
         log(`⚠️  played-dates.json rebuild failed: ${e.message}`);
     }
+
+    try {
+        const { build: buildRepeats } = require('./build_repeats.js');
+        const r = buildRepeats();
+        log(`Rebuilt repeats/index.html: ${r.repeats} repeats through #${r.through}`);
+    } catch (e) {
+        log(`⚠️  repeats/index.html rebuild failed: ${e.message}`);
+    }
+}
+
+/* ── hint page stamp ──
+ *  stamp_hint.js has its own cron at 00:05 Eastern; calling it here only
+ *  catches up if that run missed. It's a no-op when the page is current.
+ */
+function stampHint() {
+    try {
+        const { stamp } = require('./stamp_hint.js');
+        const r = stamp();
+        log(r.changed ? `Stamped hint page: Wordle #${r.num} (${r.date})` : `Hint stamp current (#${r.num})`);
+    } catch (e) {
+        log(`⚠️  hint stamp failed: ${e.message}`);
+    }
 }
 
 /* ── fresh (never-played) openers ──
@@ -341,6 +366,12 @@ function updateSitemap() {
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://wordlelist.com/repeats/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://wordlelist.com/best-starting-words/</loc>
     <lastmod>2026-07-06</lastmod>
     <changefreq>monthly</changefreq>
@@ -446,12 +477,13 @@ async function main() {
     };
     fs.writeFileSync(`${REPO_DIR}/meta.json`, JSON.stringify(meta, null, 2) + '\n');
 
-    /* 9. inject static word list + update sitemap */
+    /* 9. inject static word list + update sitemap + catch up the hint stamp */
     injectWordList();
     updateSitemap();
+    stampHint();
 
     /* 10. commit + push */
-    run('git add words.txt safe.txt prior.txt current.txt meta.json index.html sitemap.xml answers.txt played-dates.json');
+    run('git add words.txt safe.txt prior.txt current.txt meta.json index.html sitemap.xml answers.txt played-dates.json repeats/index.html hint/index.html');
     try {
         run(`git commit -m "Daily update: ${wordleDate}${newWord ? ' — ' + ' (REDACTED newWord)' : ' (word fetch failed)'}"`);
     } catch (_) {

@@ -21,8 +21,9 @@ The site fetches all four files at load time. If a visitor's local date is on or
 2. Rotates `current.txt` → `prior.txt`.
 3. Fetches the new answer from the NYT API → `current.txt`.
 4. Writes `meta.json` with the new `wordle_date`.
-5. Commits and pushes to `main` (GitHub Pages auto-deploys).
-6. Polls the Pages build to completion and posts the deploy result (✅/❌) to Discord.
+5. Rebuilds what's derived from the answer history (`played-dates.json`, the `/repeats/` page via `build_repeats.js`), the homepage word list and the sitemap, and catches up the `/hint/` stamp if its midnight run missed (see [Hint page stamp](#hint-page-stamp)).
+6. Commits and pushes to `main` (GitHub Pages auto-deploys).
+7. Polls the Pages build to completion and posts the deploy result (✅/❌) to Discord.
 
 ### Deploy notifications
 
@@ -46,6 +47,16 @@ The job runs daily at **10:00 CST** — the host's local time (cron interprets i
 
 Add it with `crontab -e`.
 
+### Hint page stamp
+
+`/hint/` picks each visitor's puzzle with JavaScript, so on its own its HTML never changes. `stamp_hint.js` writes the US Eastern puzzle number and date into the page's title, descriptions, social tags, JSON-LD and subtitle (between the `HINT-STAMP` and `HINT-DATE` markers), so search engines see a page dated for today. It holds the number and date only, never anything about the answer. It runs on its own at Eastern midnight, then pulls, stamps, and commits and pushes `hint/index.html` if it changed:
+
+```
+5 23 * * * /usr/bin/node /path/to/stamp_hint.js >> /tmp/wordlelist_update.log 2>&1
+```
+
+`23:05` Central is `00:05` Eastern all year (both zones change clocks together). `node stamp_hint.js --local` stamps the file without touching git.
+
 ### Prerequisites
 
 - [Node.js](https://nodejs.org) 20 or 24 (LTS)
@@ -55,6 +66,14 @@ Add it with `crontab -e`.
 ### Logs
 
 The script appends to `/tmp/wordlelist_update.log`. If the NYT API call fails for any reason, `current.txt` is left unchanged and the site keeps working with the previous word — nothing breaks.
+
+## Repeat tracker
+
+`/repeats/` lists every answer NYT has reused (none before February 2026), with stats and a month-by-month breakdown. `build_repeats.js` regenerates its data-driven parts, between the `REPEATS-HEAD` and `REPEATS` markers, from `answers.txt`. A repeat is any entry whose word already appeared at a lower puzzle number; the trailing `@` in `answers.txt` isn't used. Because `answers.txt` trails the live puzzle, the page can't spoil today's answer. Its banner checks today's word client-side, the same way the homepage does.
+
+```
+node build_repeats.js
+```
 
 ## Solver word list
 

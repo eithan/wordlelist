@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle Repeat Answers – Every Word Used Before (Updated Daily)</title>
+
+    <!-- SEO ─── -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://wordlelist.com/repeats/">
+
+    <!-- Open Graph ─── -->
+    <meta property="og:title" content="Wordle Repeat Answers – Every Word Used Before">
+    <meta property="og:image" content="https://wordlelist.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://wordlelist.com/repeats/">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Wordlelist">
+
+    <!-- Twitter Card ─── -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Wordle Repeat Answers – Every Word Used Before">
+    <meta name="twitter:image" content="https://wordlelist.com/og-image.png">
+
+    <!-- Structured Data ─── -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Wordle Repeat Answers",
+        "url": "https://wordlelist.com/repeats/",
+        "description": "Every Wordle answer the New York Times has reused, with dates, updated daily.",
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Past Wordle Answers",
+            "url": "https://wordlelist.com/"
+        }
+    }
+    </script>
+
+    <!-- Descriptions + FAQ JSON-LD: generated daily by build_repeats.js ─── -->
+    <!-- REPEATS-HEAD:START -->
+    <meta name="description" content="Every Wordle answer the New York Times has reused: 27 repeats since February 2026, about 1 in 9 puzzles. Full list with dates, plus a spoiler-free check on whether today's word is a repeat.">
+    <meta property="og:description" content="Every Wordle answer the New York Times has reused: 27 repeats since February 2026, about 1 in 9 puzzles. Full list with dates, plus a spoiler-free check on whether today's word is a repeat.">
+    <meta name="twitter:description" content="Every Wordle answer the New York Times has reused: 27 repeats since February 2026, about 1 in 9 puzzles. Full list with dates, plus a spoiler-free check on whether today's word is a repeat.">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Does Wordle repeat answers?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, since February 2, 2026. For its first 1,689 puzzles Wordle never reused an answer. Since then the New York Times has reused 27 past answers."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How often does Wordle repeat words?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "About 1 in 9 puzzles since repeats began: 27 of the 254 puzzles from February 2, 2026 to October 13, 2026 reused a past answer."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Has today's Wordle been used before?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The banner at the top of wordlelist.com/repeats/ tells you without revealing the word. It checks today's answer against every past Wordle answer and switches to the new puzzle at midnight in your timezone."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Has a Wordle word ever been used three times?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Not yet. Every repeat so far has been the second time that word was the answer."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Which Wordle answers have been repeated?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "27 so far, newest first: MAJOR, PROVE, FORTH, FOCUS, CLICK, TRACE, FEIGN, GRIPE, FLUME, STOUT, BATON, ACUTE, BREAK, THUMB, SMILE, AGREE, CLOCK, BRING, STAND, SANDY, COMET, IVORY, GRADE, LINEN, AWAKE, SQUAD and CIGAR."
+                }
+            }
+        ]
+    }
+    </script>
+    <!-- REPEATS-HEAD:END -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: clip;
+            max-width: 100%;
+        }
+
+        body {
+            overflow-x: hidden;
+            max-width: 100%;
+            position: relative;
+            background-color: #121213;
+            color: #d7dadc;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            padding: 1.25rem 1.5rem 1.5rem;
+            overscroll-behavior-x: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            margin: 0 auto;
+            overflow-x: hidden;
+        }
+
+        /* ─── Header ─── */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #3a3a3c;
+        }
+
+        h1 {
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            margin-bottom: 0.4rem;
+            line-height: 1.2;
+        }
+
+        .title-wordle {
+            display: block;
+            font-size: clamp(2rem, 6vw, 2.8rem);
+            padding-left: 0.22em;
+        }
+
+        .title-sub {
+            display: block;
+            font-size: clamp(1rem, 2.8vw, 1.4rem);
+            letter-spacing: 0.32em;
+            color: #ffffff;
+            margin-top: 0.2em;
+            padding-left: 0.32em;
+        }
+
+        .c-green  { color: #538d4e; }
+        .c-yellow { color: #c9b458; }
+        .c-light  { color: #d7dadc; }
+
+        .subtitle {
+            color: #818384;
+            font-size: 0.88rem;
+            letter-spacing: 0.04em;
+        }
+
+        .subtitle span { color: #d7dadc; font-weight: 600; }
+
+        .nav-links {
+            margin-top: 0.9rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            display: inline-block;
+            color: #818384;
+            font-size: 0.82rem;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            padding: 0.4rem 0.9rem;
+            transition: border-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-links a:hover { border-color: #538d4e; color: #d7dadc; }
+
+        /* ─── Intro ─── */
+        .intro {
+            margin: 0 auto 1.8rem;
+            text-align: center;
+            font-size: 0.92rem;
+            color: #818384;
+            line-height: 1.6;
+            letter-spacing: 0.01em;
+        }
+
+        .intro strong { color: #d7dadc; font-weight: 600; }
+        .intro a { color: #538d4e; }
+        .intro a:hover { color: #d7dadc; }
+
+        /* ─── Big-number chips ─── */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 2.2rem;
+            animation: fadeIn 0.35s ease both;
+        }
+
+        .stat-card {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 1rem 0.9rem;
+            text-align: center;
+        }
+
+        .stat-card b {
+            display: block;
+            color: #538d4e;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-card.yellow b { color: #c9b458; }
+
+        .stat-card span {
+            color: #818384;
+            font-size: 0.78rem;
+            line-height: 1.4;
+            display: block;
+        }
+
+        /* ─── Sections ─── */
+        section { margin-bottom: 2.2rem; }
+
+        h2 {
+            color: #d7dadc;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.7rem;
+        }
+
+        section > p {
+            color: #818384;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            margin-bottom: 0.7rem;
+        }
+
+        section > p strong { color: #d7dadc; }
+        section a { color: #538d4e; }
+        section a:hover { color: #d7dadc; }
+
+        .word-inline {
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: #d7dadc;
+        }
+
+        /* ─── Tables ─── */
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 0.55rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #2a2a2c;
+            white-space: nowrap;
+        }
+
+        th {
+            color: #818384;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: #161617;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        td.num { color: #818384; }
+        td.num strong { color: #538d4e; font-weight: 700; }
+        td.word-cell { font-weight: 800; letter-spacing: 0.13em; color: #d7dadc; }
+
+        .table-note {
+            color: #818384;
+            font-size: 0.78rem;
+            line-height: 1.6;
+            margin-top: 0.6rem;
+        }
+
+        /* ─── Letter chips ─── */
+        .letter-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin: 0.4rem 0 0.7rem;
+        }
+
+        .letter-chip {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 8px;
+            padding: 0.4rem 0.6rem;
+            text-align: center;
+            min-width: 3.4rem;
+        }
+
+        .letter-chip b {
+            display: block;
+            color: #538d4e;
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .letter-chip.yellow b { color: #c9b458; }
+
+        .letter-chip span {
+            color: #818384;
+            font-size: 0.72rem;
+        }
+
+        /* ─── FAQ ─── */
+        .seo-content {
+            margin: 2.5rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.88rem;
+            line-height: 1.7;
+        }
+
+        .seo-content h2 { margin: 1.5rem 0 0.6rem; font-size: 1.05rem; }
+        .seo-content h2:first-child { margin-top: 0; }
+        .seo-content p { margin-bottom: 0.7rem; }
+        .seo-content a { color: #538d4e; }
+        .seo-content a:hover { color: #d7dadc; }
+        .seo-content details { margin-bottom: 0.5rem; }
+
+        .seo-content summary {
+            color: #d7dadc;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.4rem 0;
+        }
+
+        .seo-content summary:hover { color: #538d4e; }
+
+        .seo-content details p {
+            padding-left: 1rem;
+            margin-top: 0.3rem;
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid #3a3a3c;
+            color: #818384;
+            font-size: 0.78rem;
+            letter-spacing: 0.06em;
+        }
+
+        footer a { color: #818384; }
+        footer a:hover { color: #d7dadc; }
+
+        /* ─── Repeat-specific ─── */
+        td .sub {
+            display: block;
+            color: #818384;
+            font-size: 0.75rem;
+            margin-top: 0.1rem;
+        }
+
+        td .muted { color: #818384; font-size: 0.78rem; }
+
+        .letter-chip { min-width: 4.6rem; }
+
+        /* ─── Today banner (same look as /hint/) ─── */
+        .banner {
+            background: #1a1a1b;
+            border: 1px solid #3a3a3c;
+            border-radius: 12px;
+            padding: 1.1rem 1.5rem 1rem;
+            margin: 0 auto 2rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            min-height: 6.2rem;
+            visibility: hidden;
+        }
+
+        .banner.played, .banner.fresh { visibility: visible; }
+
+        .banner.played {
+            border-color: #538d4e;
+            animation: playedPulse 2.5s ease-in-out infinite;
+        }
+        .banner.fresh { border-color: #c9b458; }
+
+        @keyframes playedPulse {
+            0%, 100% { box-shadow: 0 0 6px rgba(83, 141, 78, 0.35), 0 0 14px rgba(83, 141, 78, 0.15); }
+            50%       { box-shadow: 0 0 20px rgba(83, 141, 78, 0.75), 0 0 36px rgba(83, 141, 78, 0.3); }
+        }
+
+        .banner-icon { font-size: 1.5rem; margin-bottom: 0.25rem; }
+
+        .banner-text {
+            font-size: 1.05rem;
+            color: #d7dadc;
+            letter-spacing: 0.02em;
+        }
+
+        .banner-text strong { font-weight: 700; }
+
+        .banner-link {
+            margin-top: 0.45rem;
+            font-size: 0.85rem;
+            color: #818384;
+        }
+
+        .banner-link a { color: #538d4e; }
+        .banner-link a:hover { color: #d7dadc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <span class="title-wordle"><span class="c-green">W</span><span class="c-yellow">O</span><span class="c-light">R</span><span class="c-green">D</span><span class="c-yellow">L</span><span class="c-light">E</span></span>
+                <span class="title-sub">REPEATS</span>
+            </h1>
+            <p class="subtitle">every answer the New York Times has <span>used before</span></p>
+            <nav class="nav-links">
+                <a href="/">← All past answers</a>
+                <a href="/hint/">Today's hint</a>
+            </nav>
+        </header>
+
+        <p class="intro">Until 2026, no Wordle answer had ever been used twice. Now old answers come back regularly. Here's <strong>every repeat so far</strong>, updated daily. Today's answer is never spoiled: the banner below only tells you whether it's a repeat.</p>
+
+        <div id="banner" class="banner" aria-hidden="true"></div>
+<!-- REPEATS:START -->
+        <div class="stat-grid">
+            <div class="stat-card"><b>27</b><span>answers reused since Feb 2, 2026</span></div>
+            <div class="stat-card yellow"><b>1 in 9</b><span>puzzles has been a repeat since then</span></div>
+            <div class="stat-card"><b>0</b><span>repeats in the first 1,689 puzzles</span></div>
+            <div class="stat-card yellow"><b>23 of 27</b><span>repeats were first played in 2021</span></div>
+        </div>
+
+        <section>
+            <h2>When Wordle Started Repeating</h2>
+            <p>For its first <strong>1,689 puzzles</strong>, from June 19, 2021 to February 1, 2026, Wordle never used the same answer twice. That changed on <strong>February 2, 2026</strong>, when Wordle #1,689 brought back <span class="word-inline">CIGAR</span>: the very first Wordle answer, from June 19, 2021.</p>
+            <p>Since then, <strong>27 of 254 puzzles (10.6%)</strong> have reused a past answer, about 1 in 9. No word has been the answer three times yet.</p>
+        </section>
+
+        <section>
+            <h2>Repeats Month by Month</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Month</th><th>Puzzles</th><th>Repeats</th><th>Share</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Oct 2026 <span class="muted">(so far)</span></td><td class="num">13</td><td class="num"><strong>2</strong></td><td class="num">15%</td></tr>
+                        <tr><td>Sep 2026</td><td class="num">30</td><td class="num"><strong>2</strong></td><td class="num">7%</td></tr>
+                        <tr><td>Aug 2026</td><td class="num">31</td><td class="num"><strong>4</strong></td><td class="num">13%</td></tr>
+                        <tr><td>Jul 2026</td><td class="num">31</td><td class="num"><strong>3</strong></td><td class="num">10%</td></tr>
+                        <tr><td>Jun 2026</td><td class="num">30</td><td class="num"><strong>3</strong></td><td class="num">10%</td></tr>
+                        <tr><td>May 2026</td><td class="num">31</td><td class="num"><strong>4</strong></td><td class="num">13%</td></tr>
+                        <tr><td>Apr 2026</td><td class="num">30</td><td class="num"><strong>2</strong></td><td class="num">7%</td></tr>
+                        <tr><td>Mar 2026</td><td class="num">31</td><td class="num"><strong>4</strong></td><td class="num">13%</td></tr>
+                        <tr><td>Feb 2026</td><td class="num">28</td><td class="num"><strong>3</strong></td><td class="num">11%</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section>
+            <h2>Which Old Answers Come Back?</h2>
+            <p>Wordle is mostly recycling its oldest answers. <strong>23 of the 27 repeats</strong> were first played in 2021, the game's first year. By the year each word was first the answer:</p>
+            <div class="letter-strip">
+                <div class="letter-chip"><b>2021</b><span>23 repeats</span></div>
+                <div class="letter-chip"><b>2022</b><span>2 repeats</span></div>
+                <div class="letter-chip"><b>2023</b><span>1 repeat</span></div>
+                <div class="letter-chip"><b>2024</b><span>1 repeat</span></div>
+            </div>
+            <p>On average a repeated word comes back after <strong>4.5 years</strong>. The quickest comeback took 1.4 years (<span class="word-inline">SANDY</span>, #1,226 → #1,750); the longest took 5.3 years (<span class="word-inline">MAJOR</span>, #20 → #1,938).</p>
+        </section>
+
+        <section>
+            <h2>Every Repeated Wordle Answer</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Word</th><th>Repeated</th><th>First played</th><th>Gap</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="word-cell">MAJOR</td><td>Oct 9, 2026<span class="sub">#1,938</span></td><td>Jul 9, 2021<span class="sub">#20</span></td><td class="num">5.3 yrs</td></tr>
+                        <tr><td class="word-cell">PROVE</td><td>Oct 7, 2026<span class="sub">#1,936</span></td><td>Nov 29, 2021<span class="sub">#163</span></td><td class="num">4.9 yrs</td></tr>
+                        <tr><td class="word-cell">FORTH</td><td>Sep 23, 2026<span class="sub">#1,922</span></td><td>Aug 13, 2021<span class="sub">#55</span></td><td class="num">5.1 yrs</td></tr>
+                        <tr><td class="word-cell">FOCUS</td><td>Sep 13, 2026<span class="sub">#1,912</span></td><td>Mar 13, 2022<span class="sub">#267</span></td><td class="num">4.5 yrs</td></tr>
+                        <tr><td class="word-cell">CLICK</td><td>Aug 25, 2026<span class="sub">#1,893</span></td><td>Oct 31, 2021<span class="sub">#134</span></td><td class="num">4.8 yrs</td></tr>
+                        <tr><td class="word-cell">TRACE</td><td>Aug 21, 2026<span class="sub">#1,889</span></td><td>Dec 15, 2021<span class="sub">#179</span></td><td class="num">4.7 yrs</td></tr>
+                        <tr><td class="word-cell">FEIGN</td><td>Aug 7, 2026<span class="sub">#1,875</span></td><td>Jul 8, 2021<span class="sub">#19</span></td><td class="num">5.1 yrs</td></tr>
+                        <tr><td class="word-cell">GRIPE</td><td>Aug 6, 2026<span class="sub">#1,874</span></td><td>Dec 23, 2021<span class="sub">#187</span></td><td class="num">4.6 yrs</td></tr>
+                        <tr><td class="word-cell">FLUME</td><td>Jul 30, 2026<span class="sub">#1,867</span></td><td>Aug 26, 2021<span class="sub">#68</span></td><td class="num">4.9 yrs</td></tr>
+                        <tr><td class="word-cell">STOUT</td><td>Jul 13, 2026<span class="sub">#1,850</span></td><td>Aug 23, 2021<span class="sub">#65</span></td><td class="num">4.9 yrs</td></tr>
+                        <tr><td class="word-cell">BATON</td><td>Jul 3, 2026<span class="sub">#1,840</span></td><td>Dec 19, 2021<span class="sub">#183</span></td><td class="num">4.5 yrs</td></tr>
+                        <tr><td class="word-cell">ACUTE</td><td>Jun 26, 2026<span class="sub">#1,833</span></td><td>Dec 26, 2021<span class="sub">#190</span></td><td class="num">4.5 yrs</td></tr>
+                        <tr><td class="word-cell">BREAK</td><td>Jun 12, 2026<span class="sub">#1,819</span></td><td>Dec 8, 2021<span class="sub">#172</span></td><td class="num">4.5 yrs</td></tr>
+                        <tr><td class="word-cell">THUMB</td><td>Jun 7, 2026<span class="sub">#1,814</span></td><td>Oct 12, 2021<span class="sub">#115</span></td><td class="num">4.7 yrs</td></tr>
+                        <tr><td class="word-cell">SMILE</td><td>May 30, 2026<span class="sub">#1,806</span></td><td>Sep 27, 2023<span class="sub">#830</span></td><td class="num">2.7 yrs</td></tr>
+                        <tr><td class="word-cell">AGREE</td><td>May 21, 2026<span class="sub">#1,797</span></td><td>Aug 28, 2021<span class="sub">#70</span></td><td class="num">4.7 yrs</td></tr>
+                        <tr><td class="word-cell">CLOCK</td><td>May 12, 2026<span class="sub">#1,788</span></td><td>Nov 26, 2021<span class="sub">#160</span></td><td class="num">4.5 yrs</td></tr>
+                        <tr><td class="word-cell">BRING</td><td>May 2, 2026<span class="sub">#1,778</span></td><td>Nov 30, 2021<span class="sub">#164</span></td><td class="num">4.4 yrs</td></tr>
+                        <tr><td class="word-cell">STAND</td><td>Apr 19, 2026<span class="sub">#1,765</span></td><td>Aug 15, 2021<span class="sub">#57</span></td><td class="num">4.7 yrs</td></tr>
+                        <tr><td class="word-cell">SANDY</td><td>Apr 4, 2026<span class="sub">#1,750</span></td><td>Oct 27, 2024<span class="sub">#1,226</span></td><td class="num">1.4 yrs</td></tr>
+                        <tr><td class="word-cell">COMET</td><td>Mar 30, 2026<span class="sub">#1,745</span></td><td>Oct 19, 2021<span class="sub">#122</span></td><td class="num">4.4 yrs</td></tr>
+                        <tr><td class="word-cell">IVORY</td><td>Mar 27, 2026<span class="sub">#1,742</span></td><td>Aug 17, 2021<span class="sub">#59</span></td><td class="num">4.6 yrs</td></tr>
+                        <tr><td class="word-cell">GRADE</td><td>Mar 15, 2026<span class="sub">#1,730</span></td><td>Jul 4, 2021<span class="sub">#15</span></td><td class="num">4.7 yrs</td></tr>
+                        <tr><td class="word-cell">LINEN</td><td>Mar 3, 2026<span class="sub">#1,718</span></td><td>Aug 9, 2021<span class="sub">#51</span></td><td class="num">4.6 yrs</td></tr>
+                        <tr><td class="word-cell">AWAKE</td><td>Feb 21, 2026<span class="sub">#1,708</span></td><td>Jun 23, 2021<span class="sub">#4</span></td><td class="num">4.7 yrs</td></tr>
+                        <tr><td class="word-cell">SQUAD</td><td>Feb 17, 2026<span class="sub">#1,704</span></td><td>Apr 11, 2022<span class="sub">#296</span></td><td class="num">3.9 yrs</td></tr>
+                        <tr><td class="word-cell">CIGAR</td><td>Feb 2, 2026<span class="sub">#1,689</span></td><td>Jun 19, 2021<span class="sub">#0</span></td><td class="num">4.6 yrs</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="table-note">Updated daily through Wordle #1,942 (October 13, 2026). Today's answer is added once its puzzle has ended in every timezone.</p>
+        </section>
+
+        <section>
+            <h2>Check Any Word</h2>
+            <p>Wondering about a particular word? Search the <a href="/">complete list of past Wordle answers</a>. Hover over or tap any word there to see every date it was played. Still stuck on today's puzzle? Try the <a href="/hint/">spoiler-free hints</a> or the <a href="/solver/">Wordle helper</a>.</p>
+        </section>
+
+        <section class="seo-content">
+            <h2>Frequently Asked Questions</h2>
+            <details>
+                <summary>Does Wordle repeat answers?</summary>
+                <p>Yes, since February 2, 2026. For its first 1,689 puzzles Wordle never reused an answer. Since then the New York Times has reused 27 past answers.</p>
+            </details>
+            <details>
+                <summary>How often does Wordle repeat words?</summary>
+                <p>About 1 in 9 puzzles since repeats began: 27 of the 254 puzzles from February 2, 2026 to October 13, 2026 reused a past answer.</p>
+            </details>
+            <details>
+                <summary>Has today's Wordle been used before?</summary>
+                <p>The banner at the top of this page tells you without revealing the word. It checks today's answer against every past Wordle answer and switches to the new puzzle at midnight in your timezone.</p>
+            </details>
+            <details>
+                <summary>Has a Wordle word ever been used three times?</summary>
+                <p>Not yet. Every repeat so far has been the second time that word was the answer.</p>
+            </details>
+            <details>
+                <summary>Which Wordle answers have been repeated?</summary>
+                <p>27 so far, newest first: MAJOR, PROVE, FORTH, FOCUS, CLICK, TRACE, FEIGN, GRIPE, FLUME, STOUT, BATON, ACUTE, BREAK, THUMB, SMILE, AGREE, CLOCK, BRING, STAND, SANDY, COMET, IVORY, GRADE, LINEN, AWAKE, SQUAD and CIGAR.</p>
+            </details>
+        </section>
+        <!-- REPEATS:END -->
+
+        <footer><a href="/">all past answers</a> · <a href="/hint/">today's hint</a> · <a href="/best-starting-words/">best starting words</a> · <a href="/stats/">stats &amp; facts</a> · <a href="/how-to-win/">how to win</a> · <a href="/wordle-alternatives/">games like Wordle</a> · <a href="/solver/">helper</a> · wordlelist.com</footer>
+    </div>
+
+    <script>
+    (function () {
+        /* ── user's local date as YYYY-MM-DD ── */
+        function getLocalDate() {
+            var d = new Date();
+            return d.getFullYear() + '-' +
+                   String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                   String(d.getDate()).padStart(2, '0');
+        }
+
+        /* ── freshness check (same pattern as homepage) ──
+         *  On revisit with a stale tab, if wordle_date changed since this
+         *  page was first served, hard-reload once so all data is fresh.
+         */
+        (function freshness() {
+            var stored = sessionStorage.getItem('wl_repeats_date');
+            fetch('/meta.json?_=' + Date.now(), { cache: 'no-store' })
+                .then(function (r) { return r.json(); })
+                .then(function (meta) {
+                    if (!meta || !meta.wordle_date) return;
+                    if (stored && stored !== meta.wordle_date) {
+                        sessionStorage.setItem('wl_repeats_date', meta.wordle_date);
+                        location.reload();
+                    } else {
+                        sessionStorage.setItem('wl_repeats_date', meta.wordle_date);
+                    }
+                })
+                .catch(function () { /* network error — proceed */ });
+        })();
+
+        /* ── load data (same files + timezone gate as homepage and /hint/) ── */
+        Promise.all([
+            fetch('/words.txt',   { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('/current.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('/prior.txt',   { cache: 'no-store' }).then(function (r) { return r.text(); }),
+            fetch('/safe.txt',    { cache: 'no-store' }).then(function (r) { return r.text(); }).catch(function () { return ''; }),
+            fetch('/meta.json',   { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return null; })
+        ]).then(function (results) {
+            var baseWords = results[0].trim().split('\n')
+                .map(function (w) { return w.trim().toUpperCase(); })
+                .filter(function (w) { return w.length === 5; });
+
+            var currentWord = results[1].trim().toUpperCase();
+            var priorWord   = results[2].trim().toUpperCase();
+            var safeWord    = results[3].trim().toUpperCase();
+            var meta        = results[4];
+
+            if (safeWord && baseWords.indexOf(safeWord) === -1) baseWords.push(safeWord);
+
+            /* ── timezone gate (identical to homepage) ── */
+            var localDate  = getLocalDate();
+            var wordleDate = meta ? meta.wordle_date : localDate;
+
+            var answer;
+            if (localDate >= wordleDate) {
+                answer = currentWord;
+                if (baseWords.indexOf(priorWord) === -1) baseWords.push(priorWord);
+            } else {
+                answer = priorWord;
+            }
+
+            if (!answer || answer.length !== 5) return;
+
+            /* ── played-before banner (same semantics as homepage) ── */
+            var banner = document.getElementById('banner');
+            if (baseWords.indexOf(answer) !== -1) {
+                banner.className = 'banner played';
+                banner.innerHTML =
+                    '<div class="banner-icon">⚠️ 🔍 ⚠️</div>' +
+                    '<p class="banner-text">Today\'s word <strong>has been played before</strong>. It\'s a repeat!</p>' +
+                    '<p class="banner-link">Want a nudge? <a href="/hint/">Get a spoiler-free hint →</a></p>';
+            } else {
+                banner.className = 'banner fresh';
+                banner.innerHTML =
+                    '<div class="banner-icon">✨</div>' +
+                    '<p class="banner-text">Today\'s word has <strong class="c-yellow">NEVER</strong> been played before.</p>' +
+                    '<p class="banner-link">Want a nudge? <a href="/hint/">Get a spoiler-free hint →</a></p>';
+            }
+            banner.removeAttribute('aria-hidden');
+        }).catch(function () { /* banner stays hidden; the rest of the page is static */ });
+    })();
+    </script>
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "46707338e53242e685de97acc0026ce1"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
