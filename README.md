@@ -86,6 +86,8 @@ node build_stats.js
 
 `/repeats/` lists every answer NYT has reused (none before February 2026), with stats and a month-by-month breakdown. `build_repeats.js` regenerates its data-driven parts, between the `REPEATS-HEAD` and `REPEATS` markers, from `answers.txt`. A repeat is any entry whose word already appeared at a lower puzzle number; the trailing `@` in `answers.txt` isn't used. Because `answers.txt` trails the live puzzle, the page can't spoil today's answer. Its banner checks today's word client-side, the same way the homepage does.
 
+The static page lags a day, since a puzzle only reaches `answers.txt` once it has ended everywhere. So the page also fetches `answers.txt` and, with the homepage's timezone gate (local date on or after `meta.json`'s `wordle_date`), adds `prior.txt`'s puzzle and re-renders the body in the browser as soon as that puzzle has ended in the visitor's timezone. The logic and rendering live in `repeats/repeats-core.js`, which `build_repeats.js` also uses, so both agree exactly. `node test_repeats.js` checks the repeat logic and that the reveal happens at the same moment as on the homepage in several timezones.
+
 ```
 node build_repeats.js
 ```

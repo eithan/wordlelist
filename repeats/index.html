@@ -467,6 +467,7 @@
         <p class="intro">Until 2026, no Wordle answer had ever been used twice. Now old answers come back regularly. Here's <strong>every repeat so far</strong>, updated daily. Today's answer is never spoiled: the banner below only tells you whether it's a repeat.</p>
 
         <div id="banner" class="banner" aria-hidden="true"></div>
+        <div id="repeats-body">
 <!-- REPEATS:START -->
         <div class="stat-grid">
             <div class="stat-card"><b>27</b><span>answers reused since Feb 2, 2026</span></div>
@@ -553,7 +554,7 @@
                     </tbody>
                 </table>
             </div>
-            <p class="table-note">Updated daily through Wordle #1,947 (October 18, 2026). Today's answer is added once its puzzle has ended in every timezone.</p>
+            <p class="table-note">Updated daily through Wordle #1,947 (October 18, 2026). Each puzzle is added once it has ended in your timezone.</p>
         </section>
 
         <section>
@@ -585,10 +586,12 @@
             </details>
         </section>
         <!-- REPEATS:END -->
+        </div>
 
         <footer><a href="/">all past answers</a> · <a href="/hint/">today's hint</a> · <a href="/best-starting-words/">best starting words</a> · <a href="/stats/">stats &amp; facts</a> · <a href="/how-to-win/">how to win</a> · <a href="/wordle-alternatives/">games like Wordle</a> · <a href="/solver/">helper</a> · wordlelist.com</footer>
     </div>
 
+    <script src="/repeats/repeats-core.js"></script>
     <script>
     (function () {
         /* ── user's local date as YYYY-MM-DD ── */
@@ -625,7 +628,8 @@
             fetch('/current.txt', { cache: 'no-store' }).then(function (r) { return r.text(); }),
             fetch('/prior.txt',   { cache: 'no-store' }).then(function (r) { return r.text(); }),
             fetch('/safe.txt',    { cache: 'no-store' }).then(function (r) { return r.text(); }).catch(function () { return ''; }),
-            fetch('/meta.json',   { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return null; })
+            fetch('/meta.json',   { cache: 'no-store' }).then(function (r) { return r.json(); }).catch(function () { return null; }),
+            fetch('/answers.txt', { cache: 'no-store' }).then(function (r) { return r.ok ? r.text() : ''; }).catch(function () { return ''; })
         ]).then(function (results) {
             var baseWords = results[0].trim().split('\n')
                 .map(function (w) { return w.trim().toUpperCase(); })
@@ -648,6 +652,24 @@
                 if (baseWords.indexOf(priorWord) === -1) baseWords.push(priorWord);
             } else {
                 answer = priorWord;
+            }
+
+            /* ── repeats ended in this timezone but not yet in answers.txt ──
+             *  The static body above is built from answers.txt, which only gets
+             *  a puzzle once it has ended everywhere. If the gate says the
+             *  visitor is past prior.txt's puzzle (the same moment the homepage
+             *  starts listing that word), re-render the body with it included.
+             */
+            var R = window.WLRepeats;
+            if (R && results[5] && meta && meta.wordle_date) {
+                try {
+                    var history = R.parseHistory(results[5]);
+                    var extended = R.withPending(history, results[2], meta.wordle_date, localDate);
+                    if (extended !== history) {
+                        var s = R.stats(extended);
+                        document.getElementById('repeats-body').innerHTML = R.renderBody(s, R.faq(s));
+                    }
+                } catch (e) { /* keep the static body */ }
             }
 
             if (!answer || answer.length !== 5) return;
