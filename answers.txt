@@ -2,6 +2,7 @@
 # Format: WORD PUZZLE# MM/DD/YY   (trailing @ = repeat answer)
 # Puzzle numbers with a/b suffix = NYT changed the answer mid-day (two valid words that date).
 # This file drives played-dates.json via build_played_dates.js and is appended to daily by update_wordle.js.
+GRIST 1957 10/28/26
 BINGO 1956 10/27/26
 GEEKY 1955 10/26/26
 DRESS 1954 10/25/26
