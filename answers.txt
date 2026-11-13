@@ -2,6 +2,7 @@
 # Format: WORD PUZZLE# MM/DD/YY   (trailing @ = repeat answer)
 # Puzzle numbers with a/b suffix = NYT changed the answer mid-day (two valid words that date).
 # This file drives played-dates.json via build_played_dates.js and is appended to daily by update_wordle.js.
+KARAT 1972 11/12/26
 BLESS 1971 11/11/26
 TRUCE 1970 11/10/26
 LOAMY 1969 11/09/26
