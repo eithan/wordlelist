@@ -2,6 +2,7 @@
 # Format: WORD PUZZLE# MM/DD/YY   (trailing @ = repeat answer)
 # Puzzle numbers with a/b suffix = NYT changed the answer mid-day (two valid words that date).
 # This file drives played-dates.json via build_played_dates.js and is appended to daily by update_wordle.js.
+CLOUT 1979 11/19/26
 BLURT 1978 11/18/26
 ROAST 1977 11/17/26
 DRAWL 1976 11/16/26
