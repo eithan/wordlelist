@@ -2,6 +2,7 @@
 # Format: WORD PUZZLE# MM/DD/YY   (trailing @ = repeat answer)
 # Puzzle numbers with a/b suffix = NYT changed the answer mid-day (two valid words that date).
 # This file drives played-dates.json via build_played_dates.js and is appended to daily by update_wordle.js.
+SNEER 1984 11/24/26
 FILTH 1983 11/23/26
 UPEND 1982 11/22/26
 STENT 1981 11/21/26
